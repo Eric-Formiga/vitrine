@@ -1,12 +1,37 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-01T16:32:20.049Z",
-  "gitRev": "b6bf15e",
+  "timestamp": "2026-11-01T16:57:18.101Z",
+  "gitRev": "598f277",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 19,
+  "testsParsed": 29,
   "results": {
+    "AC-001": {
+      "status": "pass",
+      "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-001: conta nova no Clerk vira usuário da Vitrine @spec:AC-001 AC-001: conta nova no Clerk vira usuário da Vitrine @spec:AC-001",
+      "method": "vitest-json"
+    },
+    "AC-002": {
+      "status": "pass",
+      "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-002: aviso com assinatura inválida é recusado sem gravar nada @spec:AC-002 AC-002: aviso com assinatura inválida é recusado sem gravar nada @spec:AC-002",
+      "method": "vitest-json"
+    },
+    "AC-003": {
+      "status": "pass",
+      "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-003: aviso repetido não duplica a pessoa @spec:AC-003 AC-003: aviso repetido não duplica a pessoa @spec:AC-003",
+      "method": "vitest-json"
+    },
+    "AC-004": {
+      "status": "pass",
+      "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-004: nome e e-mail alterados no Clerk são atualizados na Vitrine @spec:AC-004 AC-004: nome e e-mail alterados no Clerk são atualizados na Vitrine @spec:AC-004",
+      "method": "vitest-json"
+    },
+    "AC-005": {
+      "status": "pass",
+      "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-005: conta excluída é anonimizada, nunca apagada @spec:AC-005 AC-005: conta excluída é anonimizada, nunca apagada @spec:AC-005",
+      "method": "vitest-json"
+    },
     "AC-011": {
       "status": "pass",
       "testName": "US-005 — Dá para saber se a API está de pé (banco fora do ar) AC-011: \"Viva\" responde 200 mesmo com o banco fora do ar @spec:AC-011 AC-011: \"Viva\" responde 200 mesmo com o banco fora do ar @spec:AC-011",
