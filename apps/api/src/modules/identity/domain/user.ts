@@ -2,6 +2,16 @@
 
 export const DEFAULT_ROLES = ['customer'] as const;
 
+/** Pessoa como a Vitrine a guarda. Os papéis decididos aqui valem mais que qualquer token. */
+export interface User {
+  id: string;
+  clerkId: string;
+  email: string;
+  name: string | null;
+  roles: string[];
+  deletedAt: Date | null;
+}
+
 /** Dados que vêm do Clerk e que a Vitrine espelha. */
 export interface ClerkProfile {
   clerkId: string;

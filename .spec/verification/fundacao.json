@@ -1,11 +1,11 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-01T16:57:18.101Z",
-  "gitRev": "598f277",
+  "timestamp": "2026-11-01T17:17:19.412Z",
+  "gitRev": "99d0bfa",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 29,
+  "testsParsed": 37,
   "results": {
     "AC-001": {
       "status": "pass",
@@ -30,6 +30,21 @@
     "AC-005": {
       "status": "pass",
       "testName": "US-001 — Quem cria conta passa a existir na Vitrine AC-005: conta excluída é anonimizada, nunca apagada @spec:AC-005 AC-005: conta excluída é anonimizada, nunca apagada @spec:AC-005",
+      "method": "vitest-json"
+    },
+    "AC-006": {
+      "status": "pass",
+      "testName": "US-002 e US-003 — Login na API AC-006: quem ainda não está no banco é cadastrado no primeiro acesso @spec:AC-006 AC-006: quem ainda não está no banco é cadastrado no primeiro acesso @spec:AC-006",
+      "method": "vitest-json"
+    },
+    "AC-007": {
+      "status": "pass",
+      "testName": "US-002 e US-003 — Login na API AC-007: sem token, a rota privada responde 401 no formato padrão @spec:AC-007 AC-007: sem token, a rota privada responde 401 no formato padrão @spec:AC-007",
+      "method": "vitest-json"
+    },
+    "AC-008": {
+      "status": "pass",
+      "testName": "US-002 e US-003 — Login na API AC-008: o perfil mostra os papéis do banco, nunca os do token @spec:AC-008 AC-008: o perfil mostra os papéis do banco, nunca os do token @spec:AC-008",
       "method": "vitest-json"
     },
     "AC-011": {
