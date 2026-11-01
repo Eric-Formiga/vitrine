@@ -1,0 +1,27 @@
+# Dependências e builds
+node_modules/
+.turbo/
+.next/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Ambiente: segredos nunca no git (documente as variáveis no .env.example)
+.env
+.env.*
+!.env.example
+
+# Sistema e editor
+.DS_Store
+Thumbs.db
+
+# onp-spec: artefatos locais
+# - relatório bruto do Vitest (a prova versionada é .spec/verification/<feature>.json)
+.spec/verification/vitest-report.json
+# - histórico de sinais: muda a cada audit e geraria conflito entre branches
+.spec/verification/sinais.json
+# - plano de execução gerado (regenere com `onp-spec plano <feature>`)
+.spec/features/*/plano-execucao.*
+.spec/features/*/plano.json
+.spec/features/*/executar-tarefas.sh
