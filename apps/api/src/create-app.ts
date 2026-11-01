@@ -24,7 +24,8 @@ export async function createApp(options: CreateAppOptions = {}): Promise<INestAp
 
   const app = await NestFactory.create(
     AppModule.forRoot({ env, logStream: options.logStream, imports: options.imports }),
-    { bufferLogs: true },
+    // rawBody: o webhook do Clerk confere a assinatura sobre o corpo exatamente como chegou.
+    { bufferLogs: true, rawBody: true },
   );
   app.useLogger(app.get(Logger));
 
