@@ -1,0 +1,23 @@
+# Postgres local (ADR-0004). As extensões unaccent e pg_trgm vêm no contrib da
+# imagem oficial e são habilitadas pelas migrações do Prisma.
+name: vitrine
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vitrine}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vitrine}
+      POSTGRES_DB: ${POSTGRES_DB:-vitrine}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
