@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/* Tema da Vitrine: tons de papel e tinta, com um acento de linha de costura.
+   Claro por padrão; escuro segue a preferência do sistema. */
+:root {
+  --background: oklch(0.985 0.004 85);
+  --foreground: oklch(0.22 0.02 260);
+  --muted: oklch(0.94 0.008 85);
+  --muted-foreground: oklch(0.5 0.02 260);
+  --border: oklch(0.89 0.01 85);
+  --primary: oklch(0.42 0.11 25);
+  --primary-foreground: oklch(0.98 0.004 85);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.18 0.015 260);
+    --foreground: oklch(0.94 0.008 85);
+    --muted: oklch(0.24 0.015 260);
+    --muted-foreground: oklch(0.7 0.015 260);
+    --border: oklch(0.3 0.015 260);
+    --primary: oklch(0.72 0.12 30);
+    --primary-foreground: oklch(0.18 0.015 260);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --radius-md: var(--radius);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

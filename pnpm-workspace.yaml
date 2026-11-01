@@ -5,10 +5,11 @@ packages:
 # Scripts de instalação revisados:
 # - @swc/core usa o binário pré-compilado da plataforma; não precisa do postinstall
 # - prisma e @prisma/engines baixam o motor de migrações; precisam
-# - cpu-features e protobufjs vêm do Testcontainers e não são usados
+# - cpu-features, protobufjs e ssh2 vêm do Testcontainers e não são usados
 allowBuilds:
   '@swc/core': false
   '@prisma/engines': true
   prisma: true
   cpu-features: false
   protobufjs: false
+  ssh2: false
