@@ -1,15 +1,30 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-01T15:42:31.149Z",
-  "gitRev": "74fcae9",
+  "timestamp": "2026-11-01T16:15:58.701Z",
+  "gitRev": "e1fbec1",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 2,
+  "testsParsed": 12,
   "results": {
     "AC-011": {
       "status": "pass",
       "testName": "US-005 — Dá para saber se a API está de pé AC-011: \"Viva\" responde 200 @spec:AC-011 AC-011: \"Viva\" responde 200 @spec:AC-011",
+      "method": "vitest-json"
+    },
+    "AC-013": {
+      "status": "pass",
+      "testName": "US-006 — Erros previsíveis e cada requisição rastreável AC-013: rota inexistente responde no formato padrão de erro @spec:AC-013 AC-013: rota inexistente responde no formato padrão de erro @spec:AC-013",
+      "method": "vitest-json"
+    },
+    "AC-014": {
+      "status": "pass",
+      "testName": "US-006 — Erros previsíveis e cada requisição rastreável AC-014: resposta e log da requisição levam o mesmo identificador @spec:AC-014 AC-014: resposta e log da requisição levam o mesmo identificador @spec:AC-014",
+      "method": "vitest-json"
+    },
+    "AC-015": {
+      "status": "pass",
+      "testName": "US-007 — A API não sobe com configuração errada AC-015: variável obrigatória ausente impede a subida e é nomeada @spec:AC-015 AC-015: variável obrigatória ausente impede a subida e é nomeada @spec:AC-015",
       "method": "vitest-json"
     }
   },
