@@ -27,11 +27,8 @@ class FalhasController {
 @Module({ controllers: [FalhasController] })
 class FalhasModule {}
 
-const ENV = {
-  NODE_ENV: 'test',
-  LOG_LEVEL: 'info',
-  DATABASE_URL: 'postgresql://vitrine:vitrine@localhost:5432/vitrine_test',
-};
+// Ambiente padrão dos testes (vitest.config.ts), com log ligado para conferir o requestId.
+const ENV = { ...process.env, LOG_LEVEL: 'info' };
 
 describe('US-006 — Erros previsíveis e cada requisição rastreável', () => {
   let app: INestApplication;
