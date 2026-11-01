@@ -35,6 +35,11 @@ describe('US-007 — A API não sobe com configuração errada', () => {
       PORT: 3333,
       LOG_LEVEL: 'info',
       DATABASE_URL: VALID.DATABASE_URL,
+      RUN_WORKER: true,
     });
+  });
+
+  it('RUN_WORKER aceita "false" para a API só enfileirar', () => {
+    expect(loadEnv({ ...VALID, RUN_WORKER: 'false' }).RUN_WORKER).toBe(false);
   });
 });
