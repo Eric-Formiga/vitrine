@@ -14,6 +14,8 @@ export default defineConfig({
       NODE_ENV: 'test',
       LOG_LEVEL: 'silent',
       DATABASE_URL: 'postgresql://vitrine:vitrine@127.0.0.1:1/vitrine',
+      // mesmo segredo de teste do test/support/clerk-test-kit.ts
+      CLERK_WEBHOOK_SECRET: 'whsec_' + Buffer.from('segredo-de-teste-da-vitrine!').toString('base64'),
     },
     // Subir o Postgres em Docker leva alguns segundos (mais na primeira vez, que baixa a imagem).
     hookTimeout: 180_000,

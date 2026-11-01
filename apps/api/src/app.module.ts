@@ -2,6 +2,7 @@ import { type DynamicModule, Module, type ModuleMetadata } from '@nestjs/common'
 import { APP_FILTER } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
 
+import { IdentityModule } from './modules/identity/identity.module.js';
 import { ConfigModule } from './shared/config/config.module.js';
 import type { Env } from './shared/config/env.js';
 import { ProblemDetailsFilter } from './shared/errors/problem-details.filter.js';
@@ -27,6 +28,7 @@ export class AppModule {
         PrismaModule,
         QueueModule,
         HealthModule,
+        IdentityModule,
         ...imports,
       ],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],

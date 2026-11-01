@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { InvalidEnvError, loadEnv } from './env.js';
 
-const VALID = { DATABASE_URL: 'postgresql://vitrine:vitrine@localhost:5432/vitrine' };
+const VALID = {
+  DATABASE_URL: 'postgresql://vitrine:vitrine@localhost:5432/vitrine',
+  CLERK_WEBHOOK_SECRET: 'whsec_' + 'teste',
+};
 
 describe('US-007 — A API não sobe com configuração errada', () => {
   // Dado: que falta uma variável de ambiente obrigatória (ex.: DATABASE_URL)
@@ -36,6 +39,7 @@ describe('US-007 — A API não sobe com configuração errada', () => {
       LOG_LEVEL: 'info',
       DATABASE_URL: VALID.DATABASE_URL,
       RUN_WORKER: true,
+      CLERK_WEBHOOK_SECRET: VALID.CLERK_WEBHOOK_SECRET,
     });
   });
 

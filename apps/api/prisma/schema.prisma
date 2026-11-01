@@ -1,5 +1,5 @@
-// Schema do banco da Vitrine (Postgres). Os modelos entram tarefa a tarefa;
-// o primeiro, `users`, chega na T-004.
+// Schema do banco da Vitrine (Postgres). Os modelos entram tarefa a tarefa,
+// seguindo docs/DATA_MODEL.md.
 
 generator client {
   provider            = "prisma-client"
@@ -10,4 +10,20 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// Pessoas da plataforma, espelhadas do Clerk. É a fonte de verdade dos papéis.
+// Nunca é apagada: conta excluída é anonimizada (spec 01, casos de borda).
+model User {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  clerkId   String    @unique @map("clerk_id")
+  email     String    @unique
+  name      String?
+  phone     String?
+  roles     String[]  @default(["customer"])
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
 }
