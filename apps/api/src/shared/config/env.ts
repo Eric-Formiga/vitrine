@@ -9,6 +9,19 @@ const envSchema = z.object({
   RUN_WORKER: z.stringbool().default(true),
   // Segredo do endpoint de webhook no painel do Clerk (Svix); confere a origem dos avisos.
   CLERK_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
+  // Chave pública (PEM) da instância do Clerk: valida tokens sem chamar a rede.
+  // Aceita "\n" escrito literalmente, para caber numa linha do .env.
+  CLERK_JWT_KEY: z
+    .string()
+    .min(1)
+    .transform((key) => key.replace(/\\n/g, '\n')),
+  // Chave da API do Clerk, usada só para buscar quem ainda não está no banco (AC-006).
+  CLERK_SECRET_KEY: z.string().startsWith('sk_'),
+  // Origens do site que podem usar os tokens (claim azp), separadas por vírgula.
+  CLERK_AUTHORIZED_PARTIES: z
+    .string()
+    .default('http://localhost:3000')
+    .transform((list) => list.split(',').map((origin) => origin.trim()).filter(Boolean)),
 });
 
 export type Env = z.infer<typeof envSchema>;
