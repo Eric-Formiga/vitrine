@@ -3,6 +3,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { createApp } from '../src/create-app.js';
+import { Public } from '../src/shared/auth/public.decorator.js';
 import { DomainError } from '../src/shared/errors/domain-error.js';
 
 class ProdutoEsgotadoError extends DomainError {
@@ -11,6 +12,7 @@ class ProdutoEsgotadoError extends DomainError {
 }
 
 // Rotas só de teste: uma falha inesperada e um erro de domínio.
+@Public()
 @Controller('teste')
 class FalhasController {
   @Get('falha')

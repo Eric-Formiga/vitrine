@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { generateKeyPairSync, randomUUID, sign } from 'node:crypto';
 
 import { Webhook } from 'svix';
 
@@ -34,6 +34,42 @@ export interface SignedEvent {
   headers: Record<'svix-id' | 'svix-timestamp' | 'svix-signature', string>;
 }
 
+// ── Tokens de sessão ──────────────────────────────────────────────────────────
+// Par de chaves gerado a cada execução: a API recebe a pública como CLERK_JWT_KEY,
+// e os testes assinam tokens com a privada, como o Clerk faria.
+const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+export const TEST_JWT_PUBLIC_KEY = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+export const TEST_WEB_ORIGIN = 'http://localhost:3000';
+
+const otherKeys = generateKeyPairSync('rsa', { modulusLength: 2048 });
+
+export interface SessionTokenOptions {
+  /** Claims extras ou sobrescritas (ex.: exp vencido, azp de outra origem). */
+  claims?: Record<string, unknown>;
+  /** Assina com uma chave que a API não conhece (token forjado). */
+  forged?: boolean;
+}
+
+export function sessionToken(clerkId: string, { claims = {}, forged = false }: SessionTokenOptions = {}): string {
+  const now = Math.floor(Date.now() / 1000);
+  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  const header = encode({ alg: 'RS256', typ: 'JWT', kid: 'ins_teste' });
+  const payload = encode({
+    sub: clerkId,
+    azp: TEST_WEB_ORIGIN,
+    iss: 'https://vitrine-teste.clerk.accounts.dev',
+    sid: `sess_${randomUUID()}`,
+    iat: now,
+    nbf: now - 5,
+    exp: now + 60,
+    ...claims,
+  });
+  const key = forged ? otherKeys.privateKey : privateKey;
+  const signature = sign('sha256', Buffer.from(`${header}.${payload}`), key).toString('base64url');
+  return `${header}.${payload}.${signature}`;
+}
+
+// ── Avisos (webhooks) ─────────────────────────────────────────────────────────
 // Monta um aviso assinado como o Clerk (via Svix) faria.
 export function signedEvent(type: string, data: object, msgId = `msg_${randomUUID()}`): SignedEvent {
   const body = JSON.stringify({ type, object: 'event', data });
