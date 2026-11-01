@@ -1,0 +1,32 @@
+{
+  "testCommand": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "reporter": "vitest-json",
+  "reporterOutputFile": ".spec/verification/vitest-report.json",
+  "testGlobs": [
+    "apps/**/*.test.*",
+    "apps/**/*.spec.*",
+    "apps/*/test/**",
+    "packages/**/*.test.*",
+    "packages/**/*.spec.*"
+  ],
+  "srcGlobs": [
+    "apps/api/src/**",
+    "apps/web/app/**",
+    "apps/web/components/**",
+    "apps/web/lib/**",
+    "apps/web/middleware.ts",
+    "packages/shared/src/**",
+    "packages/emails/src/**"
+  ],
+  "ignoreGlobs": [
+    "**/node_modules",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    ".git/**",
+    ".spec/**"
+  ]
+}
