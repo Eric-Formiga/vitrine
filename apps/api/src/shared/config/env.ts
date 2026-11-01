@@ -7,6 +7,8 @@ const envSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   // true: o processo HTTP também consome as filas (demo, ADR-0010); false: só enfileira.
   RUN_WORKER: z.stringbool().default(true),
+  // Segredo do endpoint de webhook no painel do Clerk (Svix); confere a origem dos avisos.
+  CLERK_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
 });
 
 export type Env = z.infer<typeof envSchema>;
