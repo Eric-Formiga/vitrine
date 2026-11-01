@@ -14,7 +14,7 @@
     "apps/web/app/**",
     "apps/web/components/**",
     "apps/web/lib/**",
-    "apps/web/middleware.ts",
+    "apps/web/proxy.ts",
     "packages/shared/src/**",
     "packages/emails/src/**"
   ],

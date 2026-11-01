@@ -6,7 +6,7 @@ export default defineConfig({
     environment: 'node',
     include: ['**/*.spec.ts', '**/*.spec.tsx'],
     exclude: ['node_modules/**', '.next/**'],
-    // o site ganha os primeiros testes na T-006
-    passWithNoTests: true,
+    // O @clerk/nextjs é publicado para rodar dentro de um bundler; o Vite processa ele nos testes.
+    server: { deps: { inline: [/@clerk\//] } },
   },
 });

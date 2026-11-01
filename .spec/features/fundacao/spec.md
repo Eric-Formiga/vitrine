@@ -1,7 +1,7 @@
 # Spec: Fundação — esqueleto da Vitrine com login
 
 > feature: fundacao
-> status: em-implementacao
+> status: auditada
 
 <!--
   Como ler este arquivo (o formato é verificado por `onp-spec audit`):
