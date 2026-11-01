@@ -45,6 +45,21 @@ Refs: T-004, AC-001, AC-003
 - Commits pequenos e com um propósito só; o rodapé `Refs:` liga o commit à
   tarefa e aos critérios de aceite.
 
+## Migrações do banco
+
+Criadas com `pnpm --filter @vitrine/api db:migrate --name <nome>`. O Prisma
+coloca um carimbo de data e hora na frente; o nome descreve a mudança em
+inglês e `snake_case`, no mesmo idioma do schema:
+
+| Mudança | Nome |
+|---|---|
+| criar tabela | `create_users` |
+| adicionar coluna | `add_phone_to_users` |
+| criar índice | `add_index_products_status` |
+
+Migração já aplicada em algum ambiente compartilhado nunca é editada nem
+renomeada: corrija com uma migração nova.
+
 ## Pull requests
 
 - Título no formato Conventional Commits: ele vira o commit na `main`.
