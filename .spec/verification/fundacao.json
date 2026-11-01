@@ -1,15 +1,20 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-01T16:15:58.701Z",
-  "gitRev": "e1fbec1",
+  "timestamp": "2026-11-01T16:32:20.049Z",
+  "gitRev": "b6bf15e",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 12,
+  "testsParsed": 19,
   "results": {
     "AC-011": {
       "status": "pass",
-      "testName": "US-005 — Dá para saber se a API está de pé AC-011: \"Viva\" responde 200 @spec:AC-011 AC-011: \"Viva\" responde 200 @spec:AC-011",
+      "testName": "US-005 — Dá para saber se a API está de pé (banco fora do ar) AC-011: \"Viva\" responde 200 mesmo com o banco fora do ar @spec:AC-011 AC-011: \"Viva\" responde 200 mesmo com o banco fora do ar @spec:AC-011",
+      "method": "vitest-json"
+    },
+    "AC-012": {
+      "status": "pass",
+      "testName": "US-005 — Dá para saber se a API está de pé (banco fora do ar) AC-012: \"Pronta\" responde 503 com o banco fora do ar @spec:AC-012 AC-012: \"Pronta\" responde 503 com o banco fora do ar @spec:AC-012",
       "method": "vitest-json"
     },
     "AC-013": {
@@ -25,6 +30,21 @@
     "AC-015": {
       "status": "pass",
       "testName": "US-007 — A API não sobe com configuração errada AC-015: variável obrigatória ausente impede a subida e é nomeada @spec:AC-015 AC-015: variável obrigatória ausente impede a subida e é nomeada @spec:AC-015",
+      "method": "vitest-json"
+    },
+    "AC-016": {
+      "status": "pass",
+      "testName": "US-008 — Filas rodam junto com a API e desligam com segurança AC-016: com RUN_WORKER=true a própria API executa o job @spec:AC-016 AC-016: com RUN_WORKER=true a própria API executa o job @spec:AC-016",
+      "method": "vitest-json"
+    },
+    "AC-017": {
+      "status": "pass",
+      "testName": "US-008 — Filas rodam junto com a API e desligam com segurança AC-017: com RUN_WORKER=false a API só enfileira @spec:AC-017 AC-017: com RUN_WORKER=false a API só enfileira @spec:AC-017",
+      "method": "vitest-json"
+    },
+    "AC-018": {
+      "status": "pass",
+      "testName": "US-008 — Filas rodam junto com a API e desligam com segurança AC-018: desligamento para de aceitar requisições e espera o job em andamento @spec:AC-018 AC-018: desligamento para de aceitar requisições e espera o job em andamento @spec:AC-018",
       "method": "vitest-json"
     }
   },
