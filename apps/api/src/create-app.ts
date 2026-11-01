@@ -6,6 +6,7 @@ import { Logger } from 'nestjs-pino';
 import type { DestinationStream } from 'pino';
 
 import { AppModule } from './app.module.js';
+import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
 import { loadEnv } from './shared/config/env.js';
 
 export interface CreateAppOptions {
@@ -15,6 +16,8 @@ export interface CreateAppOptions {
   logStream?: DestinationStream;
   /** Módulos extras, usados pelos testes. */
   imports?: ModuleMetadata['imports'];
+  /** Substitui a API do Clerk (usado pelos testes). */
+  clerkGateway?: ClerkGateway;
 }
 
 // Monta a aplicação com a mesma configuração no servidor (main.ts) e nos testes.
@@ -23,7 +26,12 @@ export async function createApp(options: CreateAppOptions = {}): Promise<INestAp
   const env = loadEnv(options.env ?? process.env);
 
   const app = await NestFactory.create(
-    AppModule.forRoot({ env, logStream: options.logStream, imports: options.imports }),
+    AppModule.forRoot({
+      env,
+      logStream: options.logStream,
+      imports: options.imports,
+      clerkGateway: options.clerkGateway,
+    }),
     // rawBody: o webhook do Clerk confere a assinatura sobre o corpo exatamente como chegou.
     { bufferLogs: true, rawBody: true },
   );

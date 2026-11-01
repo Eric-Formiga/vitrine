@@ -1,11 +1,13 @@
 import { Controller, Get, Inject, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
+import { Public } from '../auth/public.decorator.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { JOB_QUEUE, type JobQueue } from '../queue/job-queue.port.js';
 
 type Check = 'up' | 'down';
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(

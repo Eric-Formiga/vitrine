@@ -3,6 +3,7 @@ import type { Request } from 'express';
 import { Webhook } from 'svix';
 import { z } from 'zod';
 
+import { Public } from '../../../shared/auth/public.decorator.js';
 import { ENV } from '../../../shared/config/config.module.js';
 import type { Env } from '../../../shared/config/env.js';
 import { type ClerkUserEvent, SyncClerkUserUseCase } from '../application/sync-clerk-user.use-case.js';
@@ -24,6 +25,8 @@ const clerkEvent = z.discriminatedUnion('type', [
 ]);
 
 // POST /v1/webhooks/clerk — o Clerk avisa quando uma conta é criada, alterada ou excluída.
+// Público para o login, mas protegido pela assinatura do aviso.
+@Public()
 @Controller('webhooks/clerk')
 export class ClerkWebhookController {
   private readonly webhook: Webhook;
