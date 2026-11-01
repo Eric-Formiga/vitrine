@@ -7,6 +7,8 @@ import type { Env } from './shared/config/env.js';
 import { ProblemDetailsFilter } from './shared/errors/problem-details.filter.js';
 import { HealthModule } from './shared/health/health.module.js';
 import { loggerModule } from './shared/logging/logger.module.js';
+import { PrismaModule } from './shared/prisma/prisma.module.js';
+import { QueueModule } from './shared/queue/queue.module.js';
 
 export interface AppModuleOptions {
   env: Env;
@@ -19,7 +21,14 @@ export class AppModule {
   static forRoot({ env, logStream, imports = [] }: AppModuleOptions): DynamicModule {
     return {
       module: AppModule,
-      imports: [ConfigModule.forRoot(env), loggerModule(env, logStream), HealthModule, ...imports],
+      imports: [
+        ConfigModule.forRoot(env),
+        loggerModule(env, logStream),
+        PrismaModule,
+        QueueModule,
+        HealthModule,
+        ...imports,
+      ],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     };
   }
