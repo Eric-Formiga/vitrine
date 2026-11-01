@@ -1,0 +1,13 @@
+// Schema do banco da Vitrine (Postgres). Os modelos entram tarefa a tarefa;
+// o primeiro, `users`, chega na T-004.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}

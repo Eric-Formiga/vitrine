@@ -5,6 +5,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3333),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  // true: o processo HTTP também consome as filas (demo, ADR-0010); false: só enfileira.
+  RUN_WORKER: z.stringbool().default(true),
 });
 
 export type Env = z.infer<typeof envSchema>;

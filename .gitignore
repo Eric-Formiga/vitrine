@@ -7,6 +7,8 @@ build/
 coverage/
 *.tsbuildinfo
 next-env.d.ts
+# cliente do Prisma, gerado por `prisma generate` (roda no pnpm install)
+apps/api/src/generated/
 
 # Ambiente: segredos nunca no git (documente as variáveis no .env.example)
 .env
