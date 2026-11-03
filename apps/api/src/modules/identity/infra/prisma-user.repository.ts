@@ -23,6 +23,21 @@ export class PrismaUserRepository implements UserRepository {
     });
   }
 
+  findActiveByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' }, deletedAt: null },
+      select: { id: true, clerkId: true, email: true, name: true, roles: true, deletedAt: true },
+    });
+  }
+
+  async addRole(userId: string, role: string): Promise<void> {
+    // A condição no WHERE torna a operação idempotente mesmo com duas execuções ao mesmo tempo.
+    await this.prisma.user.updateMany({
+      where: { id: userId, NOT: { roles: { has: role } } },
+      data: { roles: { push: role } },
+    });
+  }
+
   async anonymize(clerkId: string): Promise<void> {
     await this.prisma.user.updateMany({
       where: { clerkId, deletedAt: null },

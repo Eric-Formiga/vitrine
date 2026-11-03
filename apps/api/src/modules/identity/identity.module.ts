@@ -1,7 +1,9 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 
+import { RolesGuard } from '../../shared/auth/roles.guard.js';
 import { CLERK_GATEWAY, type ClerkGateway } from './application/clerk-gateway.port.js';
+import { GrantAdminUseCase } from './application/grant-admin.use-case.js';
 import { ProvisionUserUseCase } from './application/provision-user.use-case.js';
 import { SyncClerkUserUseCase } from './application/sync-clerk-user.use-case.js';
 import { USER_REPOSITORY } from './application/user.repository.js';
@@ -29,8 +31,12 @@ export class IdentityModule {
         clerkGateway
           ? { provide: CLERK_GATEWAY, useValue: clerkGateway }
           : { provide: CLERK_GATEWAY, useClass: ClerkBackendGateway },
+        GrantAdminUseCase,
+        // A ordem importa: primeiro quem é (login), depois o que pode (papéis do banco).
         { provide: APP_GUARD, useClass: ClerkAuthGuard },
+        { provide: APP_GUARD, useClass: RolesGuard },
       ],
+      exports: [GrantAdminUseCase],
     };
   }
 }
