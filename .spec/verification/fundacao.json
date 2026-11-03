@@ -1,11 +1,11 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-03T23:23:59.472Z",
-  "gitRev": "286a5cc",
+  "timestamp": "2026-11-03T23:33:21.534Z",
+  "gitRev": "0ac99a7",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 70,
+  "testsParsed": 73,
   "results": {
     "AC-001": {
       "status": "pass",

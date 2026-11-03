@@ -1,11 +1,11 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-03T23:21:33.571Z",
-  "gitRev": "286a5cc",
+  "timestamp": "2026-11-03T23:31:32.701Z",
+  "gitRev": "0ac99a7",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 70,
+  "testsParsed": 73,
   "results": {
     "AC-019": {
       "status": "pass",
@@ -30,6 +30,11 @@
     "AC-023": {
       "status": "pass",
       "testName": "US-011 — Árvore pública de categorias AC-023: visitante recebe a árvore aninhada e ordenada, sem as arquivadas @spec:AC-023 AC-023: visitante recebe a árvore aninhada e ordenada, sem as arquivadas @spec:AC-023",
+      "method": "vitest-json"
+    },
+    "AC-024": {
+      "status": "pass",
+      "testName": "US-011 — Seed da árvore inicial de moda AC-024: o seed cria os quatro departamentos com subcategorias, tipo de tamanho e guia @spec:AC-024 AC-024: o seed cria os quatro departamentos com subcategorias, tipo de tamanho e guia @spec:AC-024",
       "method": "vitest-json"
     },
     "AC-026": {
