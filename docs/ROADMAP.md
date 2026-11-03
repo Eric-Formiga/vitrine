@@ -5,24 +5,24 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 > **Linha de corte do portfólio.** O núcleo são as **Fases 0 a 3 + Entrega do portfólio**: é onde estão os diferenciais (checkout multi-loja sem overselling, divisão do pagamento com Stripe Connect, repasse, reembolso com estorno). As **Fases 4 e 5 são bônus** e só começam depois que o núcleo estiver publicado e demonstrável; o que não for feito entra como "próximos passos" no README. O [PRD](PRD.md) (§4.1) continua descrevendo o escopo completo — a linha de corte define a ordem de entrega.
 
 ## Fase 0 — Fundação
-- [ ] Monorepo Turborepo + pnpm, configs compartilhadas (TS strict, ESLint, Prettier)
-- [ ] Docker Compose (Postgres); `.env.example`
-- [ ] pg-boss + flag `RUN_WORKER` + graceful shutdown
-- [ ] Nest: módulo `shared` (Prisma, config com validação Zod, logger pino, filtro problem+json, health)
-- [ ] Next: layout base, Tailwind, shadcn/ui, tema
-- [ ] Clerk em ambos + webhook de sincronização de usuários
-- [ ] Pipeline CI (lint, typecheck, test, build) e deploy de esqueleto (Vercel + Railway + Supabase)
-- [ ] **Spike Stripe Connect**: criar conta Express de teste, Account Link, PaymentIntent com `transfer_group`, Transfer com `source_transaction`
+- [x] Monorepo Turborepo + pnpm, configs compartilhadas (TS strict, ESLint, Prettier) — feature `fundacao`
+- [x] Docker Compose (Postgres); `.env.example` — feature `fundacao`
+- [x] pg-boss + flag `RUN_WORKER` + graceful shutdown — feature `fundacao`
+- [x] Nest: módulo `shared` (Prisma, config com validação Zod, logger pino, filtro problem+json, health) — feature `fundacao`
+- [x] Next: layout base, Tailwind, shadcn/ui, tema — feature `fundacao`
+- [x] Clerk em ambos + webhook de sincronização de usuários — feature `fundacao`
+- [ ] Pipeline CI (lint, typecheck, test, build) e deploy de esqueleto (Vercel + Railway + Supabase) — feature `ci-e-deploy` (adiada: depois da Fase 1)
+- [ ] **Spike Stripe Connect**: criar conta Express de teste, Account Link, PaymentIntent com `transfer_group`, Transfer com `source_transaction` — feature `spike-stripe-connect`
 
 **Pronto quando:** usuário loga em produção e aparece na tabela `users`.
 
 ## Fase 1 — Catálogo
-- [ ] Categorias (admin) e seed
-- [ ] Candidatura de vendedor + aprovação admin + onboarding Connect
-- [ ] CRUD de produtos, variantes e upload de imagens
-- [ ] PLP, PDP, página da loja com cache e revalidação
-- [ ] Busca FTS + facetas
-- [ ] Seed com 6 lojas e ~200 produtos
+- [ ] Categorias (admin) e seed — feature `categorias` (em andamento)
+- [ ] Candidatura de vendedor + aprovação admin + onboarding Connect — feature `vendedores`
+- [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
+- [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
+- [ ] Busca FTS + facetas — feature `busca`
+- [ ] Seed com 6 lojas e ~200 produtos — feature `vitrine`
 
 **Pronto quando:** visitante navega e busca produtos reais de várias lojas.
 
