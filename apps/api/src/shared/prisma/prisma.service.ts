@@ -8,7 +8,8 @@ import type { Env } from '../config/env.js';
 // Conexão preguiçosa: a API sobe mesmo com o banco fora do ar (AC-011).
 @Injectable()
 export class PrismaService extends PrismaClient implements OnApplicationShutdown {
-  constructor(@Inject(ENV) env: Env) {
+  // Só precisa do endereço do banco: os scripts (seed) criam o serviço sem o resto da configuração.
+  constructor(@Inject(ENV) env: Pick<Env, 'DATABASE_URL'>) {
     super({ adapter: new PrismaPg({ connectionString: env.DATABASE_URL, connectionTimeoutMillis: 2_000 }) });
   }
 

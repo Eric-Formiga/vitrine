@@ -11,7 +11,8 @@
     "start:worker": "node dist/worker.js",
     "db:migrate": "prisma migrate dev && prisma generate",
     "lint": "eslint --config ../../packages/config/eslint.config.mjs src test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:admin": "nest build && node dist/scripts/seed-admin.js"
   },
   "dependencies": {
     "@clerk/backend": "^3.26.5",

@@ -25,5 +25,27 @@ model User {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
+  auditLogs AuditLog[]
+
   @@map("users")
+}
+
+// Quem fez o quê na área de admin, com o estado antes e depois (RF-ADM-5, spec 10).
+// Só cresce: nada aqui é editado ou apagado pela aplicação.
+model AuditLog {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  actorUserId String   @map("actor_user_id") @db.Uuid
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id") @db.Uuid
+  before      Json?
+  after       Json?
+  ip          String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  actor User @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, createdAt(sort: Desc)])
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@map("audit_logs")
 }

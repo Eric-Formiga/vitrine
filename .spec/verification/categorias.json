@@ -1,0 +1,32 @@
+{
+  "feature": "categorias",
+  "timestamp": "2026-11-03T22:48:18.945Z",
+  "gitRev": "d2b923f",
+  "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "reporter": "vitest-json",
+  "exitCode": 0,
+  "testsParsed": 50,
+  "results": {
+    "AC-019": {
+      "status": "pass",
+      "testName": "US-009 — Admin inicial pelo seed AC-019: o seed torna a pessoa admin sem perder os outros papéis @spec:AC-019 AC-019: o seed torna a pessoa admin sem perder os outros papéis @spec:AC-019",
+      "method": "vitest-json"
+    },
+    "AC-020": {
+      "status": "pass",
+      "testName": "US-009 — Admin inicial pelo seed AC-020: e-mail desconhecido termina com erro e não muda ninguém @spec:AC-020 AC-020: e-mail desconhecido termina com erro e não muda ninguém @spec:AC-020",
+      "method": "vitest-json"
+    },
+    "AC-021": {
+      "status": "pass",
+      "testName": "US-010 e US-013 — Área de admin e auditoria AC-021: quem não é admin recebe o mesmo 404 de uma rota inexistente @spec:AC-021 AC-021: quem não é admin recebe o mesmo 404 de uma rota inexistente @spec:AC-021",
+      "method": "vitest-json"
+    },
+    "AC-022": {
+      "status": "pass",
+      "testName": "US-010 e US-013 — Área de admin e auditoria AC-022: admin entra na área de admin @spec:AC-022 AC-022: admin entra na área de admin @spec:AC-022",
+      "method": "vitest-json"
+    }
+  },
+  "principles": {}
+}

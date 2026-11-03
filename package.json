@@ -14,7 +14,8 @@
     "test": "vitest run",
     "format": "prettier --write .",
     "db:up": "docker compose -f infra/docker-compose.yml up -d",
-    "db:down": "docker compose -f infra/docker-compose.yml down"
+    "db:down": "docker compose -f infra/docker-compose.yml down",
+    "seed:admin": "pnpm --filter @vitrine/api seed:admin"
   },
   "prettier": "@vitrine/config/prettier",
   "devDependencies": {
