@@ -15,6 +15,9 @@ Web e API precisam de tipos consistentes. Queremos também documentação intera
 - **Pacote de schemas Zod compartilhado sem OpenAPI**: tipagem boa, mas sem documentação padrão e sem contrato consumível por terceiros.
 - **Orval**: gera hooks React Query prontos; mais código gerado. Pode ser adotado depois.
 
+## Nota (03/11/2026)
+O `nestjs-zod` 5.5 não suporta o Nest 12 (declara Nest 10/11 e `@nestjs/swagger` até 11). Os DTOs continuam em **Zod 4**, mas com cola própria: `ZodValidationPipe` / `@ZodBody` validam a entrada (erro 400 com `errors` por campo) e o schema vira JSON Schema com `z.toJSONSchema`, registrado no `@nestjs/swagger` 12. O resto da decisão (OpenAPI gerado do backend, `openapi-typescript` + `openapi-fetch` no web) não muda.
+
 ## Consequências
 - (+) Uma fonte de verdade (DTOs Zod), docs automáticas, quebra de contrato detectada em compile time no web.
 - (−) Passo de geração no fluxo de desenvolvimento (automatizado no `turbo dev` via watch).

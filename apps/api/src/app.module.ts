@@ -3,6 +3,7 @@ import { APP_FILTER } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
 
 import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
+import { CatalogModule } from './modules/catalog/catalog.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { AuditModule } from './shared/audit/audit.module.js';
 import { ConfigModule } from './shared/config/config.module.js';
@@ -33,6 +34,7 @@ export class AppModule {
         QueueModule,
         HealthModule,
         IdentityModule.forRoot({ clerkGateway }),
+        CatalogModule,
         ...imports,
       ],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
