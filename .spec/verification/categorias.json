@@ -1,11 +1,11 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-03T22:48:18.945Z",
-  "gitRev": "d2b923f",
+  "timestamp": "2026-11-03T23:21:33.571Z",
+  "gitRev": "286a5cc",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 50,
+  "testsParsed": 70,
   "results": {
     "AC-019": {
       "status": "pass",
@@ -25,6 +25,41 @@
     "AC-022": {
       "status": "pass",
       "testName": "US-010 e US-013 — Área de admin e auditoria AC-022: admin entra na área de admin @spec:AC-022 AC-022: admin entra na área de admin @spec:AC-022",
+      "method": "vitest-json"
+    },
+    "AC-023": {
+      "status": "pass",
+      "testName": "US-011 — Árvore pública de categorias AC-023: visitante recebe a árvore aninhada e ordenada, sem as arquivadas @spec:AC-023 AC-023: visitante recebe a árvore aninhada e ordenada, sem as arquivadas @spec:AC-023",
+      "method": "vitest-json"
+    },
+    "AC-026": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-026: admin cria departamento e subcategoria, que aparecem na árvore pública @spec:AC-026 AC-026: admin cria departamento e subcategoria, que aparecem na árvore pública @spec:AC-026",
+      "method": "vitest-json"
+    },
+    "AC-027": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-027: dados inválidos voltam 400 com o motivo de cada campo e nada é gravado @spec:AC-027 AC-027: dados inválidos voltam 400 com o motivo de cada campo e nada é gravado @spec:AC-027",
+      "method": "vitest-json"
+    },
+    "AC-028": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-028: admin edita e move categoria, e a árvore pública reflete @spec:AC-028 AC-028: admin edita e move categoria, e a árvore pública reflete @spec:AC-028",
+      "method": "vitest-json"
+    },
+    "AC-029": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-029: arquivar leva junto as descendentes, que somem só da árvore pública @spec:AC-029 AC-029: arquivar leva junto as descendentes, que somem só da árvore pública @spec:AC-029",
+      "method": "vitest-json"
+    },
+    "AC-033": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-033: restaurar devolve só a categoria escolhida @spec:AC-033 AC-033: restaurar devolve só a categoria escolhida @spec:AC-033",
+      "method": "vitest-json"
+    },
+    "AC-030": {
+      "status": "pass",
+      "testName": "US-012 e US-013 — Admin mantém as categorias AC-030: cada escrita do admin em categorias gera um registro com antes e depois @spec:AC-030 AC-030: cada escrita do admin em categorias gera um registro com antes e depois @spec:AC-030",
       "method": "vitest-json"
     }
   },

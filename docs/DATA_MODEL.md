@@ -64,7 +64,7 @@ erDiagram
 **shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents`, `handling_days`.
 
 ### Catálogo
-**categories** — `id`, `parent_id`, `name`, `slug` (único), `position`, `size_chart jsonb`.
+**categories** — `id`, `parent_id`, `name`, `slug` (único na árvore inteira, inclusive entre arquivadas), `position`, `size_type` (`CLOTHING`, `SHOES`, `ONE_SIZE`: define a grade de tamanhos das variantes), `size_chart jsonb` (`{ columns, rows }`), `archived_at` (arquivada junto com as descendentes; nunca apagada).
 
 **products** — `id`, `seller_id`, `category_id`, `title`, `slug` (único por loja), `description`, `condition` (`NEW`,`USED`), `status` (`DRAFT`,`ACTIVE`,`ARCHIVED`,`SUSPENDED`), `search_vector tsvector` (gerado), `min_price_cents` (denormalizado p/ ordenação), `sold_count`, `rating_avg`, `rating_count`, `published_at`.
 

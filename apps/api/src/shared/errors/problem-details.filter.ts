@@ -3,7 +3,7 @@ import { STATUS_CODES } from 'node:http';
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
-import { DomainError } from './domain-error.js';
+import { DomainError, type FieldError, RequestValidationError } from './domain-error.js';
 
 interface ProblemDetails {
   type: string;
@@ -13,6 +13,7 @@ interface ProblemDetails {
   instance: string;
   requestId?: string;
   code?: string;
+  errors?: FieldError[];
 }
 
 // Todo erro da API sai no formato RFC 9457 (application/problem+json) — AC-013.
@@ -47,6 +48,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
         status: exception.status,
         detail: exception.message,
         code: exception.code,
+        ...(exception instanceof RequestValidationError ? { errors: exception.errors } : {}),
         ...base,
       };
     }

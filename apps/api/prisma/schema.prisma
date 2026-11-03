@@ -30,6 +30,36 @@ model User {
   @@map("users")
 }
 
+// Grade de tamanhos das variantes dos produtos da categoria (spec 03).
+enum SizeType {
+  CLOTHING // PP a XGG
+  SHOES // 33 a 46
+  ONE_SIZE // U
+
+  @@map("size_type")
+}
+
+// Árvore do catálogo (RF-CAT-4). Nunca é apagada: arquivar marca a categoria e as
+// descendentes com archived_at, e o slug continua reservado.
+model Category {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  parentId   String?   @map("parent_id") @db.Uuid
+  name       String
+  slug       String    @unique
+  position   Int       @default(0)
+  sizeType   SizeType  @map("size_type")
+  sizeChart  Json?     @map("size_chart")
+  archivedAt DateTime? @map("archived_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+
+  @@index([parentId, position])
+  @@map("categories")
+}
+
 // Quem fez o quê na área de admin, com o estado antes e depois (RF-ADM-5, spec 10).
 // Só cresce: nada aqui é editado ou apagado pela aplicação.
 model AuditLog {

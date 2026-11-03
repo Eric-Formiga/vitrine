@@ -16,7 +16,9 @@ Documentação interativa gerada automaticamente em `/docs` (Swagger UI) a parti
 | Concorrência | `ETag`/`If-Match` em edição de produto (evitar sobrescrita) |
 | Rate limit | headers `RateLimit-*`; 429 com `Retry-After` |
 
-Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`.
+Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`.
+
+Rotas `/admin/*` respondem 404 (e não 403) para quem não é admin, e toda escrita bem-sucedida grava `audit_logs`.
 
 ## 2. Endpoints
 
@@ -100,7 +102,8 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 | GET | `/admin/sellers` | 🛡️ | Lista com filtro por status |
 | POST | `/admin/sellers/{id}/approve` · `/reject` · `/suspend` · `/reinstate` | 🛡️ | |
 | PATCH | `/admin/sellers/{id}/commission` | 🛡️ | Comissão customizada |
-| GET / POST / PATCH / DELETE | `/admin/categories[/{id}]` | 🛡️ | |
+| GET / POST / PATCH / DELETE | `/admin/categories[/{id}]` | 🛡️ | Árvore com as arquivadas; DELETE arquiva em cascata (204) |
+| POST | `/admin/categories/{id}/restore` | 🛡️ | Restaura só a categoria (exige a pai ativa) |
 | POST | `/admin/products/{id}/suspend` · `/reinstate` | 🛡️ | Moderação |
 | POST | `/admin/reviews/{id}/hide` · `/restore` | 🛡️ | |
 | GET | `/admin/orders[/{id}]` | 🛡️ | Todos os pedidos |
