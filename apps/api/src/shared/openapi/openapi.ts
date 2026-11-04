@@ -57,8 +57,13 @@ function zodComponents(): Record<string, SchemaObject> {
     target: 'openapi-3.0',
     uri: (id) => `${COMPONENTS}${id}`,
   });
+  // O $id é do JSON Schema; no OpenAPI quem identifica o schema é a chave em components.
   return Object.fromEntries(
-    Object.entries(schemas).map(([id, { $id: _ignored, ...schema }]) => [id, schema as SchemaObject]),
+    Object.entries(schemas).map(([id, schema]) => {
+      const component: Record<string, unknown> = { ...schema };
+      delete component.$id;
+      return [id, component as SchemaObject];
+    }),
   );
 }
 
