@@ -1,11 +1,11 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-03T23:31:32.701Z",
-  "gitRev": "0ac99a7",
+  "timestamp": "2026-11-04T00:11:47.131Z",
+  "gitRev": "7515cee",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 73,
+  "testsParsed": 77,
   "results": {
     "AC-019": {
       "status": "pass",
@@ -65,6 +65,16 @@
     "AC-030": {
       "status": "pass",
       "testName": "US-012 e US-013 — Admin mantém as categorias AC-030: cada escrita do admin em categorias gera um registro com antes e depois @spec:AC-030 AC-030: cada escrita do admin em categorias gera um registro com antes e depois @spec:AC-030",
+      "method": "vitest-json"
+    },
+    "AC-031": {
+      "status": "pass",
+      "testName": "US-014 — Contrato da API AC-031: /docs mostra a documentação interativa, sem login @spec:AC-031 AC-031: /docs mostra a documentação interativa, sem login @spec:AC-031",
+      "method": "vitest-json"
+    },
+    "AC-032": {
+      "status": "pass",
+      "testName": "US-014 — Contrato da API AC-032: o contrato guardado em packages/api-client está em dia com a API @spec:AC-032 AC-032: o contrato guardado em packages/api-client está em dia com a API @spec:AC-032",
       "method": "vitest-json"
     }
   },

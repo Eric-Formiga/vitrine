@@ -1,0 +1,3 @@
+# Gerados por `pnpm api:generate`: o teste do contrato (AC-032) compara byte a byte.
+packages/api-client/openapi.json
+packages/api-client/src/schema.d.ts

@@ -8,6 +8,7 @@ import type { DestinationStream } from 'pino';
 import { AppModule } from './app.module.js';
 import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
 import { loadEnv } from './shared/config/env.js';
+import { setupOpenApi } from './shared/openapi/openapi.js';
 
 export interface CreateAppOptions {
   /** Variáveis de ambiente; padrão: process.env. */
@@ -40,6 +41,8 @@ export async function createApp(options: CreateAppOptions = {}): Promise<INestAp
   // Health checks ficam fora da versão; o resto da API, sob /v1 (ASM-003).
   app.setGlobalPrefix('v1', { exclude: ['health/live', 'health/ready'] });
   app.enableShutdownHooks();
+  // Contrato e documentação interativa em /docs (ADR-0008, AC-031).
+  setupOpenApi(app);
 
   return app;
 }

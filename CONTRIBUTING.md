@@ -60,6 +60,18 @@ inglês e `snake_case`, no mesmo idioma do schema:
 Migração já aplicada em algum ambiente compartilhado nunca é editada nem
 renomeada: corrija com uma migração nova.
 
+## Contrato da API
+
+Mudou uma rota ou um formato da API (DTO Zod)? Gere o contrato de novo e faça
+commit dos arquivos gerados junto com a mudança:
+
+```bash
+pnpm api:generate   # packages/api-client/openapi.json e src/schema.d.ts
+```
+
+Um teste compara esses arquivos com o que a API gera; se esquecer, ele falha. A
+documentação interativa fica em `http://localhost:3333/docs`.
+
 ## Pull requests
 
 - Título no formato Conventional Commits: ele vira o commit na `main`.
