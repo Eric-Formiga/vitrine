@@ -16,7 +16,8 @@
     "db:up": "docker compose -f infra/docker-compose.yml up -d",
     "db:down": "docker compose -f infra/docker-compose.yml down",
     "seed:admin": "pnpm --filter @vitrine/api seed:admin",
-    "db:seed": "pnpm --filter @vitrine/api db:seed"
+    "db:seed": "pnpm --filter @vitrine/api db:seed",
+    "api:generate": "pnpm --filter @vitrine/api api:generate"
   },
   "prettier": "@vitrine/config/prettier",
   "devDependencies": {

@@ -1,4 +1,7 @@
 import { applyDecorators, Controller, SetMetadata } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
+import { ApiProblems, SECURITY_SCHEME } from '../openapi/openapi.js';
 
 export type Role = 'customer' | 'seller' | 'admin';
 
@@ -10,4 +13,10 @@ export const Roles = (...roles: Role[]): MethodDecorator & ClassDecorator => Set
 // Controller da área de admin: sempre em /admin/... e sempre exigindo o papel admin.
 // Usar este decorator (e não @Controller) impede de esquecer a proteção numa rota nova.
 export const AdminController = (path: string): ClassDecorator =>
-  applyDecorators(Controller(`admin/${path}`), Roles('admin'));
+  applyDecorators(
+    Controller(`admin/${path}`),
+    Roles('admin'),
+    ApiTags('admin'),
+    ApiBearerAuth(SECURITY_SCHEME),
+    ApiProblems(401, 404),
+  );

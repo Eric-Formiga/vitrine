@@ -1,7 +1,9 @@
 import { Body, type PipeTransform } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { z } from 'zod';
 
 import { RequestValidationError } from '../errors/domain-error.js';
+import { openApiSchema } from '../openapi/openapi.js';
 
 // Mensagens padrão do Zod em português do Brasil (cada schema ainda pode ter as suas).
 z.config(z.locales.ptBR());
@@ -21,5 +23,15 @@ export class ZodValidationPipe<T extends z.ZodType> implements PipeTransform<unk
   }
 }
 
-/** Corpo da requisição validado: `@ZodBody(createCategorySchema) body: CreateCategoryInput`. */
-export const ZodBody = (schema: z.ZodType): ParameterDecorator => Body(new ZodValidationPipe(schema));
+/**
+ * Corpo da requisição validado: `@ZodBody(createCategorySchema) body: CreateCategoryInput`.
+ * Também documenta o corpo no contrato OpenAPI (o schema precisa ter .meta({ id })).
+ */
+export const ZodBody =
+  (schema: z.ZodType): ParameterDecorator =>
+  (target, propertyKey, index) => {
+    Body(new ZodValidationPipe(schema))(target, propertyKey, index);
+    if (propertyKey === undefined) return;
+    const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
+    if (descriptor) ApiBody({ schema: openApiSchema(schema) })(target, propertyKey, descriptor);
+  };

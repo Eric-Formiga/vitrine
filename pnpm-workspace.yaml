@@ -6,10 +6,19 @@ packages:
 # - @swc/core usa o binário pré-compilado da plataforma; não precisa do postinstall
 # - prisma e @prisma/engines baixam o motor de migrações; precisam
 # - cpu-features, protobufjs e ssh2 vêm do Testcontainers e não são usados
+# - @scarf/scarf vem do swagger-ui-dist e só envia telemetria de instalação
 allowBuilds:
+  '@scarf/scarf': false
   '@swc/core': false
   '@prisma/engines': true
   prisma: true
   cpu-features: false
   protobufjs: false
   ssh2: false
+
+# openapi-typescript 7.13 declara só TypeScript 5, mas funciona com o 6 (testado em
+# 03/11/2026). Roda só em desenvolvimento (pnpm api:generate) e o resultado é
+# conferido pelo teste do contrato (AC-032): se quebrar, quebra ali, não em produção.
+peerDependencyRules:
+  allowedVersions:
+    openapi-typescript>typescript: '6'
