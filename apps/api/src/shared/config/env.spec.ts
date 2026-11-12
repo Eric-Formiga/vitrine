@@ -51,7 +51,7 @@ describe('US-007 — A API não sobe com configuração errada', () => {
 
   it('sem as variáveis do Asaas a API sobe; o token do webhook precisa de 32 caracteres', () => {
     expect(loadEnv(VALID).ASAAS_API_KEY).toBeUndefined();
-    expect(() => loadEnv({ ...VALID, ASAAS_WEBHOOK_TOKEN: 'curto' })).toThrow(/ASAAS_WEBHOOK_TOKEN (inválida)/);
+    expect(() => loadEnv({ ...VALID, ASAAS_WEBHOOK_TOKEN: 'curto' })).toThrow(/ASAAS_WEBHOOK_TOKEN \(inválida\)/);
     expect(() => loadEnv({ ...VALID, ASAAS_API_URL: 'http://api-sandbox.asaas.com/v3' })).toThrow(/ASAAS_API_URL/);
   });
 
