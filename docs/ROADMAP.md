@@ -17,7 +17,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 **Pronto quando:** usuário loga em produção e aparece na tabela `users`.
 
 ## Fase 1 — Catálogo
-- [x] Categorias (admin) e seed — feature `categorias` (falta o contrato OpenAPI e o menu no site)
+- [x] Categorias (admin) e seed — feature `categorias`
 - [ ] Candidatura de vendedor + aprovação admin + onboarding Connect — feature `vendedores`
 - [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
 - [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
