@@ -1,0 +1,17 @@
+{
+  "feature": "spike-asaas",
+  "timestamp": "2026-11-12T20:36:25.261Z",
+  "gitRev": "adbda82",
+  "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "reporter": "vitest-json",
+  "exitCode": 1,
+  "testsParsed": 90,
+  "results": {
+    "AC-034": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix da loja AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034 AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034",
+      "method": "vitest-json"
+    }
+  },
+  "principles": {}
+}

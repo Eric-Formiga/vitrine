@@ -1,0 +1,34 @@
+[
+  {
+    "method": "GET",
+    "path": "/pix/addressKeys/external?type=PHONE&key=47996515839",
+    "status": 200,
+    "responseBody": {
+      "type": "PHONE",
+      "key": "+5547996515839",
+      "ispb": "19540550",
+      "ispbName": "ASAAS GESTÃO FINANCEIRA INSTITUIÇÃO DE PAGAMENTO S.A.",
+      "financialInstitution": {
+        "id": 458,
+        "name": "ASAAS GESTÃO FINANCEIRA INSTITUIÇÃO DE PAGAMENTO S.A.",
+        "code": "461",
+        "bank": {
+          "object": "bank",
+          "id": 53,
+          "code": "461",
+          "name": "Asaas I.P S.A"
+        }
+      },
+      "owner": {
+        "name": "Joao pagador de Pix",
+        "cpfCnpj": "***.202.745-**"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/pix/addressKeys/external?type=EMAIL&key=ninguem-spike%40vitrine.dev.br",
+    "status": 404,
+    "responseBody": null
+  }
+]

@@ -10,6 +10,24 @@ export class PaymentGatewayNotConfiguredError extends DomainError {
   }
 }
 
+/** A chave Pix informada não existe no diretório do Pix. */
+export class PixKeyNotFoundError extends DomainError {
+  readonly code = 'PIX_KEY_NOT_FOUND';
+
+  constructor() {
+    super('Chave Pix não encontrada. Confira o tipo e a chave.');
+  }
+}
+
+/** O titular da chave Pix não é a loja (o documento não bate). */
+export class PixKeyOwnerMismatchError extends DomainError {
+  readonly code = 'PIX_KEY_OWNER_MISMATCH';
+
+  constructor() {
+    super('Esta chave Pix não está no CPF/CNPJ da loja. Use uma chave da própria loja.');
+  }
+}
+
 /** O provedor recusou o pedido ou falhou; a mensagem dele vai junto, sem dados sensíveis. */
 export class PaymentProviderError extends DomainError {
   readonly code = 'PAYMENT_PROVIDER_ERROR';

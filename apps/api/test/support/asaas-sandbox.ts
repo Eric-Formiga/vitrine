@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 
-import type { SubaccountInput } from '../../src/modules/payments/application/payment-gateway.port.js';
+import type { PixKey } from '../../src/modules/payments/domain/pix-key.js';
 import { AsaasHttpClient } from '../../src/modules/payments/infra/asaas/asaas-http.client.js';
 import { AsaasGateway } from '../../src/modules/payments/infra/asaas/asaas.gateway.js';
 import { type Cassette, createCassette } from './http-cassette.js';
@@ -44,20 +44,9 @@ export function sandboxGateway(scenario: string): SandboxKit {
 }
 
 /**
- * A loja de teste é sempre a mesma (ASM-013): o sandbox aceita só 20 subcontas por dia.
- * Dados fictícios; o CPF é um número válido de exemplo, de ninguém.
+ * Única chave Pix que o sandbox deixa consultar (documentação do Asaas). O titular vem
+ * mascarado como ***.202.745-**; o CPF abaixo é um número válido de teste com esses
+ * dígitos no meio, de ninguém.
  */
-export const LOJA_TESTE: SubaccountInput = {
-  name: 'Loja Teste Vitrine',
-  email: 'loja-teste-spike@vitrine.dev.br',
-  cpfCnpj: '52998224725',
-  birthDate: '1990-05-10',
-  mobilePhone: '11987654321',
-  monthlyIncomeCents: 500_000,
-  address: {
-    street: 'Avenida Paulista',
-    number: '1000',
-    province: 'Bela Vista',
-    postalCode: '01310100',
-  },
-};
+export const CHAVE_PIX_TESTE: PixKey = { type: 'PHONE', key: '47996515839' };
+export const CPF_DO_TITULAR_TESTE = '11120274591';
