@@ -22,6 +22,12 @@ const envSchema = z.object({
     .string()
     .default('http://localhost:3000')
     .transform((list) => list.split(',').map((origin) => origin.trim()).filter(Boolean)),
+  // Asaas (ADR-0011). Opcionais na subida: sem a chave, a API sobe e só o pagamento
+  // fica indisponível. A chave começa com "$": no .env, entre aspas simples.
+  ASAAS_API_KEY: z.string().min(1).optional(),
+  ASAAS_API_URL: z.url({ protocol: /^https$/ }).default('https://api-sandbox.asaas.com/v3'),
+  // Token que o Asaas manda no cabeçalho asaas-access-token dos webhooks (32 a 255 caracteres).
+  ASAAS_WEBHOOK_TOKEN: z.string().min(32).max(255).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
