@@ -2,7 +2,14 @@ import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
+import { CategoryMenu } from '@/components/category-menu';
 import { Button } from '@/components/ui/button';
+import { loadDepartments } from '@/lib/api/categories';
+
+// Busca os departamentos no servidor. Fica em Suspense: a página não espera o menu.
+async function DepartmentsMenu() {
+  return <CategoryMenu departments={await loadDepartments()} />;
+}
 
 export function SiteHeader() {
   return (
@@ -33,6 +40,9 @@ export function SiteHeader() {
           </Suspense>
         </nav>
       </div>
+      <Suspense fallback={null}>
+        <DepartmentsMenu />
+      </Suspense>
     </header>
   );
 }

@@ -1,7 +1,7 @@
 # Spec: Categorias — árvore do catálogo, admin e contrato da API
 
 > feature: categorias
-> status: rascunho
+> status: auditada
 
 <!--
   Como ler este arquivo (o formato é verificado por `onp-spec audit`):
