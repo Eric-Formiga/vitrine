@@ -45,7 +45,14 @@ describe('US-007 — A API não sobe com configuração errada', () => {
       CLERK_JWT_KEY: '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----',
       CLERK_SECRET_KEY: VALID.CLERK_SECRET_KEY,
       CLERK_AUTHORIZED_PARTIES: ['http://localhost:3000'],
+      ASAAS_API_URL: 'https://api-sandbox.asaas.com/v3',
     });
+  });
+
+  it('sem as variáveis do Asaas a API sobe; o token do webhook precisa de 32 caracteres', () => {
+    expect(loadEnv(VALID).ASAAS_API_KEY).toBeUndefined();
+    expect(() => loadEnv({ ...VALID, ASAAS_WEBHOOK_TOKEN: 'curto' })).toThrow(/ASAAS_WEBHOOK_TOKEN (inválida)/);
+    expect(() => loadEnv({ ...VALID, ASAAS_API_URL: 'http://api-sandbox.asaas.com/v3' })).toThrow(/ASAAS_API_URL/);
   });
 
   it('aceita várias origens autorizadas separadas por vírgula', () => {
