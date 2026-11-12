@@ -1,10 +1,10 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-12T20:38:12.253Z",
-  "gitRev": "adbda82",
+  "timestamp": "2026-11-12T20:57:50.227Z",
+  "gitRev": "6744766",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
-  "exitCode": 1,
+  "exitCode": 0,
   "testsParsed": 90,
   "results": {
     "AC-019": {
