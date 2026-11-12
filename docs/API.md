@@ -76,8 +76,8 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 |---|---|---|---|
 | POST | `/seller/application` | 👤 | Candidatura |
 | GET / PATCH | `/seller/me` | 🏪 | Dados da loja |
-| POST | `/seller/stripe/onboarding-link` | 🏪 | Account Link do Connect |
-| POST | `/seller/stripe/dashboard-link` | 🏪 | Login Link do Express Dashboard |
+| GET | `/seller/payment-account` | 🏪 | Situação da subconta Asaas da loja e pendências do cadastro |
+| POST | `/seller/payment-account/onboarding-link` | 🏪 | Link do Asaas para a loja enviar documentos (forma a confirmar no spike) |
 | PUT | `/seller/shipping` | 🏪 | Configuração de frete |
 | GET / POST | `/seller/products` | 🏪 | Listar/criar |
 | GET / PATCH / DELETE | `/seller/products/{id}` | 🏪 | Detalhe/editar/arquivar |
@@ -110,7 +110,7 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 | POST | `/admin/seller-orders/{id}/refund` | 🛡️ | Reembolso manual `{ amountCents, reason }` |
 | GET | `/admin/returns?status=ESCALATED` | 🛡️ | Devoluções escaladas |
 | POST | `/admin/returns/{id}/resolve` | 🛡️ | Decide a favor de comprador/vendedor |
-| GET | `/admin/disputes` | 🛡️ | Disputas Stripe |
+| GET | `/admin/chargebacks` | 🛡️ | Chargebacks (contestações de cartão) |
 | GET / POST / PATCH | `/admin/coupons[/{id}]` | 🛡️ | Cupons de plataforma |
 | GET / PATCH | `/admin/settings` | 🛡️ | Comissão padrão, prazos |
 | GET | `/admin/metrics` | 🛡️ | GMV, receita, pedidos, lojas |
@@ -119,7 +119,6 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 ### Webhooks e operação
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
-| POST | `/webhooks/stripe` | 🔏 | Eventos da conta da plataforma |
-| POST | `/webhooks/stripe-connect` | 🔏 | Eventos de contas conectadas (`account.updated`) |
+| POST | `/webhooks/asaas` | 🔏 | Eventos do Asaas (pagamentos, checkout, transferências, chargebacks, situação das subcontas); token no cabeçalho `asaas-access-token` |
 | POST | `/webhooks/clerk` | 🔏 | Sincronização de usuários (Svix) |
 | GET | `/health/live` · `/health/ready` | 🌐 | Health checks |

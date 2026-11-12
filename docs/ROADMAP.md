@@ -2,7 +2,7 @@
 
 Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 
-> **Linha de corte do portfólio.** O núcleo são as **Fases 0 a 3 + Entrega do portfólio**: é onde estão os diferenciais (checkout multi-loja sem overselling, divisão do pagamento com Stripe Connect, repasse, reembolso com estorno). As **Fases 4 e 5 são bônus** e só começam depois que o núcleo estiver publicado e demonstrável; o que não for feito entra como "próximos passos" no README. O [PRD](PRD.md) (§4.1) continua descrevendo o escopo completo — a linha de corte define a ordem de entrega.
+> **Linha de corte do portfólio.** O núcleo são as **Fases 0 a 3 + Entrega do portfólio**: é onde estão os diferenciais (checkout multi-loja sem overselling, divisão do pagamento entre lojas com subcontas do Asaas, repasse, reembolso com dívida da loja). As **Fases 4 e 5 são bônus** e só começam depois que o núcleo estiver publicado e demonstrável; o que não for feito entra como "próximos passos" no README. O [PRD](PRD.md) (§4.1) continua descrevendo o escopo completo — a linha de corte define a ordem de entrega.
 
 ## Fase 0 — Fundação
 - [x] Monorepo Turborepo + pnpm, configs compartilhadas (TS strict, ESLint, Prettier) — feature `fundacao`
@@ -12,13 +12,13 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 - [x] Next: layout base, Tailwind, shadcn/ui, tema — feature `fundacao`
 - [x] Clerk em ambos + webhook de sincronização de usuários — feature `fundacao`
 - [ ] Pipeline CI (lint, typecheck, test, build) e deploy de esqueleto (Vercel + Railway + Supabase) — feature `ci-e-deploy` (adiada: depois da Fase 1)
-- [ ] **Spike Stripe Connect**: criar conta Express de teste, Account Link, PaymentIntent com `transfer_group`, Transfer com `source_transaction` — feature `spike-stripe-connect`
+- [ ] **Spike Asaas** (substitui o spike do Stripe, ADR-0011): subconta no sandbox com aprovação automática, Checkout hospedado com Pix e cartão, webhook com token, recebimento simulado, transferência para o `walletId`, estorno parcial — feature `spike-asaas` (antes de `vendedores`)
 
 **Pronto quando:** usuário loga em produção e aparece na tabela `users`.
 
 ## Fase 1 — Catálogo
 - [x] Categorias (admin) e seed — feature `categorias`
-- [ ] Candidatura de vendedor + aprovação admin + onboarding Connect — feature `vendedores`
+- [ ] Candidatura de vendedor + aprovação admin + subconta Asaas — feature `vendedores`
 - [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
 - [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
 - [ ] Busca FTS + facetas — feature `busca`
@@ -29,29 +29,29 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 ## Fase 2 — Compra
 - [ ] Carrinho visitante/logado + merge
 - [ ] Endereços com ViaCEP; frete por loja
-- [ ] Checkout com reserva de estoque, idempotência e Payment Element
-- [ ] Webhooks Stripe, outbox + relay pg-boss, e-mails de pedido
+- [ ] Checkout com reserva de estoque, idempotência e Checkout hospedado do Asaas (Pix e cartão)
+- [ ] Webhook do Asaas, outbox + relay pg-boss, e-mails de pedido
 - [ ] Expiração de reservas
 - [ ] Teste de concorrência k6
 
-**Pronto quando:** compra multi-loja paga com cartão de teste gera sub-pedidos e e-mails.
+**Pronto quando:** compra multi-loja paga no sandbox do Asaas (Pix ou cartão de teste) gera sub-pedidos e e-mails.
 
 ## Fase 3 — Pós-venda e dinheiro
 - [ ] Despacho, confirmação de entrega (manual/automática), prazos
-- [ ] Ledger, cálculo de comissão, job de repasse (Transfers)
-- [ ] Painel financeiro do vendedor + Express Dashboard
-- [ ] Cancelamentos, devoluções, reembolsos parciais, estorno de transferências
-- [ ] Disputas
+- [ ] Ledger, cálculo de comissão, job de repasse (transferências para as subcontas)
+- [ ] Painel financeiro do vendedor (a liberar, liberado, estornos, saldo devedor)
+- [ ] Cancelamentos, devoluções, reembolsos parciais, dívida da loja após o repasse
+- [ ] Chargebacks
 
-**Pronto quando:** o ciclo completo compra → entrega → repasse → devolução funciona e reconcilia com o Stripe.
+**Pronto quando:** o ciclo completo compra → entrega → repasse → devolução funciona e reconcilia com o Asaas.
 
 ## Entrega do portfólio (fecha o núcleo)
-- [ ] Login de demonstração com 1 clique (comprador, vendedor e admin, com dados prontos) e cartão de teste visível no checkout
+- [ ] Login de demonstração com 1 clique (comprador, vendedor e admin, com dados prontos) e instruções de pagamento de teste (Pix simulado e cartão de teste) visíveis no checkout
 - [ ] E2E Playwright da jornada principal: compra multi-loja → despacho → entrega → repasse → devolução
 - [ ] README com GIFs/vídeo, arquitetura, link da demo, credenciais de teste e "como rodar"
 - [ ] Post técnico: "Como evitei overselling e dividi pagamentos entre vendedores"
 
-**Pronto quando:** quem abre o link entra com 1 clique, completa uma compra multi-loja com cartão de teste e entende a arquitetura pelo README em poucos minutos.
+**Pronto quando:** quem abre o link entra com 1 clique, completa uma compra multi-loja com pagamento de teste e entende a arquitetura pelo README em poucos minutos.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-12T19:11:52.300Z",
-  "gitRev": "5df9e26",
+  "timestamp": "2026-11-12T19:50:00.922Z",
+  "gitRev": "1ab67b8",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,

@@ -18,7 +18,7 @@ Manter comprador, vendedor e admin informados por e-mail transacional, disparado
 | Evento | Destinatário | Template |
 |---|---|---|
 | `SellerApproved` / `SellerRejected` | vendedor | Loja aprovada (com link de onboarding) / Candidatura recusada |
-| `SellerStripeStatusChanged` (desabilitada) | vendedor | Ação necessária na conta de recebimento |
+| `SellerPaymentAccountStatusChanged` (pendência ou reprovação) | vendedor | Ação necessária na conta de recebimento (Asaas) |
 | `OrderPaid` | comprador | Pedido confirmado (resumo por loja) |
 | `OrderPaid` | cada vendedor | Nova venda — despache até {data} |
 | `OrderExpired` | comprador | Pagamento não concluído |
@@ -30,7 +30,7 @@ Manter comprador, vendedor e admin informados por e-mail transacional, disparado
 | `ReturnApproved` / `ReturnRejected` | comprador | Atualização da devolução |
 | `RefundIssued` | comprador | Reembolso de R$ X processado |
 | `PayoutReleased` | vendedor | Repasse de R$ X enviado |
-| `DisputeCreated` | admin, vendedores | Disputa aberta no pedido {n} |
+| `ChargebackOpened` | admin, vendedores | Chargeback aberto no pedido {n} |
 | `PriceDropped` | comprador (opt-in) | Um favorito baixou de preço |
 | `DataExportReady` | usuário | Seus dados estão prontos |
 

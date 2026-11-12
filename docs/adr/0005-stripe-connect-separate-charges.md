@@ -1,6 +1,6 @@
 # ADR-0005 — Stripe Connect Express com *separate charges and transfers*
 
-**Status:** Aceita · **Data:** 2026-10-19
+**Status:** Substituída pela [ADR-0011](0011-asaas-subcontas-e-transferencias.md) em 2026-11-12 (troca do Stripe pelo Asaas) · **Data:** 2026-10-19
 
 ## Contexto
 Um carrinho pode conter itens de várias lojas e deve ser pago numa única cobrança. A plataforma precisa reter comissão, segurar o dinheiro até a entrega + janela de arrependimento, e reembolsar parcialmente por loja.

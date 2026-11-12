@@ -8,13 +8,13 @@ Dar à operação da plataforma controle sobre lojas, conteúdo, dinheiro e saú
 ## Seções
 
 ### Visão geral (`/admin`)
-- KPIs do período: GMV, receita de comissão líquida (comissão − cupons de plataforma − taxas estimadas), pedidos pagos, ticket médio, lojas ativas, taxa de devolução, disputas abertas.
+- KPIs do período: GMV, receita de comissão líquida (comissão − cupons de plataforma − taxas estimadas), pedidos pagos, ticket médio, lojas ativas, taxa de devolução, chargebacks abertos.
 - Gráfico de GMV diário; top lojas por GMV.
-- Fila de trabalho: candidaturas pendentes, devoluções escaladas, disputas com prazo, repasses com falha, jobs em *dead letter*.
+- Fila de trabalho: candidaturas pendentes, devoluções escaladas, chargebacks com prazo, repasses com falha, lojas com saldo devedor, jobs em *dead letter*.
 - Saúde das filas: pendentes, em execução, falhas e *dead letter* por fila (consulta ao schema `pgboss`), com ação de reprocessar.
 
 ### Lojas
-- Lista filtrável (status, Stripe habilitado, data); detalhe com dados, documentos, métricas (vendas, atraso, cancelamento, devolução, nota), histórico de auditoria.
+- Lista filtrável (status, subconta Asaas aprovada, data); detalhe com dados, documentos, métricas (vendas, atraso, cancelamento, devolução, nota), histórico de auditoria.
 - Ações: aprovar, rejeitar (motivo), suspender (motivo, opção de ocultar produtos), reativar, comissão customizada.
 
 ### Catálogo
@@ -24,9 +24,9 @@ Dar à operação da plataforma controle sobre lojas, conteúdo, dinheiro e saú
 
 ### Pedidos e financeiro
 - Busca por número, e-mail do comprador, loja.
-- Detalhe completo: timeline de eventos (inclusive webhooks recebidos), ledger por sub-pedido, links para objetos no Dashboard do Stripe.
-- Reembolso manual; resolução de devoluções escaladas; lista de disputas com `evidence_due_by`.
-- Relatório de reconciliação (divergências local × Stripe).
+- Detalhe completo: timeline de eventos (inclusive webhooks recebidos), ledger por sub-pedido, links para a cobrança e as transferências no painel do Asaas.
+- Reembolso manual; resolução de devoluções escaladas; lista de chargebacks com `evidence_due_by`.
+- Relatório de reconciliação (divergências local × Asaas).
 
 ### Cupons de plataforma
 - CRUD com métricas de uso e custo total.

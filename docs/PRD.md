@@ -19,7 +19,7 @@ Um marketplace onde vendedores independentes de moda abrem sua loja em minutos, 
 
 ### 1.3 Objetivo do projeto (portfólio)
 Demonstrar, num sistema realista e publicado, competência em:
-- **Pagamentos distribuídos**: um pagamento → vários repasses, comissões, reembolsos parciais, estornos de repasse, disputas.
+- **Pagamentos distribuídos**: um pagamento → vários repasses, comissões, reembolsos parciais, dívida da loja após o repasse, chargebacks.
 - **Consistência e concorrência**: reserva de estoque sem *overselling*, idempotência, webhooks, outbox.
 - **Arquitetura**: monólito modular em camadas, contratos tipados ponta a ponta, eventos de domínio.
 - **Qualidade**: testes em múltiplos níveis, CI/CD, observabilidade, acessibilidade, performance.
@@ -30,7 +30,7 @@ Como é um projeto de portfólio, as métricas medem **qualidade de engenharia e
 
 | Métrica | Meta |
 |---|---|
-| Fluxo completo demonstrável em produção (modo teste Stripe) | compra multi-vendedor → repasse → devolução |
+| Fluxo completo demonstrável em produção (sandbox do Asaas) | compra multi-vendedor → repasse → devolução |
 | Lighthouse (home, PLP, PDP) | Performance ≥ 90, Acessibilidade ≥ 95, SEO ≥ 95 |
 | Cobertura de testes nas camadas de domínio/aplicação | ≥ 80% |
 | Teste de concorrência de estoque (k6) | 0 casos de overselling em 200 compras simultâneas do último item |
@@ -49,15 +49,15 @@ Como é um projeto de portfólio, as métricas medem **qualidade de engenharia e
 
 ### 4.1 MVP (v1) — dentro do escopo
 - Autenticação (Clerk) com papéis comprador, vendedor e admin
-- Candidatura de vendedor, aprovação pelo admin e onboarding Stripe Connect Express
+- Candidatura de vendedor, aprovação pelo admin e criação da subconta da loja no Asaas
 - Catálogo com categorias hierárquicas, produtos com variantes (tamanho × cor), imagens, guia de medidas
 - Busca textual em português com filtros facetados e ordenação
 - Carrinho multi-vendedor (visitante e logado, com merge)
 - Frete por vendedor via tabela configurável (fixo por região + grátis acima de valor)
-- Checkout único com Stripe Payment Element (cartão; Pix se disponível na conta)
+- Checkout único no Checkout hospedado do Asaas (Pix e cartão de crédito)
 - Pedido dividido em sub-pedidos por vendedor; fluxo de despacho com código de rastreio
 - Repasse automático ao vendedor após janela de arrependimento, com comissão da plataforma
-- Devoluções e reembolsos parciais; tratamento de disputas (chargebacks)
+- Devoluções e reembolsos parciais; tratamento de chargebacks
 - Cupons da plataforma e do vendedor
 - Avaliações de compra verificada; wishlist
 - E-mails transacionais
@@ -97,7 +97,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|---|
 | RF-SELLER-1 | Candidatura para vender (dados da loja, documento, categoria principal) | M |
 | RF-SELLER-2 | Aprovação/rejeição/suspensão pelo admin | M |
-| RF-SELLER-3 | Onboarding Stripe Connect Express e acompanhamento de status | M |
+| RF-SELLER-3 | Subconta Asaas da loja (KYC pelo Asaas) e acompanhamento da situação | M |
 | RF-SELLER-4 | Página pública da loja (logo, banner, bio, avaliação média, produtos) | M |
 | RF-SELLER-5 | Configuração de frete da loja | M |
 | RF-SELLER-6 | Dashboard com vendas, ticket médio, produtos mais vendidos | S |
@@ -123,16 +123,16 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 | RF-CHK-1 | Checkout exige login, endereço e seleção de frete | M |
 | RF-CHK-2 | Aplicação de até 1 cupom da plataforma + 1 cupom por loja | S |
 | RF-CHK-3 | Reserva de estoque por 15 min durante pagamento | M |
-| RF-CHK-4 | Pagamento único via Stripe Payment Element | M |
+| RF-CHK-4 | Pagamento único via Checkout hospedado do Asaas (Pix e cartão) | M |
 | RF-CHK-5 | Página de confirmação com status em tempo real (polling) | M |
 
 ### 5.5 Pagamentos e repasses (`PAY`)
 | ID | Requisito | Prioridade |
 |---|---|---|
-| RF-PAY-1 | Processar webhooks Stripe de forma idempotente | M |
+| RF-PAY-1 | Processar webhooks do Asaas de forma idempotente, conferindo o estado na API | M |
 | RF-PAY-2 | Calcular comissão por sub-pedido e registrar ledger de valores | M |
-| RF-PAY-3 | Repasse automático (Transfer) ao vendedor após liberação | M |
-| RF-PAY-4 | Painel financeiro do vendedor (a liberar, liberado, estornado) e link ao Express Dashboard | M |
+| RF-PAY-3 | Repasse automático (transferência para a subconta) ao vendedor após liberação | M |
+| RF-PAY-4 | Painel financeiro do vendedor (a liberar, liberado, estornado, saldo devedor) | M |
 
 ### 5.6 Pedidos e entrega (`ORD`)
 | ID | Requisito | Prioridade |
@@ -148,7 +148,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|---|
 | RF-RET-1 | Solicitação de devolução até 7 dias após entrega | M |
 | RF-RET-2 | Fluxo de aprovação, recebimento e reembolso parcial | M |
-| RF-RET-3 | Tratamento de disputas Stripe (bloqueio/estorno de repasse) | S |
+| RF-RET-3 | Tratamento de chargebacks (bloqueio de repasse; perda após o repasse vira dívida da loja) | S |
 
 ### 5.8 Engajamento (`ENG`)
 | ID | Requisito | Prioridade |
@@ -177,9 +177,9 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 | RNF-18 | Custo | Infraestrutura da demo ≤ US$ 5/mês (ver [ARCHITECTURE.md §10](ARCHITECTURE.md#10-ambientes-e-deploy)) |
 | RNF-4 | Consistência | Nenhum overselling sob concorrência; toda mutação de estoque é atômica |
 | RNF-5 | Confiabilidade | Webhooks e jobs idempotentes; reprocessamento seguro; outbox garante entrega *at-least-once* |
-| RNF-6 | Segurança | Nenhum dado de cartão trafega ou é armazenado pela plataforma (PCI SAQ A via Stripe Elements) |
+| RNF-6 | Segurança | Nenhum dado de cartão trafega ou é armazenado pela plataforma (PCI SAQ A via Checkout hospedado do Asaas) |
 | RNF-7 | Segurança | OWASP Top 10: validação de entrada, autorização por recurso, rate limiting, headers (helmet/CSP), CORS restrito, segredos fora do código |
-| RNF-8 | Segurança | Assinatura verificada em todos os webhooks (Stripe, Stripe Connect, Clerk) |
+| RNF-8 | Segurança | Origem verificada em todos os webhooks: assinatura Svix (Clerk); token em tempo constante, IPs oficiais e reconsulta na API (Asaas, que não assina os avisos) |
 | RNF-9 | Privacidade | LGPD: consentimento de cookies, exportação/exclusão de dados, minimização de PII em logs |
 | RNF-10 | Acessibilidade | WCAG 2.1 AA; navegação por teclado no fluxo de compra completo |
 | RNF-11 | Disponibilidade | Meta 99,5% (limitada por planos gratuitos/baratos); health checks `live`/`ready` |
@@ -195,27 +195,27 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 | ID | Regra |
 |---|---|
 | RN-1 | Moeda única BRL. Preços armazenados em centavos. |
-| RN-2 | Apenas lojas `APPROVED` e com Stripe `charges_enabled` e `payouts_enabled` podem publicar produtos. |
+| RN-2 | Apenas lojas `APPROVED` e com a subconta aprovada no Asaas podem publicar produtos. |
 | RN-3 | Comissão padrão da plataforma: 12% sobre (subtotal de itens − desconto do vendedor). Frete não é comissionado. Admin pode definir comissão por loja. |
-| RN-4 | A plataforma absorve as taxas do Stripe (cobertas pela comissão). |
+| RN-4 | A plataforma absorve as taxas do Asaas (cobertas pela comissão). |
 | RN-5 | Um pedido é pago numa única cobrança; cada loja gera um sub-pedido independente com status próprio. |
-| RN-6 | Estoque é reservado ao iniciar o checkout por 15 min; expirado sem pagamento, a reserva é liberada e o PaymentIntent cancelado. |
+| RN-6 | Estoque é reservado ao iniciar o checkout por 15 min; expirado sem pagamento, a reserva é liberada e o Checkout expira. |
 | RN-7 | Preço, nome e imagem do item são congelados (snapshot) no pedido. |
 | RN-8 | Vendedor tem 3 dias úteis após pagamento para despachar; senão o sub-pedido pode ser cancelado pelo comprador com reembolso. |
 | RN-9 | Entrega é confirmada pelo comprador ou automaticamente 15 dias após o despacho. |
 | RN-10 | Direito de arrependimento (CDC art. 49): devolução pode ser solicitada até 7 dias após a entrega. |
-| RN-11 | Repasse ao vendedor é liberado 7 dias após a entrega sem devolução aberta. Devolução aberta suspende o repasse até resolução. |
+| RN-11 | Repasse ao vendedor é liberado 7 dias após a entrega sem devolução aberta e com o pagamento já recebido no Asaas (cartão: D+32). Devolução aberta suspende o repasse até resolução. |
 | RN-12 | Cupom da plataforma é custeado pela plataforma (não reduz o repasse); cupom de loja é custeado pela loja (reduz a base do repasse). |
 | RN-13 | Máximo 1 cupom de plataforma + 1 cupom por loja por pedido. |
 | RN-14 | Avaliação só é permitida para item de sub-pedido `DELIVERED`/`COMPLETED`, uma por item comprado. |
-| RN-15 | Disputa aberta antes do repasse bloqueia o repasse; disputa perdida após o repasse gera estorno de transferência (*transfer reversal*). |
+| RN-15 | Chargeback aberto antes do repasse bloqueia o repasse; chargeback perdido (ou reembolso) após o repasse vira dívida da loja, abatida nos próximos repasses. |
 | RN-16 | Vendedor não pode comprar os próprios produtos. |
 | RN-17 | Produto com pedidos não é excluído fisicamente, apenas arquivado. |
 
 ## 8. Premissas, restrições e riscos
 
 **Premissas**
-- Stripe operando em **modo teste**; contas conectadas de teste para os vendedores da demo.
+- Asaas operando em **sandbox**; subcontas de teste para as lojas da demo.
 - Dados de seed realistas (lojas, produtos, imagens livres de direitos).
 
 **Restrições**
@@ -225,8 +225,9 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 **Riscos**
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Disponibilidade de Stripe Connect/Pix para conta brasileira em produção | Médio | Projeto roda em modo teste; documentar o que mudaria em produção. Validar no início (spike). |
-| Complexidade de repasses/reembolsos | Alto | Ledger explícito, máquina de estados, testes de integração com Stripe mockado + testes manuais com Stripe CLI |
+| Comportamento do Asaas diferente do documentado (eventos, aprovação de subconta, transferências) | Médio | Spike no início da Fase 1 (`spike-asaas`); tudo atrás da porta `PaymentGateway` |
+| Cartão creditado só em D+32 atrasa o repasse | Baixo | Regra explícita no repasse; no sandbox o recebimento é simulado; em produção, antecipação opcional |
+| Complexidade de repasses/reembolsos | Alto | Ledger explícito, máquina de estados, testes de integração com gateway falso + testes manuais no sandbox do Asaas |
 | Cold start em planos gratuitos | Baixo | Plano hobby pago na API; health check externo |
 | Escopo grande para dev solo | Alto | Roadmap em fases com MVP navegável cedo; itens `S`/`C` cortáveis |
 
@@ -236,8 +237,9 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|
 | Pedido (Order) | Compra do comprador; contém um pagamento e N sub-pedidos |
 | Sub-pedido (SellerOrder) | Parte do pedido pertencente a uma loja; unidade de despacho, devolução e repasse |
-| Repasse (Payout/Transfer) | Transferência Stripe da plataforma para a conta conectada da loja |
-| Conta conectada | Conta Stripe Express do vendedor |
+| Repasse (Payout/Transfer) | Transferência da conta Asaas da plataforma para a subconta da loja |
+| Subconta | Conta Asaas da loja, ligada à conta da plataforma, identificada pelo `walletId` |
+| Chargeback | Contestação de uma compra no cartão, aberta pelo comprador junto ao banco |
 | Reserva | Bloqueio temporário de estoque durante o pagamento |
 | GMV | Valor bruto total transacionado |
 | PLP / PDP | Página de listagem / página de produto |
