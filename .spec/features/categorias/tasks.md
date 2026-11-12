@@ -40,5 +40,5 @@
 
 ## T-011 — Menu de departamentos no site [pendente]
 - Refs: US-011, AC-025
-- Arquivos: apps/web/package.json, pnpm-lock.yaml, apps/web/vitest.config.ts, apps/web/lib/api/public-client.ts, apps/web/lib/api/categories.ts, apps/web/lib/api/categories.spec.ts, apps/web/components/category-menu.tsx, apps/web/components/category-menu.spec.tsx, apps/web/components/site-header.tsx
+- Arquivos: apps/web/package.json, pnpm-lock.yaml, apps/web/next.config.ts, apps/web/lib/api/public-client.ts, apps/web/lib/api/categories.ts, apps/web/lib/api/categories.spec.ts, apps/web/components/category-menu.tsx, apps/web/components/category-menu.spec.tsx, apps/web/components/site-header.tsx
 - Notas: depende da T-010 (cliente tipado). O site lê a árvore com o cliente público do `@vitrine/api-client` (sem token). `loadDepartments()` devolve `[]` se a API falhar ou estiver fora do ar — o site nunca quebra por causa do menu. `CategoryMenu` recebe os departamentos e renderiza links `/c/{slug}`; o teste renderiza com `react-dom/server`. Cache e `revalidateTag` ficam para a feature `vitrine`.

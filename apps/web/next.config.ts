@@ -9,6 +9,8 @@ if (existsSync(rootEnvFile)) process.loadEnvFile(rootEnvFile);
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // O cliente tipado da API é publicado como TypeScript; o Next compila junto com o site.
+  transpilePackages: ['@vitrine/api-client'],
 };
 
 export default nextConfig;
