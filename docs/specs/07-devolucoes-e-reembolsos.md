@@ -40,7 +40,7 @@ comissão_dev  = round(commission_bps × (valor_itens − desc_loja))   ← devo
 - `PaymentGateway.refund({ paymentId, amountCents: reembolso, reference: returnRequestId })` → `POST /v3/payments/{id}/refund { value, description }` (parcial, Pix ou cartão). O registro local em `refunds` (único por `return_request_id`) é a idempotência: antes de repetir, confere na API se o estorno já existe.
 - `parte_loja = valor_itens − desc_loja − comissão_dev (+ frete se aplicável)`. A plataforma absorve a parte do cupom de plataforma.
 - Se o repasse **ainda não** ocorreu: o repasse sai recalculado, já sem a `parte_loja`.
-- Se o repasse **já** ocorreu: nada é puxado da subconta; a `parte_loja` vira dívida da loja no ledger (saldo negativo do sub-pedido), abatida nos próximos repasses (`DEBT_OFFSET`, spec 05).
+- Se o repasse **já** ocorreu: nada é puxado de volta da loja (o Pix já saiu); a `parte_loja` vira dívida da loja no ledger (saldo negativo do sub-pedido), abatida nos próximos repasses (`DEBT_OFFSET`, spec 05).
 - `order_items.refunded_quantity` atualizado; estoque **não** volta automaticamente (vendedor decide ao receber: "repor no estoque").
 - Devolução parcial → sub-pedido volta a `DELIVERED` e o repasse é liberado com valor recalculado; total → `REFUNDED`.
 

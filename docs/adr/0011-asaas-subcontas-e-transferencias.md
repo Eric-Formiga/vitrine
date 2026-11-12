@@ -1,6 +1,6 @@
 # ADR-0011 — Asaas com subcontas, Checkout hospedado e repasse por transferência
 
-**Status:** Aceita · **Data:** 2026-11-12 · Substitui a [ADR-0005](0005-stripe-connect-separate-charges.md)
+**Status:** Aceita, com a parte de subcontas substituída pela [ADR-0012](0012-repasse-por-pix-sem-subcontas.md) (repasse por Pix para a chave da loja) · **Data:** 2026-11-12 · Substitui a [ADR-0005](0005-stripe-connect-separate-charges.md)
 
 ## Contexto
 A Vitrine é um marketplace brasileiro: um carrinho com itens de várias lojas é pago numa única cobrança, a plataforma retém a comissão, segura o dinheiro até a entrega + janela de arrependimento e reembolsa parcialmente por loja (ADR-0005 resolvia isso com Stripe Connect).

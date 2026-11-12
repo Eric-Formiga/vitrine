@@ -5,11 +5,11 @@
 ## Objetivo
 Cobrar o comprador uma única vez e repassar a cada loja sua parte, menos a comissão, no momento certo — com rastreabilidade total via ledger e reconciliação com o Asaas.
 
-## Modelo Asaas (ver [ADR-0011](../adr/0011-asaas-subcontas-e-transferencias.md))
+## Modelo Asaas (ver [ADR-0011](../adr/0011-asaas-subcontas-e-transferencias.md) e [ADR-0012](../adr/0012-repasse-por-pix-sem-subcontas.md))
 - **Cobrança na conta da plataforma, sem split**: um Checkout hospedado por pedido (`POST /v3/checkouts`, Pix e cartão, `externalReference = orderId`, expira junto com a reserva de estoque).
-- **Uma subconta por loja** (`sellers.asaas_wallet_id`). Cada sub-pedido gera, quando elegível, uma **transferência** da conta raiz para o `walletId` da loja (`POST /v3/transfers`).
+- **Repasse por Pix para a chave da loja** (`sellers.pix_key`, conferida no cadastro). Cada sub-pedido gera, quando elegível, uma **transferência Pix** da conta da plataforma (`POST /v3/transfers` com `operationType: PIX`).
 - **Dinheiro disponível:** Pix é creditado na hora; cartão em **D+32**. O repasse só sai com o pagamento recebido.
-- O Asaas cuida do KYC e do saque da subconta para o banco da loja.
+- Não há conta da loja no Asaas: o dinheiro vai direto para o banco dela, e o extrato da loja é o painel financeiro da Vitrine.
 
 ## Estados do pagamento (no Asaas → na Vitrine)
 
@@ -31,7 +31,6 @@ Cobrar o comprador uma única vez e repassar a cada loja sua parte, menos a comi
 | `PAYMENT_REFUNDED` / `PAYMENT_PARTIALLY_REFUNDED` | Atualiza `refunds.status` e `payments.amount_refunded_cents` |
 | `PAYMENT_CHARGEBACK_*` | Ver spec 07 |
 | `TRANSFER_DONE` / `TRANSFER_FAILED` | Atualiza `transfers` e ledger |
-| `ACCOUNT_STATUS_*` (subcontas) | Situação da subconta da loja (spec 02) |
 
 **Processamento:**
 1. Conferir o cabeçalho `asaas-access-token` com `ASAAS_WEBHOOK_TOKEN`, em **tempo constante**. Diferente → `401`, nada gravado. Em produção, aceitar só os IPs oficiais do Asaas.
@@ -57,12 +56,12 @@ Job diário de reconciliação compara `payments`, `transfers` e `refunds` locai
 
 ## Repasse (payout release)
 
-**Elegibilidade (RN-11):** sub-pedido `DELIVERED`, `delivered_at + 7 dias ≤ agora`, **pagamento recebido** (`payments.received_at` preenchido), sem devolução aberta, sem chargeback aberto no pagamento, loja não suspensa e subconta aprovada no Asaas.
+**Elegibilidade (RN-11):** sub-pedido `DELIVERED`, `delivered_at + 7 dias ≤ agora`, **pagamento recebido** (`payments.received_at` preenchido), sem devolução aberta, sem chargeback aberto no pagamento, loja não suspensa e chave Pix conferida.
 
 **Job `payout-release`** (diário, também agendado ao marcar entrega e ao receber `PAYMENT_RECEIVED`):
 1. Seleciona elegíveis com `FOR UPDATE SKIP LOCKED`.
 2. Calcula o valor: saldo do sub-pedido **menos a dívida da loja** (até zerar). Se sobrar 0, só registra o `DEBT_OFFSET` e conclui sem transferência.
-3. Cria `transfers` (`PENDING`, único por sub-pedido) e chama `POST /v3/transfers { value, walletId }`. O registro local único é a idempotência; antes de repetir uma tentativa, consulta se a transferência já existe no Asaas (o Asaas recusa com 409 uma transferência idêntica nos últimos 15 min).
+3. Cria `transfers` (`PENDING`, único por sub-pedido) e chama `POST /v3/transfers { value, operationType: PIX, pixAddressKey, pixAddressKeyType, externalReference: "payout:<sellerOrderId>" }`. **Idempotência:** antes de transferir, procura no Asaas uma transferência com a mesma `externalReference` (`GET /v3/transfers?externalReference=`); se existir, usa ela. O saldo da plataforma é debitado na criação.
 4. `TRANSFER_DONE` (ou retorno imediato `DONE`) → `PAID`, ledger `TRANSFER` (+ `DEBT_OFFSET`), sub-pedido `COMPLETED`, outbox `PayoutReleased` (e-mail ao vendedor).
 5. Falha → `FAILED` com motivo; retry com backoff; após 5 tentativas alerta o admin.
 6. Quando todos os sub-pedidos estão finalizados, pedido `COMPLETED`.
@@ -71,11 +70,11 @@ Job diário de reconciliação compara `payments`, `transfers` e `refunds` locai
 - Cards: **A liberar** (pagos ainda não repassados, com a data prevista), **Liberado** (últimos 30 dias), **Estornos** e **Saldo devedor** (quando houver).
 - Extrato (ledger) filtrável por período, exportável em CSV.
 - Para cada sub-pedido: previsão de liberação = o mais tarde entre `delivered_at + 7 dias` e a data de crédito do pagamento (cartão: D+32).
-- O saque da subconta para o banco da loja é feito no Asaas.
+- O repasse cai direto na chave Pix da loja; o painel mostra o comprovante (id da transferência no Asaas).
 
 ## Casos de borda
 - Comissão > base (cupom de loja enorme): base mínima 0; validação no cupom impede (spec 08).
-- Subconta da loja desabilitada no Asaas na hora do repasse: transferência adiada, vendedor notificado.
+- Chave Pix da loja inválida na hora do repasse (`TRANSFER_FAILED`): repasse retido, vendedor avisado para cadastrar outra chave; o saldo volta para a plataforma.
 - Loja com dívida e sem vendas futuras: a dívida fica visível no painel do admin; cobrança fora do sistema no MVP.
 - Arredondamento: sempre inteiro em centavos; diferenças de rateio vão para o último sub-pedido; testes de propriedade (fast-check) garantem que a soma dos sub-pedidos = total cobrado.
 - Sandbox: o recebimento do cartão (D+32) é simulado pela API do sandbox, para a demo mostrar o repasse no mesmo dia.

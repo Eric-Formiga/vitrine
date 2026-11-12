@@ -49,7 +49,7 @@ Como é um projeto de portfólio, as métricas medem **qualidade de engenharia e
 
 ### 4.1 MVP (v1) — dentro do escopo
 - Autenticação (Clerk) com papéis comprador, vendedor e admin
-- Candidatura de vendedor, aprovação pelo admin e criação da subconta da loja no Asaas
+- Candidatura de vendedor com chave Pix de recebimento conferida e aprovação pelo admin
 - Catálogo com categorias hierárquicas, produtos com variantes (tamanho × cor), imagens, guia de medidas
 - Busca textual em português com filtros facetados e ordenação
 - Carrinho multi-vendedor (visitante e logado, com merge)
@@ -97,7 +97,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|---|
 | RF-SELLER-1 | Candidatura para vender (dados da loja, documento, categoria principal) | M |
 | RF-SELLER-2 | Aprovação/rejeição/suspensão pelo admin | M |
-| RF-SELLER-3 | Subconta Asaas da loja (KYC pelo Asaas) e acompanhamento da situação | M |
+| RF-SELLER-3 | Chave Pix de recebimento, com conferência automática do titular no Asaas | M |
 | RF-SELLER-4 | Página pública da loja (logo, banner, bio, avaliação média, produtos) | M |
 | RF-SELLER-5 | Configuração de frete da loja | M |
 | RF-SELLER-6 | Dashboard com vendas, ticket médio, produtos mais vendidos | S |
@@ -131,7 +131,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|---|
 | RF-PAY-1 | Processar webhooks do Asaas de forma idempotente, conferindo o estado na API | M |
 | RF-PAY-2 | Calcular comissão por sub-pedido e registrar ledger de valores | M |
-| RF-PAY-3 | Repasse automático (transferência para a subconta) ao vendedor após liberação | M |
+| RF-PAY-3 | Repasse automático (transferência Pix para a chave da loja) após liberação | M |
 | RF-PAY-4 | Painel financeiro do vendedor (a liberar, liberado, estornado, saldo devedor) | M |
 
 ### 5.6 Pedidos e entrega (`ORD`)
@@ -195,7 +195,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 | ID | Regra |
 |---|---|
 | RN-1 | Moeda única BRL. Preços armazenados em centavos. |
-| RN-2 | Apenas lojas `APPROVED` e com a subconta aprovada no Asaas podem publicar produtos. |
+| RN-2 | Apenas lojas `APPROVED` e com chave Pix de recebimento conferida podem publicar produtos. |
 | RN-3 | Comissão padrão da plataforma: 12% sobre (subtotal de itens − desconto do vendedor). Frete não é comissionado. Admin pode definir comissão por loja. |
 | RN-4 | A plataforma absorve as taxas do Asaas (cobertas pela comissão). |
 | RN-5 | Um pedido é pago numa única cobrança; cada loja gera um sub-pedido independente com status próprio. |
@@ -215,7 +215,7 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 ## 8. Premissas, restrições e riscos
 
 **Premissas**
-- Asaas operando em **sandbox**; subcontas de teste para as lojas da demo.
+- Asaas operando em **sandbox**; chaves Pix de teste do Banco Central para as lojas da demo.
 - Dados de seed realistas (lojas, produtos, imagens livres de direitos).
 
 **Restrições**
@@ -225,7 +225,8 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 **Riscos**
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Comportamento do Asaas diferente do documentado (eventos, aprovação de subconta, transferências) | Médio | Spike no início da Fase 1 (`spike-asaas`); tudo atrás da porta `PaymentGateway` |
+| Comportamento do Asaas diferente do documentado (eventos, conferência de chave Pix, transferências) | Médio | Spike no início da Fase 1 (`spike-asaas`); tudo atrás da porta `PaymentGateway` |
+| Sem KYC do provedor: a plataforma paga para chaves Pix que ela mesma confere | Médio | Validação do CPF/CNPJ, conferência do titular da chave e aprovação manual do admin (ADR-0012); em produção, análise regulatória e conta PJ |
 | Cartão creditado só em D+32 atrasa o repasse | Baixo | Regra explícita no repasse; no sandbox o recebimento é simulado; em produção, antecipação opcional |
 | Complexidade de repasses/reembolsos | Alto | Ledger explícito, máquina de estados, testes de integração com gateway falso + testes manuais no sandbox do Asaas |
 | Cold start em planos gratuitos | Baixo | Plano hobby pago na API; health check externo |
@@ -237,8 +238,8 @@ Detalhamento, critérios de aceite e regras em [specs/](specs/).
 |---|---|
 | Pedido (Order) | Compra do comprador; contém um pagamento e N sub-pedidos |
 | Sub-pedido (SellerOrder) | Parte do pedido pertencente a uma loja; unidade de despacho, devolução e repasse |
-| Repasse (Payout/Transfer) | Transferência da conta Asaas da plataforma para a subconta da loja |
-| Subconta | Conta Asaas da loja, ligada à conta da plataforma, identificada pelo `walletId` |
+| Repasse (Payout/Transfer) | Transferência Pix da conta Asaas da plataforma para a chave Pix da loja |
+| Chave Pix de recebimento | Chave (CPF, CNPJ, e-mail, celular ou aleatória) cadastrada pela loja, com o titular conferido |
 | Chargeback | Contestação de uma compra no cartão, aberta pelo comprador junto ao banco |
 | Reserva | Bloqueio temporário de estoque durante o pagamento |
 | GMV | Valor bruto total transacionado |

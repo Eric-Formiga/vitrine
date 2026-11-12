@@ -59,7 +59,7 @@ erDiagram
 **addresses** — `id`, `user_id`, `label`, `recipient`, `zip_code`, `street`, `number`, `complement`, `district`, `city`, `state` (UF), `is_default`.
 
 ### Vendedores
-**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `logo_url`, `banner_url`, `document` (CPF/CNPJ, criptografado em repouso), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `asaas_account_id` (único), `asaas_wallet_id` (único; destino dos repasses), `asaas_account_status` (`PENDING`,`APPROVED`,`REJECTED`,`DISABLED`, vindo dos eventos de situação da conta), `asaas_pending_items jsonb` (pendências do cadastro no Asaas), `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count`, `approved_at`.
+**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `logo_url`, `banner_url`, `document` (CPF/CNPJ, criptografado em repouso), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `pix_key_type` (`CPF`,`CNPJ`,`EMAIL`,`PHONE`,`EVP`), `pix_key` (destino dos repasses, ADR-0012), `pix_key_owner_name`, `pix_key_owner_document` (mascarado, como o Asaas devolve), `pix_key_verified_at`, `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count`, `approved_at`.
 
 **shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents`, `handling_days`.
 
@@ -90,7 +90,7 @@ Restrição: `CHECK (stock >= 0 AND reserved >= 0 AND reserved <= stock)`; `UNIQ
 ### Pagamentos e financeiro
 **payments** — `id`, `order_id` (único), `asaas_checkout_id` (único), `asaas_payment_id` (único, preenchido quando o comprador paga), `status` (`PENDING`,`CONFIRMED`,`RECEIVED`,`REFUNDED`,`EXPIRED`,`CANCELED`), `billing_type` (`PIX`,`CREDIT_CARD`), `amount_cents`, `net_amount_cents` (após a taxa do Asaas), `amount_refunded_cents`, `confirmed_at`, `received_at` (dinheiro disponível: Pix na hora, cartão em D+32), `estimated_credit_date`.
 
-**transfers** — `id`, `seller_order_id` (único), `seller_id`, `asaas_transfer_id` (único), `amount_cents`, `debt_offset_cents` (dívida da loja abatida neste repasse), `status` (`PENDING`,`PAID`,`FAILED`), `failure_reason`.
+**transfers** — `id`, `seller_order_id` (único), `seller_id`, `asaas_transfer_id` (único), `external_reference` (único, `payout:<seller_order_id>`; idempotência no Asaas), `pix_key` (chave usada no envio), `amount_cents`, `debt_offset_cents` (dívida da loja abatida neste repasse), `status` (`PENDING`,`PAID`,`FAILED`), `failure_reason`.
 
 **refunds** — `id`, `payment_id`, `seller_order_id`, `return_request_id`, `asaas_refund_reference`, `amount_cents`, `seller_share_cents` (parte que sai do repasse da loja ou vira dívida), `reason`, `status`.
 

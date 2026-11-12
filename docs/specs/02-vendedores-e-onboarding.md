@@ -3,7 +3,7 @@
 **Requisitos:** RF-SELLER-1..6, RF-ADM-1 · RN-2, RN-3, RN-16 · **Módulo Nest:** `sellers`
 
 ## Objetivo
-Permitir que um usuário vire vendedor de forma controlada: candidatura → aprovação → subconta Asaas aprovada → loja pública.
+Permitir que um usuário vire vendedor de forma controlada: candidatura → chave Pix de recebimento conferida → aprovação → loja pública.
 
 ## Fluxo
 
@@ -17,28 +17,29 @@ stateDiagram-v2
   SUSPENDED --> APPROVED: admin reativa
 ```
 
-A situação da subconta no Asaas é independente e vem dos eventos `ACCOUNT_STATUS_*` do webhook: a loja só **vende** quando `status = APPROVED` na Vitrine **e** a subconta está aprovada no Asaas (`asaas_account_status = APPROVED`).
+O repasse vai para a **chave Pix** da loja ([ADR-0012](../adr/0012-repasse-por-pix-sem-subcontas.md)): não existe conta da loja no Asaas. A loja só **vende** quando `status = APPROVED` **e** tem uma chave Pix conferida (`pix_key_verified_at` preenchido).
 
 ## Histórias e critérios de aceite
 
 ### H1 — Candidatura
 - Formulário: nome da loja, slug (sugerido, editável, único), bio, CPF/CNPJ (validação de dígitos), categoria principal, Instagram (opcional).
-- Dados que o Asaas exige para criar a subconta: e-mail e celular de contato, endereço com CEP, faturamento mensal estimado e, conforme o documento, data de nascimento (CPF) ou tipo de empresa (CNPJ). Guardados com o documento (criptografado em repouso).
+- Chave Pix de recebimento (tipo e chave), conferida na hora (H3).
 - Cria `sellers` com `PENDING`; usuário ainda não recebe papel `seller`.
 - Uma candidatura ativa por usuário.
 
 ### H2 — Aprovação pelo admin
-- Ao aprovar: papel `seller` adicionado ao usuário, **subconta Asaas criada** (`POST /v3/accounts` com os dados da candidatura); guardamos `asaas_account_id` e `asaas_wallet_id` (a chave de API da subconta não é guardada, ADR-0011); e-mail com as próximas etapas.
-- A criação da subconta é idempotente (procura por e-mail/documento antes de criar) e, se o Asaas falhar, a aprovação fica registrada e a criação é refeita por job, sem aprovar duas vezes.
+- Ao aprovar: papel `seller` adicionado ao usuário e e-mail com as próximas etapas. O admin vê, na candidatura, o titular da chave Pix devolvido pelo Asaas (nome e documento mascarado) e o resultado da conferência.
+- Sem chave Pix conferida, o admin não consegue aprovar (`422`).
 - Ao rejeitar: motivo obrigatório, enviado por e-mail.
 - Toda decisão grava `audit_logs`.
 
-### H3 — Subconta Asaas (onboarding)
+### H3 — Chave Pix de recebimento
 - Painel mostra checklist: "Dados da loja ✓ · Conta de recebimento ⏳ · Frete ⏳ · Primeiro produto ⏳".
-- `GET /seller/payment-account` mostra a situação da subconta e as pendências do cadastro no Asaas (`asaas_pending_items`).
-- Se o Asaas pedir documentos, `POST /seller/payment-account/onboarding-link` leva a loja ao envio no Asaas (a forma exata, link de onboarding ou e-mail do próprio Asaas, é confirmada no spike).
-- Webhook `/webhooks/asaas` com eventos `ACCOUNT_STATUS_*` atualiza `asaas_account_status` e as pendências; a aprovação final é `ACCOUNT_STATUS_GENERAL_APPROVAL_APPROVED`. No sandbox, a aprovação automática fica ligada.
-- Se o Asaas reprovar ou desabilitar a subconta depois, produtos da loja somem da vitrine (filtro de consulta) e o vendedor é avisado por e-mail.
+- `PUT /seller/pix-key { type, key }` (tipos: CPF, CNPJ, EMAIL, PHONE, EVP) consulta o titular no Asaas (`GET /v3/pix/addressKeys/external`).
+- **Conferência automática:** os dígitos visíveis do documento mascarado (ex.: `***.202.745-**`) precisam bater com o CPF/CNPJ da loja; senão → `422 PIX_KEY_OWNER_MISMATCH` e nada é salvo. Chave inexistente → `422 PIX_KEY_NOT_FOUND`.
+- Chave aceita: guardamos tipo, chave, nome do titular, documento mascarado e `pix_key_verified_at`. Trocar a chave refaz a conferência; a troca é auditada e avisada por e-mail.
+- `GET /seller/pix-key` mostra a chave atual e o titular conferido.
+- Repasse com chave que deixou de existir no Asaas: a transferência falha, o repasse fica retido e o vendedor é avisado para cadastrar outra chave.
 
 ### H4 — Configuração de frete
 - CEP de origem, valor por região (N, NE, CO, SE, S), frete grátis acima de X (opcional), prazo de manuseio (1–5 dias).
@@ -58,4 +59,4 @@ A situação da subconta no Asaas é independente e vem dos eventos `ACCOUNT_STA
 - Suspensão não cancela sub-pedidos em andamento; repasses ficam retidos até revisão do admin.
 
 ## Eventos
-`SellerApplied`, `SellerApproved`, `SellerRejected`, `SellerSuspended`, `SellerPaymentAccountStatusChanged`.
+`SellerApplied`, `SellerApproved`, `SellerRejected`, `SellerSuspended`, `SellerPixKeyChanged`.

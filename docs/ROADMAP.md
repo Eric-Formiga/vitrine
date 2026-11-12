@@ -2,7 +2,7 @@
 
 Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 
-> **Linha de corte do portfólio.** O núcleo são as **Fases 0 a 3 + Entrega do portfólio**: é onde estão os diferenciais (checkout multi-loja sem overselling, divisão do pagamento entre lojas com subcontas do Asaas, repasse, reembolso com dívida da loja). As **Fases 4 e 5 são bônus** e só começam depois que o núcleo estiver publicado e demonstrável; o que não for feito entra como "próximos passos" no README. O [PRD](PRD.md) (§4.1) continua descrevendo o escopo completo — a linha de corte define a ordem de entrega.
+> **Linha de corte do portfólio.** O núcleo são as **Fases 0 a 3 + Entrega do portfólio**: é onde estão os diferenciais (checkout multi-loja sem overselling, divisão do pagamento entre lojas com repasse por Pix (Asaas), repasse, reembolso com dívida da loja). As **Fases 4 e 5 são bônus** e só começam depois que o núcleo estiver publicado e demonstrável; o que não for feito entra como "próximos passos" no README. O [PRD](PRD.md) (§4.1) continua descrevendo o escopo completo — a linha de corte define a ordem de entrega.
 
 ## Fase 0 — Fundação
 - [x] Monorepo Turborepo + pnpm, configs compartilhadas (TS strict, ESLint, Prettier) — feature `fundacao`
@@ -12,13 +12,13 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 - [x] Next: layout base, Tailwind, shadcn/ui, tema — feature `fundacao`
 - [x] Clerk em ambos + webhook de sincronização de usuários — feature `fundacao`
 - [ ] Pipeline CI (lint, typecheck, test, build) e deploy de esqueleto (Vercel + Railway + Supabase) — feature `ci-e-deploy` (adiada: depois da Fase 1)
-- [ ] **Spike Asaas** (substitui o spike do Stripe, ADR-0011): subconta no sandbox com aprovação automática, Checkout hospedado com Pix e cartão, webhook com token, recebimento simulado, transferência para o `walletId`, estorno parcial — feature `spike-asaas` (em andamento; antes de `vendedores`)
+- [ ] **Spike Asaas** (substitui o spike do Stripe, ADR-0011 e ADR-0012): conferência de chave Pix, Pix e cartão no sandbox, Checkout hospedado, repasse por Pix, estorno parcial, webhook com token — feature `spike-asaas` (em andamento; antes de `vendedores`)
 
 **Pronto quando:** usuário loga em produção e aparece na tabela `users`.
 
 ## Fase 1 — Catálogo
 - [x] Categorias (admin) e seed — feature `categorias`
-- [ ] Candidatura de vendedor + aprovação admin + subconta Asaas — feature `vendedores`
+- [ ] Candidatura de vendedor + chave Pix de recebimento conferida + aprovação admin — feature `vendedores`
 - [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
 - [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
 - [ ] Busca FTS + facetas — feature `busca`
@@ -38,7 +38,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 
 ## Fase 3 — Pós-venda e dinheiro
 - [ ] Despacho, confirmação de entrega (manual/automática), prazos
-- [ ] Ledger, cálculo de comissão, job de repasse (transferências para as subcontas)
+- [ ] Ledger, cálculo de comissão, job de repasse (transferências Pix para as lojas)
 - [ ] Painel financeiro do vendedor (a liberar, liberado, estornos, saldo devedor)
 - [ ] Cancelamentos, devoluções, reembolsos parciais, dívida da loja após o repasse
 - [ ] Chargebacks
