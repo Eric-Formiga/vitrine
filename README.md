@@ -1,7 +1,7 @@
 # Vitrine
 
 Marketplace multi-vendedor de moda — projeto de portfólio com foco em
-arquitetura, pagamentos distribuídos (Asaas: subcontas, Pix e repasse) e qualidade de engenharia.
+arquitetura, pagamentos distribuídos (Asaas: Pix, cartão e repasse por Pix) e qualidade de engenharia.
 
 > **Em construção:** Fase 0 (fundação). Acompanhe pelo [roadmap](docs/ROADMAP.md).
 

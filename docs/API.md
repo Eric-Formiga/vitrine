@@ -76,8 +76,7 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 |---|---|---|---|
 | POST | `/seller/application` | 👤 | Candidatura |
 | GET / PATCH | `/seller/me` | 🏪 | Dados da loja |
-| GET | `/seller/payment-account` | 🏪 | Situação da subconta Asaas da loja e pendências do cadastro |
-| POST | `/seller/payment-account/onboarding-link` | 🏪 | Link do Asaas para a loja enviar documentos (forma a confirmar no spike) |
+| GET / PUT | `/seller/pix-key` | 🏪 | Chave Pix de recebimento; o PUT confere o titular no Asaas (`PIX_KEY_NOT_FOUND`, `PIX_KEY_OWNER_MISMATCH`) |
 | PUT | `/seller/shipping` | 🏪 | Configuração de frete |
 | GET / POST | `/seller/products` | 🏪 | Listar/criar |
 | GET / PATCH / DELETE | `/seller/products/{id}` | 🏪 | Detalhe/editar/arquivar |
@@ -119,6 +118,6 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 ### Webhooks e operação
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
-| POST | `/webhooks/asaas` | 🔏 | Eventos do Asaas (pagamentos, checkout, transferências, chargebacks, situação das subcontas); token no cabeçalho `asaas-access-token` |
+| POST | `/webhooks/asaas` | 🔏 | Eventos do Asaas (pagamentos, checkout, transferências, chargebacks); token no cabeçalho `asaas-access-token` |
 | POST | `/webhooks/clerk` | 🔏 | Sincronização de usuários (Svix) |
 | GET | `/health/live` · `/health/ready` | 🌐 | Health checks |

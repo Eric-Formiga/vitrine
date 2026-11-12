@@ -18,7 +18,9 @@
 ## Contexto
 
 O pagamento da Vitrine passou do Stripe para o Asaas ([ADR-0011](../../../docs/adr/0011-asaas-subcontas-e-transferencias.md),
-12/11/2026). Antes de construir vendedores e checkout em cima dele, este spike
+12/11/2026). No próprio spike, o sandbox recusou subcontas para conta de pessoa
+física, e o repasse passou a ser por **Pix para a chave da loja**
+([ADR-0012](../../../docs/adr/0012-repasse-por-pix-sem-subcontas.md)). Antes de construir vendedores e checkout em cima dele, este spike
 prova no **sandbox** do Asaas cada passo do dinheiro e deixa pronto o adaptador
 de produção (`AsaasGateway`, atrás da porta `PaymentGateway`), com testes de
 contrato que **gravam** as respostas reais do sandbox e depois as **reproduzem**
@@ -40,12 +42,12 @@ Como dev, quero um adaptador de pagamento que já funcione contra o sandbox do
 Asaas, para construir vendedores, checkout e repasse sobre comportamento
 comprovado, e não sobre suposições da documentação.
 
-#### AC-034 — Subconta da loja criada uma única vez
+#### AC-034 — Chave Pix da loja conferida no Asaas
 
-- **Dado** os dados completos de uma loja de teste (nome, e-mail, CPF, celular, faturamento e endereço)
-- **Quando** o adaptador cria a subconta no sandbox, e depois tenta criar de novo com os mesmos dados
-- **Então** a primeira chamada devolve o id da subconta e o `walletId`
-- **E** a segunda não cria outra subconta: devolve a mesma (procura pelo e-mail antes de criar)
+- **Dado** a chave Pix de teste do sandbox (celular `47996515839`) e o CPF da loja
+- **Quando** o adaptador consulta o titular da chave no Asaas
+- **Então** recebe o nome do titular e o documento mascarado, e a conferência aceita quando os dígitos visíveis batem com o CPF da loja
+- **E** recusa quando os dígitos não batem (`PIX_KEY_OWNER_MISMATCH`) e quando a chave não existe (`PIX_KEY_NOT_FOUND`)
 
 #### AC-035 — Pix cobrado na conta da plataforma e recebido
 
@@ -68,12 +70,12 @@ comprovado, e não sobre suposições da documentação.
 - **Então** recebe o id e o endereço da página de pagamento do Asaas, aceitando Pix e cartão
 - **E** o pedido fica ligado ao Checkout (`externalReference` = id do pedido)
 
-#### AC-038 — Repasse transferido para a subconta uma única vez
+#### AC-038 — Repasse por Pix enviado uma única vez
 
-- **Dado** saldo disponível na plataforma e a subconta da loja de teste
-- **Quando** o adaptador transfere R$ 10,00 para o `walletId` da loja, e a mesma transferência é pedida de novo
-- **Então** a transferência fica concluída (ou em processamento) e o saldo da plataforma diminui R$ 10,00
-- **E** o pedido repetido não transfere duas vezes
+- **Dado** saldo disponível na plataforma e uma chave Pix de teste do Banco Central (`cliente-a00001@pix.bcb.gov.br`)
+- **Quando** o adaptador transfere R$ 10,00 por Pix com a referência do repasse, e a mesma transferência é pedida de novo
+- **Então** a transferência é aceita (em processamento ou concluída) e o saldo da plataforma diminui R$ 10,00
+- **E** o pedido repetido não transfere duas vezes: encontra a transferência pela `externalReference` e devolve a mesma
 
 #### AC-039 — Estorno parcial de um Pix recebido
 
@@ -111,7 +113,7 @@ mandando um aviso falso.
 
 ## Fora de escopo
 
-- Candidatura, aprovação de loja e páginas do vendedor → feature `vendedores` (usa o `createSubaccount` daqui).
+- Candidatura, aprovação de loja e páginas do vendedor → feature `vendedores` (usa a conferência de chave Pix daqui).
 - Fluxo de checkout com pedido, reserva de estoque e reação ao pagamento → Fase 2 (usa o `createCheckout` e o webhook daqui).
 - Ledger, job de repasse e dívida da loja → Fase 3 (usa `transfer` e `refund` daqui).
 - Chargeback: o sandbox não simula sozinho (só a pedido do suporte); fica para a Fase 3, com o evento documentado no relatório.
@@ -126,7 +128,7 @@ mandando um aviso falso.
 | ID | Suposição | Status | Resolução |
 |---|---|---|---|
 | ASM-012 | Os testes de contrato rodam contra o sandbox de verdade sempre que a suíte roda | invalidada | o dono do produto escolheu, em 12/11/2026, gravar e reproduzir: com `ASAAS_RECORD=1` os testes batem no sandbox e gravam as respostas (sem chaves) em `test/fixtures/asaas`; nas demais rodadas, reproduzem essas respostas, sem rede e sem chave |
-| ASM-013 | Para respeitar o limite de 20 subcontas por dia do sandbox, os testes usam sempre a mesma loja de teste (mesmo e-mail), criada só na primeira execução | confirmada | confirmado pelo dono do produto em 12/11/2026 |
+| ASM-013 | Para respeitar o limite de 20 subcontas por dia do sandbox, os testes usam sempre a mesma loja de teste (mesmo e-mail), criada só na primeira execução | invalidada | sem subcontas desde a ADR-0012 (12/11/2026); os testes usam as chaves Pix de teste do sandbox |
 | ASM-014 | O túnel `cloudflared` é instalado na máquina do dono do produto para capturar os avisos reais durante o spike | invalidada | o dono do produto escolheu, em 12/11/2026, não capturar avisos reais agora: os exemplos seguem o formato da documentação, com ids de pagamentos reais do sandbox; a captura fica para a Fase 2 |
 
 ## Perguntas em aberto
@@ -135,4 +137,5 @@ mandando um aviso falso.
 
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
+| Q-004 | O sandbox recusou subcontas para conta de pessoa física. Como seguir? | respondida | Sem subcontas: repasse por Pix para a chave da loja, com o titular conferido automaticamente no Asaas (ADR-0012, decidido em 12/11/2026) |
 | Q-003 | O que o spike entrega e como capturar os webhooks reais? | respondida | Adaptador de produção com testes de contrato que gravam e reproduzem o sandbox; sem captura real de webhooks agora (decidido em 12/11/2026) |

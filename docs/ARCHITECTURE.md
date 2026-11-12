@@ -13,7 +13,7 @@
 | Auth | Clerk (`@clerk/nextjs`, `@clerk/backend`) | ([ADR-0003](adr/0003-clerk-autenticacao.md)) |
 | Banco | Supabase Postgres + Prisma | ([ADR-0004](adr/0004-supabase-postgres-prisma.md)) |
 | Arquivos | Supabase Storage (upload via URL assinada) | Mesmo provedor do banco, CDN incluída |
-| Pagamentos | Asaas: subcontas por loja, Checkout hospedado (Pix e cartão) e transferências | ([ADR-0011](adr/0011-asaas-subcontas-e-transferencias.md), substitui a ADR-0005) |
+| Pagamentos | Asaas: Checkout hospedado (Pix e cartão) e repasse por Pix para a chave da loja | ([ADR-0011](adr/0011-asaas-subcontas-e-transferencias.md) e [ADR-0012](adr/0012-repasse-por-pix-sem-subcontas.md); substituem a ADR-0005) |
 | Filas/jobs | pg-boss (no próprio Postgres) | Escolhido no lugar de Redis/BullMQ **por custo**: evita um serviço pago ([ADR-0009](adr/0009-filas-pg-boss.md)) |
 | Cache / rate limit | Em memória (LRU no processo) | Instância única na demo; Redis só se escalar ([ADR-0009](adr/0009-filas-pg-boss.md)) |
 | Busca | Postgres FTS (`portuguese` + `unaccent`) + `pg_trgm` | ([ADR-0007](adr/0007-busca-postgres-fts.md)) |
@@ -186,7 +186,7 @@ Filas com **pg-boss** no Postgres (schema `pgboss`), conectado pelo session pool
 | `notifications` | `OrderPaid`, `SellerOrderShipped`, ... | envia e-mails |
 | `reservation-expiry` | job atrasado 15 min por pedido | libera reservas e expira o Checkout se ainda não pago |
 | `auto-confirm-delivery` | diário | entrega automática 15 dias após despacho (RN-9) |
-| `payout-release` | diário + job atrasado | transfere para a subconta da loja os sub-pedidos elegíveis (RN-11), descontando dívidas |
+| `payout-release` | diário + job atrasado | transfere por Pix, para a chave da loja, os sub-pedidos elegíveis (RN-11), descontando dívidas |
 | `ship-deadline` | diário | marca sub-pedidos atrasados (RN-8) |
 | `search-reindex` | `ProductUpdated` | atualiza vetor de busca e revalida cache do Next |
 

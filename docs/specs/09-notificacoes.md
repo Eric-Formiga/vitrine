@@ -18,7 +18,8 @@ Manter comprador, vendedor e admin informados por e-mail transacional, disparado
 | Evento | Destinatário | Template |
 |---|---|---|
 | `SellerApproved` / `SellerRejected` | vendedor | Loja aprovada (com link de onboarding) / Candidatura recusada |
-| `SellerPaymentAccountStatusChanged` (pendência ou reprovação) | vendedor | Ação necessária na conta de recebimento (Asaas) |
+| `SellerPixKeyChanged` | vendedor | Chave Pix de recebimento alterada (aviso de segurança) |
+| `PayoutFailed` | vendedor | Repasse não enviado: confira a chave Pix |
 | `OrderPaid` | comprador | Pedido confirmado (resumo por loja) |
 | `OrderPaid` | cada vendedor | Nova venda — despache até {data} |
 | `OrderExpired` | comprador | Pagamento não concluído |

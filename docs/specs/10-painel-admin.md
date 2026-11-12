@@ -14,7 +14,7 @@ Dar à operação da plataforma controle sobre lojas, conteúdo, dinheiro e saú
 - Saúde das filas: pendentes, em execução, falhas e *dead letter* por fila (consulta ao schema `pgboss`), com ação de reprocessar.
 
 ### Lojas
-- Lista filtrável (status, subconta Asaas aprovada, data); detalhe com dados, documentos, métricas (vendas, atraso, cancelamento, devolução, nota), histórico de auditoria.
+- Lista filtrável (status, chave Pix conferida, data); detalhe mostra o titular da chave Pix devolvido pelo Asaas; detalhe com dados, documentos, métricas (vendas, atraso, cancelamento, devolução, nota), histórico de auditoria.
 - Ações: aprovar, rejeitar (motivo), suspender (motivo, opção de ocultar produtos), reativar, comissão customizada.
 
 ### Catálogo
