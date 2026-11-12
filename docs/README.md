@@ -1,6 +1,6 @@
 # Vitrine — Documentação de Produto e Engenharia
 
-> Marketplace multi-vendedor de moda. Projeto de portfólio com foco em arquitetura, pagamentos distribuídos (Stripe Connect) e qualidade de engenharia.
+> Marketplace multi-vendedor de moda. Projeto de portfólio com foco em arquitetura, pagamentos distribuídos (Asaas: subcontas, Pix e repasse) e qualidade de engenharia.
 
 ## Índice
 
@@ -35,12 +35,13 @@
 | [0002](adr/0002-nest-monolito-modular.md) | NestJS como monólito modular em camadas | Aceita |
 | [0003](adr/0003-clerk-autenticacao.md) | Clerk para autenticação; autorização no backend | Aceita |
 | [0004](adr/0004-supabase-postgres-prisma.md) | Supabase (Postgres + Storage) com Prisma | Aceita |
-| [0005](adr/0005-stripe-connect-separate-charges.md) | Stripe Connect Express com *separate charges and transfers* | Aceita |
+| [0005](adr/0005-stripe-connect-separate-charges.md) | Stripe Connect Express com *separate charges and transfers* | Substituída pela 0011 |
 | [0006](adr/0006-outbox-bullmq.md) | Transactional Outbox + BullMQ para eventos assíncronos | Substituída por 0009 |
 | [0007](adr/0007-busca-postgres-fts.md) | Busca com Postgres FTS + pg_trgm | Aceita |
 | [0008](adr/0008-contrato-openapi.md) | Contrato de API via OpenAPI gerado do backend | Aceita |
 | [0009](adr/0009-filas-pg-boss.md) | Filas e jobs com pg-boss, sem Redis (decisão por custo) | Aceita |
 | [0010](adr/0010-api-e-worker-mesmo-processo.md) | API e worker no mesmo processo em produção | Aceita |
+| [0011](adr/0011-asaas-subcontas-e-transferencias.md) | Asaas com subcontas, Checkout hospedado e repasse por transferência | Aceita |
 
 ## Convenções de rastreabilidade
 

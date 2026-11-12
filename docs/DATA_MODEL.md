@@ -47,7 +47,7 @@ erDiagram
   seller_orders ||--o{ ledger_entries : records
 
   payments ||--o{ refunds : has
-  payments ||--o{ disputes : has
+  payments ||--o{ chargebacks : has
   return_requests ||--o| refunds : triggers
 ```
 
@@ -59,7 +59,7 @@ erDiagram
 **addresses** — `id`, `user_id`, `label`, `recipient`, `zip_code`, `street`, `number`, `complement`, `district`, `city`, `state` (UF), `is_default`.
 
 ### Vendedores
-**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `logo_url`, `banner_url`, `document` (CPF/CNPJ, criptografado em repouso), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `stripe_account_id` (único), `stripe_charges_enabled`, `stripe_payouts_enabled`, `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count`, `approved_at`.
+**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `logo_url`, `banner_url`, `document` (CPF/CNPJ, criptografado em repouso), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `asaas_account_id` (único), `asaas_wallet_id` (único; destino dos repasses), `asaas_account_status` (`PENDING`,`APPROVED`,`REJECTED`,`DISABLED`, vindo dos eventos de situação da conta), `asaas_pending_items jsonb` (pendências do cadastro no Asaas), `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count`, `approved_at`.
 
 **shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents`, `handling_days`.
 
@@ -88,15 +88,15 @@ Restrição: `CHECK (stock >= 0 AND reserved >= 0 AND reserved <= stock)`; `UNIQ
 **stock_reservations** — `id`, `order_id`, `variant_id`, `quantity`, `status` (`ACTIVE`,`COMMITTED`,`RELEASED`), `expires_at`.
 
 ### Pagamentos e financeiro
-**payments** — `id`, `order_id` (único), `stripe_payment_intent_id` (único), `stripe_charge_id`, `status` (`REQUIRES_PAYMENT`,`PROCESSING`,`SUCCEEDED`,`FAILED`,`CANCELED`), `amount_cents`, `amount_refunded_cents`, `method` (`card`,`pix`).
+**payments** — `id`, `order_id` (único), `asaas_checkout_id` (único), `asaas_payment_id` (único, preenchido quando o comprador paga), `status` (`PENDING`,`CONFIRMED`,`RECEIVED`,`REFUNDED`,`EXPIRED`,`CANCELED`), `billing_type` (`PIX`,`CREDIT_CARD`), `amount_cents`, `net_amount_cents` (após a taxa do Asaas), `amount_refunded_cents`, `confirmed_at`, `received_at` (dinheiro disponível: Pix na hora, cartão em D+32), `estimated_credit_date`.
 
-**transfers** — `id`, `seller_order_id` (único), `seller_id`, `stripe_transfer_id` (único), `amount_cents`, `reversed_cents`, `status` (`PENDING`,`PAID`,`PARTIALLY_REVERSED`,`REVERSED`,`FAILED`).
+**transfers** — `id`, `seller_order_id` (único), `seller_id`, `asaas_transfer_id` (único), `amount_cents`, `debt_offset_cents` (dívida da loja abatida neste repasse), `status` (`PENDING`,`PAID`,`FAILED`), `failure_reason`.
 
-**refunds** — `id`, `payment_id`, `seller_order_id`, `return_request_id`, `stripe_refund_id`, `amount_cents`, `reason`, `status`.
+**refunds** — `id`, `payment_id`, `seller_order_id`, `return_request_id`, `asaas_refund_reference`, `amount_cents`, `seller_share_cents` (parte que sai do repasse da loja ou vira dívida), `reason`, `status`.
 
-**disputes** — `id`, `payment_id`, `stripe_dispute_id`, `amount_cents`, `reason`, `status`, `evidence_due_by`.
+**chargebacks** — `id`, `payment_id`, `asaas_chargeback_reference`, `amount_cents`, `reason`, `status` (`REQUESTED`,`IN_DISPUTE`,`WON`,`LOST`), `evidence_due_by`.
 
-**ledger_entries** — livro-razão append-only por sub-pedido: `id`, `seller_order_id`, `type` (`SALE`,`COMMISSION`,`SELLER_DISCOUNT`,`REFUND`,`TRANSFER`,`TRANSFER_REVERSAL`,`DISPUTE`), `amount_cents` (com sinal), `reference_id`. Saldo do vendedor = soma das entradas. Permite auditoria e reconciliação com o Stripe.
+**ledger_entries** — livro-razão append-only por sub-pedido: `id`, `seller_order_id`, `type` (`SALE`,`COMMISSION`,`SELLER_DISCOUNT`,`REFUND`,`TRANSFER`,`DEBT_OFFSET`,`CHARGEBACK`), `amount_cents` (com sinal), `reference_id`. Saldo do vendedor = soma das entradas; sub-pedido com saldo negativo depois do repasse é dívida da loja, abatida nos próximos repasses (`DEBT_OFFSET`). Permite auditoria e reconciliação com o Asaas.
 
 ### Promoções e engajamento
 **coupons** — `id`, `code` (único, case-insensitive), `seller_id` (nulo = plataforma), `type` (`PERCENT`,`FIXED`), `value` (bps ou centavos), `min_subtotal_cents`, `max_discount_cents`, `starts_at`, `ends_at`, `usage_limit`, `per_user_limit`, `used_count`, `active`.
@@ -107,7 +107,7 @@ Restrição: `CHECK (stock >= 0 AND reserved >= 0 AND reserved <= stock)`; `UNIQ
 
 ### Infraestrutura
 **outbox_events** — `id`, `aggregate_type`, `aggregate_id`, `type`, `payload jsonb`, `created_at`, `published_at`, `attempts`.
-**stripe_events** — `id` (= `event.id` do Stripe), `type`, `received_at`, `processed_at`.
+**asaas_events** — `id` (= `id` do evento do Asaas), `type`, `received_at`, `processed_at`.
 **idempotency_keys** — `key`, `user_id`, `request_hash`, `response jsonb`, `status_code`, `expires_at`.
 **audit_logs** — `id`, `actor_user_id`, `action`, `entity_type`, `entity_id`, `before jsonb`, `after jsonb`, `ip`, `created_at`.
 **platform_settings** — `key`, `value jsonb` (comissão padrão, prazos).
@@ -179,4 +179,4 @@ Pedido com duas lojas, cupom de plataforma de 10% (máx R$ 30) e cupom da loja A
 | Comissão 12% | 2160 | 1200 |
 | **Repasse** = base − comissão + frete | 17830 | 11290 |
 
-Plataforma recebe 29680, repassa 29120, fica com 560 brutos (3360 de comissão − 2800 do cupom que ela custeou), dos quais paga a taxa Stripe. O cupom de plataforma incide sobre a soma das bases (após cupons de loja), sem frete. Arredondamento: comissão por `Math.round` (half-even) por sub-pedido; resto do rateio do cupom vai para a última loja.
+Plataforma recebe 29680, repassa 29120, fica com 560 brutos (3360 de comissão − 2800 do cupom que ela custeou), dos quais paga a taxa do Asaas. O cupom de plataforma incide sobre a soma das bases (após cupons de loja), sem frete. Arredondamento: comissão por `Math.round` (half-even) por sub-pedido; resto do rateio do cupom vai para a última loja.

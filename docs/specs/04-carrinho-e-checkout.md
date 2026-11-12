@@ -24,7 +24,7 @@ Permitir montar um carrinho com produtos de várias lojas e pagar tudo de uma ve
 ## Checkout
 
 ### Página
-Etapas numa única página: **Endereço → Frete (por loja, informativo) → Revisão (itens por loja, cupons) → Pagamento (Payment Element)**.
+Etapas numa única página: **Endereço → Frete (por loja, informativo) → Revisão (itens por loja, cupons) → Pagamento (Checkout hospedado do Asaas: Pix ou cartão)**.
 
 ### H4 — Iniciar pagamento (`POST /checkout`)
 Requisição: `{ addressId }` + header `Idempotency-Key`.
@@ -38,8 +38,8 @@ Em **uma transação** (isolamento `READ COMMITTED` + UPDATEs condicionais):
 6. Grava evento outbox `OrderCreated` (agenda job de expiração).
 
 Fora da transação (após commit):
-7. `PaymentGateway.createPaymentIntent({ amount: grandTotal, currency: 'brl', transfer_group: orderId, metadata: { orderId }, automatic_payment_methods })` com idempotency key do Stripe = `order:{orderId}`.
-8. Grava `payments` com `stripe_payment_intent_id`. Retorna `{ orderId, clientSecret, expiresAt }`.
+7. `PaymentGateway.createCheckout({ orderId, amountCents: grandTotal, billingTypes: ['PIX', 'CREDIT_CARD'], expiresAt, successUrl, cancelUrl })` → `POST /v3/checkouts` com `externalReference = orderId`, na conta da plataforma (sem split; ADR-0011). Antes de criar, procura um Checkout já existente para o pedido, para a repetição não gerar dois.
+8. Grava `payments` com `asaas_checkout_id`. Retorna `{ orderId, checkoutUrl, expiresAt }`; o site redireciona o comprador para o `checkoutUrl`.
 
 Se o passo 7 falhar: job de compensação libera reservas e marca pedido `PAYMENT_FAILED`; cliente recebe `502` e pode tentar novamente com nova chave.
 
@@ -48,21 +48,21 @@ Se o passo 7 falhar: job de compensação libera reservas e marca pedido `PAYMEN
 **Pedido pendente existente:** se o usuário já tem pedido `PENDING_PAYMENT` não expirado com o mesmo conteúdo, a API devolve ele em vez de criar outro.
 
 ### H5 — Pagamento
-- Payment Element com `clientSecret`; métodos habilitados no Stripe (cartão; Pix se disponível).
+- Redireciona para o Checkout hospedado do Asaas (Pix com QR Code e copia-e-cola; cartão de crédito). Na volta, `/checkout/sucesso?order=...` acompanha o status por polling; quem confirma o pagamento é o webhook, nunca a volta do comprador.
 - Contador visível do tempo de reserva.
 - `return_url` = `/checkout/confirmacao?order={id}`.
 
 ### H6 — Confirmação
 - Página faz polling em `GET /checkout/{orderId}/status` a cada 2 s (até 60 s): `PENDING_PAYMENT | PROCESSING | PAID | PAYMENT_FAILED | EXPIRED`.
 - `PAID`: mostra número do pedido, sub-pedidos por loja e prazos; carrinho é esvaziado (no webhook, não no redirect).
-- `PAYMENT_FAILED`: permite tentar outro método **com o mesmo PaymentIntent** enquanto a reserva não expirar.
+- `PAYMENT_FAILED`: permite tentar de novo (outro cartão ou Pix) **no mesmo Checkout** enquanto a reserva não expirar.
 
 ### H7 — Expiração
-- Job atrasado em 15 min: se pedido ainda não pago → cancela PaymentIntent no Stripe, `reserved -= q`, reservas `RELEASED`, cupons liberados, pedido `EXPIRED`.
+- Job atrasado em 15 min: se pedido ainda não pago → expira o Checkout no Asaas, `reserved -= q`, reservas `RELEASED`, cupons liberados, pedido `EXPIRED`.
 - Corrida webhook × expiração: ambos atualizam com `WHERE status = 'PENDING_PAYMENT'`; quem perder não faz nada. Se o pagamento for confirmado após a expiração (raro, ex.: Pix tardio) → reembolso automático integral e e-mail explicativo.
 
 ## Testes obrigatórios
 - Integração: duas requisições simultâneas pelo último item → exatamente uma `201`, uma `409`.
 - Integração: replay da mesma `Idempotency-Key` → mesma resposta, um só pedido.
 - k6: 200 usuários virtuais pelo mesmo item com estoque 1.
-- E2E: carrinho com 2 lojas, cartão `4242…`, pedido pago com 2 sub-pedidos.
+- E2E: carrinho com 2 lojas, pagamento no sandbox do Asaas (cartão de teste e Pix simulado), pedido pago com 2 sub-pedidos.

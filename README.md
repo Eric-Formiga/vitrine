@@ -1,7 +1,7 @@
 # Vitrine
 
 Marketplace multi-vendedor de moda — projeto de portfólio com foco em
-arquitetura, pagamentos distribuídos (Stripe Connect) e qualidade de engenharia.
+arquitetura, pagamentos distribuídos (Asaas: subcontas, Pix e repasse) e qualidade de engenharia.
 
 > **Em construção:** Fase 0 (fundação). Acompanhe pelo [roadmap](docs/ROADMAP.md).
 
@@ -14,7 +14,7 @@ arquitetura, pagamentos distribuídos (Stripe Connect) e qualidade de engenharia
 ## Stack
 
 NestJS · Next.js · PostgreSQL (Supabase) + Prisma · pg-boss · Clerk ·
-Stripe Connect · Turborepo + pnpm · Vitest · Playwright
+Asaas · Turborepo + pnpm · Vitest · Playwright
 
 ## Como o projeto é desenvolvido
 

@@ -13,7 +13,7 @@
 | Auth | Clerk (`@clerk/nextjs`, `@clerk/backend`) | ([ADR-0003](adr/0003-clerk-autenticacao.md)) |
 | Banco | Supabase Postgres + Prisma | ([ADR-0004](adr/0004-supabase-postgres-prisma.md)) |
 | Arquivos | Supabase Storage (upload via URL assinada) | Mesmo provedor do banco, CDN incluída |
-| Pagamentos | Stripe Payments + Stripe Connect Express | ([ADR-0005](adr/0005-stripe-connect-separate-charges.md)) |
+| Pagamentos | Asaas: subcontas por loja, Checkout hospedado (Pix e cartão) e transferências | ([ADR-0011](adr/0011-asaas-subcontas-e-transferencias.md), substitui a ADR-0005) |
 | Filas/jobs | pg-boss (no próprio Postgres) | Escolhido no lugar de Redis/BullMQ **por custo**: evita um serviço pago ([ADR-0009](adr/0009-filas-pg-boss.md)) |
 | Cache / rate limit | Em memória (LRU no processo) | Instância única na demo; Redis só se escalar ([ADR-0009](adr/0009-filas-pg-boss.md)) |
 | Busca | Postgres FTS (`portuguese` + `unaccent`) + `pg_trgm` | ([ADR-0007](adr/0007-busca-postgres-fts.md)) |
@@ -47,16 +47,16 @@ flowchart LR
 
   web -- REST + JWT Clerk --> api
   web -- SDK --> clerk[(Clerk)]
-  web -- Payment Element --> stripe[(Stripe)]
+  web -- redireciona para o Checkout --> asaas[(Asaas)]
 
   api --> db
   api --> storage
-  api --> stripe
+  api --> asaas
   worker --> db
-  worker --> stripe
+  worker --> asaas
   worker --> resend[(Resend)]
 
-  stripe -- webhooks --> api
+  asaas -- webhooks --> api
   clerk -- webhooks --> api
   api -- revalidateTag --> web
 ```
@@ -114,7 +114,7 @@ modules/orders/
 
 Regras:
 - **Módulos se comunicam por** (a) serviços públicos exportados explicitamente ou (b) eventos de domínio via outbox. Nunca importam `infra/` de outro módulo.
-- **Gateways externos atrás de portas**: `PaymentGateway` (Stripe), `StorageGateway` (Supabase), `ShippingCalculator`, `Mailer`. Facilita testes e troca futura.
+- **Gateways externos atrás de portas**: `PaymentGateway` (Asaas), `StorageGateway` (Supabase), `ShippingCalculator`, `Mailer`. Facilita testes e troca futura.
 - **Transações**: casos de uso que mudam mais de um agregado usam `UnitOfWork` (Prisma `$transaction` interativa) e gravam eventos na tabela `outbox_events` na mesma transação.
 - **Erros**: exceções de domínio tipadas → mapeadas para `application/problem+json` (RFC 9457) por um filtro global.
 
@@ -151,17 +151,18 @@ sequenceDiagram
   participant W as Web
   participant A as API
   participant D as Postgres
-  participant S as Stripe
+  participant S as Asaas
   participant Q as Worker
 
   W->>A: POST /v1/checkout (Idempotency-Key)
   A->>D: TX: recalcula carrinho, valida cupons,<br/>reserva estoque (UPDATE condicional),<br/>cria Order + SellerOrders (PENDING_PAYMENT)
-  A->>S: PaymentIntents.create(amount, brl, transfer_group=orderId)
-  A-->>W: { orderId, clientSecret }
-  W->>S: confirmPayment (Payment Element)
-  S-->>W: redirect /checkout/sucesso?order=...
+  A->>S: POST /v3/checkouts (Pix + cartão, externalReference=orderId, expira em 15 min)
+  A-->>W: { orderId, checkoutUrl }
+  W->>S: comprador paga na página do Asaas
+  S-->>W: volta para /checkout/sucesso?order=...
   W->>A: GET /v1/checkout/{orderId}/status (polling)
-  S->>A: webhook payment_intent.succeeded
+  S->>A: webhook PAYMENT_CONFIRMED / PAYMENT_RECEIVED (token no cabeçalho)
+  A->>S: GET /v3/payments/{id} (confere o estado na fonte)
   A->>D: TX: dedup evento, Order=PAID,<br/>efetiva reservas, outbox OrderPaid
   Q->>D: lê outbox
   Q->>Q: e-mails, notifica vendedores, agenda timers
@@ -169,11 +170,11 @@ sequenceDiagram
 
 Garantias:
 - **Idempotência do checkout**: `Idempotency-Key` (UUID do cliente) gravada com hash do payload e resposta; repetição devolve a mesma resposta.
-- **Idempotência de webhook**: tabela `stripe_events` com `event.id` único; evento repetido é ignorado.
+- **Idempotência de webhook**: tabela `asaas_events` com o `id` do evento único; evento repetido é ignorado. Como o Asaas não assina os avisos, o token do cabeçalho é conferido e o estado é sempre reconsultado na API do Asaas.
 - **Anti-overselling**: `UPDATE product_variants SET reserved = reserved + :q WHERE id = :id AND stock - reserved >= :q` — se 0 linhas afetadas, item indisponível e a transação aborta.
 - **Fonte de verdade do pagamento é o webhook**, nunca o redirect do cliente.
 
-Fluxos de repasse, reembolso e disputa: ver [specs/05](specs/05-pagamentos-e-repasses.md) e [specs/07](specs/07-devolucoes-e-reembolsos.md).
+Fluxos de repasse, reembolso e chargeback: ver [specs/05](specs/05-pagamentos-e-repasses.md) e [specs/07](specs/07-devolucoes-e-reembolsos.md).
 
 ## 7. Processamento assíncrono
 
@@ -183,9 +184,9 @@ Filas com **pg-boss** no Postgres (schema `pgboss`), conectado pelo session pool
 |---|---|---|
 | `outbox-relay` | a cada 2 s | publica eventos pendentes da outbox em filas pg-boss |
 | `notifications` | `OrderPaid`, `SellerOrderShipped`, ... | envia e-mails |
-| `reservation-expiry` | job atrasado 15 min por pedido | libera reservas e cancela PaymentIntent se ainda não pago |
+| `reservation-expiry` | job atrasado 15 min por pedido | libera reservas e expira o Checkout se ainda não pago |
 | `auto-confirm-delivery` | diário | entrega automática 15 dias após despacho (RN-9) |
-| `payout-release` | diário + job atrasado | cria Transfers elegíveis (RN-11) |
+| `payout-release` | diário + job atrasado | transfere para a subconta da loja os sub-pedidos elegíveis (RN-11), descontando dívidas |
 | `ship-deadline` | diário | marca sub-pedidos atrasados (RN-8) |
 | `search-reindex` | `ProductUpdated` | atualiza vetor de busca e revalida cache do Next |
 
@@ -214,11 +215,11 @@ Todos os consumidores são idempotentes (chave por evento/entidade), com retry e
 
 ## 10. Ambientes e deploy
 
-| Ambiente | Web | API/Worker | Banco | Stripe |
+| Ambiente | Web | API/Worker | Banco | Asaas |
 |---|---|---|---|---|
-| Local | `next dev` | `nest start --watch` (`RUN_WORKER=true`) | Postgres no Docker Compose | test mode + `stripe listen` |
-| Preview (por PR) | Vercel Preview | — (usa a API de produção) | — | test |
-| Produção (demo) | Vercel | Railway (1 serviço, `RUN_WORKER=true`) | Supabase | test mode |
+| Local | `next dev` | `nest start --watch` (`RUN_WORKER=true`) | Postgres no Docker Compose | sandbox + túnel (`cloudflared`) para os webhooks |
+| Preview (por PR) | Vercel Preview | — (usa a API de produção) | — | sandbox |
+| Produção (demo) | Vercel | Railway (1 serviço, `RUN_WORKER=true`) | Supabase | sandbox |
 
 Migrações: `prisma migrate deploy` como passo de *release* na Railway antes do novo container receber tráfego. O pg-boss cria/migra o próprio schema ao iniciar.
 
@@ -231,7 +232,7 @@ Migrações: `prisma migrate deploy` como passo de *release* na Railway antes do
 | Supabase (Postgres + Storage) | Free | US$ 0 |
 | Railway (API + workers) | Hobby (US$ 5 inclui US$ 5 de uso) | US$ 5 |
 | Resend, Sentry, Grafana Cloud | Free | US$ 0 |
-| Stripe | Modo teste | US$ 0 |
+| Asaas | Sandbox | R$ 0 |
 | Domínio (opcional) | .com.br | ~R$ 40/ano |
 
 Cuidados:
@@ -270,7 +271,7 @@ flowchart LR
 | Carga/concorrência | k6 | 200 checkouts simultâneos do último item → 1 sucesso | 0 overselling |
 | Acessibilidade | axe (Playwright) + Lighthouse CI | regressões a11y/perf | metas do PRD |
 
-Stripe em testes: unit/integração usam um `FakePaymentGateway`; E2E usa Stripe test mode com cartões de teste e `stripe trigger` para webhooks.
+Asaas em testes: unit/integração usam um `FakePaymentGateway` e webhooks simulados com o token de teste; E2E usa o sandbox do Asaas (cartões de teste e simulação de recebimento pela API do sandbox).
 
 ## 13. Observabilidade
 
