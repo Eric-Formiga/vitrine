@@ -118,6 +118,6 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 ### Webhooks e operação
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
-| POST | `/webhooks/asaas` | 🔏 | Eventos do Asaas (pagamentos, checkout, transferências, chargebacks); token no cabeçalho `asaas-access-token` |
+| POST | `/webhooks/asaas` | 🔏 | Eventos do Asaas (pagamentos, checkout, transferências, chargebacks). Token no cabeçalho `asaas-access-token`, comparado em tempo constante: sem ele, ou sem `ASAAS_WEBHOOK_TOKEN` configurado, responde 401. Cada evento é processado uma vez pelo `id` (o reenvio responde 200 sem reprocessar), e o estado do objeto é buscado na API do Asaas, não lido do aviso |
 | POST | `/webhooks/clerk` | 🔏 | Sincronização de usuários (Svix) |
 | GET | `/health/live` · `/health/ready` | 🌐 | Health checks |

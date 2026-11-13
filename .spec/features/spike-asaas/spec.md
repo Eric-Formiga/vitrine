@@ -1,7 +1,7 @@
 # Spec: Spike Asaas — adaptador de pagamento provado no sandbox
 
 > feature: spike-asaas
-> status: rascunho
+> status: auditada
 
 <!--
   Como ler este arquivo (o formato é verificado por `onp-spec audit`):

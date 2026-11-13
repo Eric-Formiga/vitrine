@@ -10,7 +10,7 @@ A ADR-0011 previa uma **subconta** do Asaas por loja, com o repasse transferido 
 A conta do projeto é de pessoa física, e o dono do produto decidiu, em 12/11/2026, seguir **sem subcontas**. A mesma sondagem no sandbox mostrou que a conta PF consegue fazer o resto do caminho:
 - **receber Pix:** cobrança de R$ 50,00, recebida e disponível na hora, com valor líquido de R$ 49,01;
 - **transferir por Pix** para uma chave (`POST /v3/transfers` com `operationType: PIX`): o saldo é debitado na criação, sem taxa no sandbox, e a transferência nasce `PENDING`;
-- **buscar transferência pela `externalReference`** (`GET /v3/transfers?externalReference=`);
+- ~~**buscar transferência pela `externalReference`** (`GET /v3/transfers?externalReference=`)~~. **Corrigido em 13/11/2026:** o filtro é ignorado e a listagem devolve todas as transferências. Na sondagem de 12/11 parecia funcionar porque havia uma só (veja a nota abaixo);
 - **consultar o titular de uma chave Pix** (`GET /v3/pix/addressKeys/external?type=&key=`): devolve o nome e o CPF/CNPJ mascarado (`***.202.745-**`).
 
 ## Decisão
@@ -32,3 +32,11 @@ A conta do projeto é de pessoa física, e o dono do produto decidiu, em 12/11/2
 - (−) Em produção, uma plataforma que recebe e repassa dinheiro de terceiros exige análise regulatória (arranjos de pagamento do Banco Central) e, provavelmente, uma conta PJ. Isso está fora do escopo do portfólio e fica documentado no README.
 - (−) Em produção, transferências Pix podem ter tarifa conforme o plano do Asaas; ela entra no custo da plataforma (RN-4).
 - **A validar no spike:** quando a transferência sai de `PENDING` para `DONE` no sandbox, os eventos `TRANSFER_*` e o comportamento com chave de outro titular.
+
+## Nota de 13/11/2026: o que o spike mudou
+O relatório completo está em [docs/spikes/asaas.md](../spikes/asaas.md).
+- **A idempotência não pode confiar no filtro do Asaas.** `GET /v3/transfers?externalReference=` ignora o filtro. O adaptador (`AsaasGateway.transferPix`) percorre as páginas e compara a referência ele mesmo. A consequência "(+) a idempotência usa a própria `externalReference`" continua valendo, mas a comparação é feita do nosso lado.
+- **O Asaas bloqueia transferência repetida:** mesmo valor para a mesma chave no mesmo dia volta `409 checkout.already.requested`, mesmo com outra referência; a Vitrine traduz para `PIX_TRANSFER_DUPLICATE`. Por isso, na Fase 3 o repasse deve ser **um por loja por dia**, somando os sub-pedidos elegíveis, com `externalReference = payout:<loja>:<data>`, em vez de um por sub-pedido. O registro do repasse no banco da Vitrine, gravado antes da chamada, é a primeira defesa contra pagar duas vezes.
+- **`PENDING` → `DONE`: não validado.** As transferências ficam `PENDING` com `authorized: false` até a autorização de ação crítica (no sandbox, token `000000`). Validar antes da Fase 3.
+- **Eventos `TRANSFER_*`:** nomes confirmados na documentação; não capturados neste spike.
+- **Chave de outro titular:** não testada, porque o sandbox só deixa consultar a chave de teste.

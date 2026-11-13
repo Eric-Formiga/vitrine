@@ -36,3 +36,12 @@ O Asaas atende o mercado brasileiro de forma nativa (Pix, KYC das lojas, sandbox
 - (−) Webhook sem assinatura: a segurança vem do token, da restrição de IP em produção e da reconsulta na API.
 - (−) Sem CLI de webhook local como o `stripe listen`: em desenvolvimento, os avisos chegam por um túnel (ex.: `cloudflared`) ou por simulação nos testes.
 - **A validar no spike (`spike-asaas`):** aprovação automática de subconta no sandbox; criação do Checkout com Pix + cartão e expiração em 15 min; nomes e ordem dos eventos (pagamento, checkout, transferência, chargeback, situação da conta); transferência para `walletId` e sua idempotência; estorno parcial de Pix e cartão; custo das transferências entre contas.
+
+## Resultado do spike (13/11/2026)
+O relatório completo está em [docs/spikes/asaas.md](../spikes/asaas.md). Resumo:
+- **Subcontas:** recusadas para conta PF → repasse por Pix ([ADR-0012](0012-repasse-por-pix-sem-subcontas.md)).
+- **Checkout:** confirmado com Pix + cartão, expiração de 15 min e `externalReference`.
+- **Webhook:** feito como decidido aqui: token em tempo constante, idempotência pelo `id` do evento (tabela `asaas_events`) e reconsulta na API. A ordem dos eventos fica para a Fase 2, com captura real.
+- **Estorno parcial de Pix:** funciona depois de alguns segundos do recebimento e fica aguardando autorização de ação crítica. O estorno de cartão não foi testado.
+- **Transferências:** sem taxa no sandbox. Ficam `PENDING` até a autorização de ação crítica, e o caminho até `DONE` ainda precisa ser validado antes da Fase 3.
+- **Cartão no sandbox:** os cartões de recusa da documentação foram aprovados; só o cartão vencido é recusado.
