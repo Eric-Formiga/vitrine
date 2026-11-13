@@ -59,9 +59,11 @@ comprovado, e não sobre suposições da documentação.
 #### AC-036 — Cartão aprovado fica confirmado; cartão recusado vira erro claro
 
 - **Dado** um comprador de teste
-- **Quando** o adaptador cobra com o cartão de teste de aprovação e, depois, com o de recusa
+- **Quando** o adaptador cobra com um cartão de teste válido e, depois, com um cartão que o Asaas recusa (vencido)
 - **Então** a cobrança aprovada fica confirmada (`CONFIRMED`), mas ainda não recebida (dinheiro do cartão em D+32)
 - **E** a recusa vira um erro de domínio (`PAYMENT_DECLINED`), sem estourar erro genérico
+
+> Achado de 13/11/2026: o sandbox **aprovou** os dois cartões de recusa da documentação (`5184019740373151` e `4916561358240741`) e até um número inválido. A única recusa reproduzível foi a de cartão vencido (`400 invalid_creditCard`). O dono do produto escolheu provar a recusa com ele.
 
 #### AC-037 — Checkout hospedado criado com Pix e cartão
 

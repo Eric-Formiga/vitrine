@@ -1,15 +1,30 @@
 {
   "feature": "spike-asaas",
-  "timestamp": "2026-11-12T20:55:26.335Z",
-  "gitRev": "6744766",
+  "timestamp": "2026-11-13T18:46:12.685Z",
+  "gitRev": "2e17a2e",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 90,
+  "testsParsed": 94,
   "results": {
     "AC-034": {
       "status": "pass",
-      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix da loja AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034 AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix e cobranças AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034 AC-034: o titular da chave Pix é consultado e conferido com o CPF da loja @spec:AC-034",
+      "method": "vitest-json"
+    },
+    "AC-035": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix e cobranças AC-035: Pix cobrado na conta da plataforma e recebido aumenta o saldo @spec:AC-035 AC-035: Pix cobrado na conta da plataforma e recebido aumenta o saldo @spec:AC-035",
+      "method": "vitest-json"
+    },
+    "AC-036": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix e cobranças AC-036: cartão aprovado fica confirmado e cartão recusado vira PAYMENT_DECLINED @spec:AC-036 AC-036: cartão aprovado fica confirmado e cartão recusado vira PAYMENT_DECLINED @spec:AC-036",
+      "method": "vitest-json"
+    },
+    "AC-037": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix e cobranças AC-037: Checkout hospedado criado com Pix e cartão e ligado ao pedido @spec:AC-037 AC-037: Checkout hospedado criado com Pix e cartão e ligado ao pedido @spec:AC-037",
       "method": "vitest-json"
     }
   },

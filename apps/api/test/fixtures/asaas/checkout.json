@@ -1,0 +1,75 @@
+[
+  {
+    "method": "POST",
+    "path": "/checkouts",
+    "requestBody": {
+      "billingTypes": [
+        "PIX",
+        "CREDIT_CARD"
+      ],
+      "chargeTypes": [
+        "DETACHED"
+      ],
+      "minutesToExpire": 15,
+      "externalReference": "pedido-spike-t013",
+      "callback": {
+        "successUrl": "https://vitrine.dev.br/checkout/sucesso",
+        "cancelUrl": "https://vitrine.dev.br/checkout/cancelado",
+        "expiredUrl": "https://vitrine.dev.br/checkout/expirado"
+      },
+      "items": [
+        {
+          "name": "Camiseta básica",
+          "quantity": 2,
+          "value": 49.9
+        },
+        {
+          "name": "Boné",
+          "quantity": 1,
+          "value": 35
+        }
+      ]
+    },
+    "status": 200,
+    "responseBody": {
+      "id": "78f7502e-9bb1-4012-9904-a3e19b0e49dd",
+      "link": "https://sandbox.asaas.com/000/checkoutSession/show/78f7502e-9bb1-4012-9904-a3e19b0e49dd",
+      "status": "ACTIVE",
+      "minutesToExpire": 15,
+      "externalReference": "pedido-spike-t013",
+      "billingTypes": [
+        "PIX",
+        "CREDIT_CARD"
+      ],
+      "chargeTypes": [
+        "DETACHED"
+      ],
+      "callback": {
+        "cancelUrl": "https://vitrine.dev.br/checkout/cancelado",
+        "successUrl": "https://vitrine.dev.br/checkout/sucesso",
+        "expiredUrl": "https://vitrine.dev.br/checkout/expirado"
+      },
+      "items": [
+        {
+          "name": "Camiseta básica",
+          "description": null,
+          "externalReference": null,
+          "quantity": 2,
+          "value": 49.9
+        },
+        {
+          "name": "Boné",
+          "description": null,
+          "externalReference": null,
+          "quantity": 1,
+          "value": 35
+        }
+      ],
+      "subscription": null,
+      "installment": null,
+      "split": null,
+      "customer": null,
+      "customerData": null
+    }
+  }
+]
