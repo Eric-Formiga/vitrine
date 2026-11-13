@@ -3,6 +3,7 @@ import { APP_FILTER } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
 
 import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
+import type { PaymentGateway } from './modules/payments/application/payment-gateway.port.js';
 import { CatalogModule } from './modules/catalog/catalog.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
@@ -20,11 +21,12 @@ export interface AppModuleOptions {
   logStream?: DestinationStream;
   imports?: ModuleMetadata['imports'];
   clerkGateway?: ClerkGateway;
+  paymentGateway?: PaymentGateway;
 }
 
 @Module({})
 export class AppModule {
-  static forRoot({ env, logStream, imports = [], clerkGateway }: AppModuleOptions): DynamicModule {
+  static forRoot({ env, logStream, imports = [], clerkGateway, paymentGateway }: AppModuleOptions): DynamicModule {
     return {
       module: AppModule,
       imports: [
@@ -36,7 +38,7 @@ export class AppModule {
         HealthModule,
         IdentityModule.forRoot({ clerkGateway }),
         CatalogModule,
-        PaymentsModule,
+        PaymentsModule.forRoot({ paymentGateway }),
         ...imports,
       ],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],

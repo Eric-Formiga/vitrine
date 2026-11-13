@@ -1,11 +1,11 @@
 {
   "feature": "spike-asaas",
-  "timestamp": "2026-11-13T19:29:20.285Z",
-  "gitRev": "2442828",
+  "timestamp": "2026-11-13T20:43:58.646Z",
+  "gitRev": "69cb522",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 97,
+  "testsParsed": 103,
   "results": {
     "AC-034": {
       "status": "pass",
@@ -35,6 +35,21 @@
     "AC-039": {
       "status": "pass",
       "testName": "US-015 — Adaptador do Asaas no sandbox: repasse por Pix e estorno AC-039: estorno parcial de um Pix recebido e excesso recusado @spec:AC-039 AC-039: estorno parcial de um Pix recebido e excesso recusado @spec:AC-039",
+      "method": "vitest-json"
+    },
+    "AC-040": {
+      "status": "pass",
+      "testName": "US-016 — Os avisos do Asaas chegam com segurança AC-040: aviso sem o token certo é recusado com 401 e nada é gravado @spec:AC-040 AC-040: aviso sem o token certo é recusado com 401 e nada é gravado @spec:AC-040",
+      "method": "vitest-json"
+    },
+    "AC-041": {
+      "status": "pass",
+      "testName": "US-016 — Os avisos do Asaas chegam com segurança AC-041: aviso de pagamento é registrado e o estado vem da API do Asaas @spec:AC-041 AC-041: aviso de pagamento é registrado e o estado vem da API do Asaas @spec:AC-041",
+      "method": "vitest-json"
+    },
+    "AC-042": {
+      "status": "pass",
+      "testName": "US-016 — Os avisos do Asaas chegam com segurança AC-042: aviso repetido responde 200 sem processar nem consultar de novo @spec:AC-042 AC-042: aviso repetido responde 200 sem processar nem consultar de novo @spec:AC-042",
       "method": "vitest-json"
     }
   },

@@ -79,3 +79,15 @@ model AuditLog {
   @@index([actorUserId, createdAt(sort: Desc)])
   @@map("audit_logs")
 }
+
+// Avisos (webhooks) recebidos do Asaas, um por id de evento: o Asaas reenvia o mesmo
+// aviso, e a chave primária garante que cada um é processado uma vez (spec 05).
+// processed_at nulo = gravado, mas o processamento não terminou (será refeito no reenvio).
+model AsaasEvent {
+  id          String    @id
+  type        String
+  receivedAt  DateTime  @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@map("asaas_events")
+}

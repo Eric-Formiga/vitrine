@@ -12,7 +12,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 - [x] Next: layout base, Tailwind, shadcn/ui, tema — feature `fundacao`
 - [x] Clerk em ambos + webhook de sincronização de usuários — feature `fundacao`
 - [ ] Pipeline CI (lint, typecheck, test, build) e deploy de esqueleto (Vercel + Railway + Supabase) — feature `ci-e-deploy` (adiada: depois da Fase 1)
-- [ ] **Spike Asaas** (substitui o spike do Stripe, ADR-0011 e ADR-0012): conferência de chave Pix, Pix e cartão no sandbox, Checkout hospedado, repasse por Pix, estorno parcial, webhook com token — feature `spike-asaas` (em andamento; antes de `vendedores`)
+- [x] **Spike Asaas** (substitui o spike do Stripe, ADR-0011 e ADR-0012): conferência de chave Pix, Pix e cartão no sandbox, Checkout hospedado, repasse por Pix, estorno parcial, webhook com token — feature `spike-asaas` (relatório em `docs/spikes/asaas.md`)
 
 **Pronto quando:** usuário loga em produção e aparece na tabela `users`.
 

@@ -452,6 +452,20 @@
           "admin"
         ]
       }
+    },
+    "/v1/webhooks/asaas": {
+      "post": {
+        "operationId": "AsaasWebhookController_receive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AsaasWebhook"
+        ]
+      }
     }
   },
   "info": {

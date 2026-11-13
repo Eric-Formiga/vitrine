@@ -7,6 +7,7 @@ import type { DestinationStream } from 'pino';
 
 import { AppModule } from './app.module.js';
 import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
+import type { PaymentGateway } from './modules/payments/application/payment-gateway.port.js';
 import { loadEnv } from './shared/config/env.js';
 import { setupOpenApi } from './shared/openapi/openapi.js';
 
@@ -19,6 +20,8 @@ export interface CreateAppOptions {
   imports?: ModuleMetadata['imports'];
   /** Substitui a API do Clerk (usado pelos testes). */
   clerkGateway?: ClerkGateway;
+  /** Substitui o Asaas (usado pelos testes). */
+  paymentGateway?: PaymentGateway;
 }
 
 // Monta a aplicação com a mesma configuração no servidor (main.ts) e nos testes.
@@ -32,6 +35,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<INestAp
       logStream: options.logStream,
       imports: options.imports,
       clerkGateway: options.clerkGateway,
+      paymentGateway: options.paymentGateway,
     }),
     // rawBody: o webhook do Clerk confere a assinatura sobre o corpo exatamente como chegou.
     { bufferLogs: true, rawBody: true },
