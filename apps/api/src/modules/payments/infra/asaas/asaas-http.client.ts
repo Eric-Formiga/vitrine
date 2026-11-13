@@ -65,7 +65,8 @@ export class AsaasHttpClient {
     if (!response.ok) {
       const error = parsed as AsaasErrorBody | undefined;
       const messages = [...(error?.errors ?? []).map((e) => e.description ?? e.code ?? ''), error?.message ?? ''];
-      throw new PaymentProviderError(response.status, messages.filter(Boolean));
+      const codes = (error?.errors ?? []).map((e) => e.code ?? '');
+      throw new PaymentProviderError(response.status, messages.filter(Boolean), codes.filter(Boolean));
     }
     return parsed as T;
   }

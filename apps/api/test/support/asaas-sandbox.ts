@@ -34,6 +34,8 @@ export function sandboxGateway(scenario: string): SandboxKit {
   const cassette = createCassette(new URL(`../fixtures/asaas/${scenario}.json`, import.meta.url), {
     baseUrl: SANDBOX_URL,
     record: RECORDING,
+    // O vencimento é "hoje" na hora em que o teste roda.
+    volatileRequestFields: ['dueDate'],
   });
   const client = new AsaasHttpClient({
     apiKey: RECORDING ? sandboxApiKey() : 'chave-falsa-so-para-reproduzir',
@@ -42,6 +44,48 @@ export function sandboxGateway(scenario: string): SandboxKit {
   });
   return { gateway: new AsaasGateway(client), client, cassette };
 }
+
+/**
+ * Simula, no sandbox, o comprador pagando a cobrança (POST /sandbox/payment/{id}/confirm).
+ * Só existe no sandbox, por isso mora aqui e nunca na porta de pagamento.
+ */
+export async function confirmPaymentInSandbox(client: AsaasHttpClient, paymentId: string): Promise<void> {
+  await client.post(`/sandbox/payment/${encodeURIComponent(paymentId)}/confirm`);
+}
+
+/** Data de hoje (AAAA-MM-DD) no fuso de São Paulo, como o Asaas espera no vencimento. */
+export function todayInSaoPaulo(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+}
+
+/** Comprador de teste. O CPF é um número válido de exemplo, de ninguém. */
+export const COMPRADOR_TESTE = {
+  name: 'Comprador de Teste da Vitrine',
+  document: '11144477735',
+  email: 'comprador-spike@vitrine.dev.br',
+};
+
+/** Dados do titular do cartão, como o Asaas exige na cobrança direta. */
+export const TITULAR_CARTAO_TESTE = {
+  ...COMPRADOR_TESTE,
+  postalCode: '01310100',
+  addressNumber: '1000',
+  phone: '11999999999',
+};
+
+/**
+ * Cartões do sandbox. Em 13/11/2026 o sandbox aprovou até os "cartões de recusa" da
+ * documentação (Mastercard 5184019740373151, Visa 4916561358240741) e números inválidos;
+ * a única recusa reproduzível é o cartão vencido (400 invalid_creditCard).
+ */
+export const CARTAO_APROVADO = {
+  holderName: 'COMPRADOR TESTE',
+  number: '5162306219378829',
+  expiryMonth: '12',
+  expiryYear: '2031',
+  ccv: '123',
+};
+export const CARTAO_RECUSADO = { ...CARTAO_APROVADO, expiryMonth: '01', expiryYear: '2020' };
 
 /**
  * Única chave Pix que o sandbox deixa consultar (documentação do Asaas). O titular vem

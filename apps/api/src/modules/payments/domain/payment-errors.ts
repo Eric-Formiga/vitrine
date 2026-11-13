@@ -28,6 +28,16 @@ export class PixKeyOwnerMismatchError extends DomainError {
   }
 }
 
+/** A operadora do cartão recusou a cobrança. A mensagem do provedor vai junto. */
+export class PaymentDeclinedError extends DomainError {
+  readonly code = 'PAYMENT_DECLINED';
+  override readonly status = 402;
+
+  constructor(readonly providerMessages: string[]) {
+    super(`Pagamento recusado: ${providerMessages.join('; ') || 'a operadora não autorizou a cobrança'}.`);
+  }
+}
+
 /** O provedor recusou o pedido ou falhou; a mensagem dele vai junto, sem dados sensíveis. */
 export class PaymentProviderError extends DomainError {
   readonly code = 'PAYMENT_PROVIDER_ERROR';
@@ -36,6 +46,8 @@ export class PaymentProviderError extends DomainError {
   constructor(
     readonly providerStatus: number,
     readonly providerMessages: string[],
+    /** Códigos do provedor (ex.: "invalid_creditCard"), para o adaptador traduzir recusas conhecidas. */
+    readonly providerCodes: string[] = [],
   ) {
     super(`O provedor de pagamento respondeu ${providerStatus}: ${providerMessages.join('; ') || 'sem detalhes'}`);
   }

@@ -1,0 +1,157 @@
+[
+  {
+    "method": "GET",
+    "path": "/customers?cpfCnpj=11144477735",
+    "status": 200,
+    "responseBody": {
+      "object": "list",
+      "hasMore": false,
+      "totalCount": 1,
+      "limit": 10,
+      "offset": 0,
+      "data": [
+        {
+          "object": "customer",
+          "id": "cus_000009961250",
+          "dateCreated": "2026-11-13",
+          "name": "Comprador de Teste da Vitrine",
+          "email": "comprador-spike@vitrine.dev.br",
+          "company": null,
+          "phone": null,
+          "mobilePhone": null,
+          "address": null,
+          "addressNumber": null,
+          "complement": null,
+          "province": null,
+          "postalCode": null,
+          "cpfCnpj": "11144477735",
+          "personType": "FISICA",
+          "deleted": false,
+          "additionalEmails": null,
+          "externalReference": null,
+          "notificationDisabled": true,
+          "observations": null,
+          "municipalInscription": null,
+          "stateInscription": null,
+          "canDelete": true,
+          "cannotBeDeletedReason": null,
+          "canEdit": true,
+          "cannotEditReason": null,
+          "city": null,
+          "cityName": null,
+          "state": null,
+          "country": "Brasil"
+        }
+      ]
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/payments",
+    "requestBody": {
+      "customer": "cus_000009961250",
+      "billingType": "CREDIT_CARD",
+      "value": 89.9,
+      "dueDate": "2026-11-13",
+      "description": "Spike Asaas: cobrança com cartão",
+      "externalReference": "spike:cartao-aprovado",
+      "creditCard": {
+        "holderName": "COMPRADOR TESTE",
+        "number": "5162306219378829",
+        "expiryMonth": "12",
+        "expiryYear": "2031",
+        "ccv": "123"
+      },
+      "creditCardHolderInfo": {
+        "name": "Comprador de Teste da Vitrine",
+        "email": "comprador-spike@vitrine.dev.br",
+        "cpfCnpj": "11144477735",
+        "postalCode": "01310100",
+        "addressNumber": "1000",
+        "phone": "11999999999"
+      },
+      "remoteIp": "203.0.113.10"
+    },
+    "status": 200,
+    "responseBody": {
+      "object": "payment",
+      "id": "pay_0_vnfj80u56izlup",
+      "dateCreated": "2026-11-13",
+      "customer": "cus_000009961250",
+      "checkoutSession": null,
+      "paymentLink": null,
+      "value": 89.9,
+      "netValue": 87.63,
+      "originalValue": null,
+      "interestValue": null,
+      "description": "Spike Asaas: cobrança com cartão",
+      "billingType": "CREDIT_CARD",
+      "confirmedDate": "2026-11-13",
+      "creditCard": {
+        "creditCardNumber": "8829",
+        "creditCardBrand": "MASTERCARD",
+        "creditCardToken": "[removida]"
+      },
+      "pixTransaction": null,
+      "status": "CONFIRMED",
+      "dueDate": "2026-11-13",
+      "originalDueDate": "2026-11-13",
+      "paymentDate": null,
+      "clientPaymentDate": "2026-11-13",
+      "installmentNumber": null,
+      "invoiceUrl": "https://sandbox.asaas.com/i/0_vnfj80u56izlup",
+      "invoiceNumber": "21246541",
+      "externalReference": "spike:cartao-aprovado",
+      "deleted": false,
+      "anticipated": false,
+      "anticipable": false,
+      "creditDate": "2026-12-15",
+      "estimatedCreditDate": "2026-12-15",
+      "transactionReceiptUrl": "https://sandbox.asaas.com/000/comprovantes/4579686719276008",
+      "nossoNumero": null,
+      "bankSlipUrl": null,
+      "lastInvoiceViewedDate": null,
+      "lastBankSlipViewedDate": null,
+      "postalService": false,
+      "escrow": null,
+      "refunds": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/payments",
+    "requestBody": {
+      "customer": "cus_000009961250",
+      "billingType": "CREDIT_CARD",
+      "value": 89.9,
+      "dueDate": "2026-11-13",
+      "description": "Spike Asaas: cobrança com cartão",
+      "externalReference": "spike:cartao-recusado",
+      "creditCard": {
+        "holderName": "COMPRADOR TESTE",
+        "number": "5162306219378829",
+        "expiryMonth": "01",
+        "expiryYear": "2020",
+        "ccv": "123"
+      },
+      "creditCardHolderInfo": {
+        "name": "Comprador de Teste da Vitrine",
+        "email": "comprador-spike@vitrine.dev.br",
+        "cpfCnpj": "11144477735",
+        "postalCode": "01310100",
+        "addressNumber": "1000",
+        "phone": "11999999999"
+      },
+      "remoteIp": "203.0.113.10"
+    },
+    "status": 400,
+    "responseBody": {
+      "errors": [
+        {
+          "code": "invalid_creditCard",
+          "description": "O cartão informado está expirado."
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,254 @@
+[
+  {
+    "method": "GET",
+    "path": "/finance/balance",
+    "status": 200,
+    "responseBody": {
+      "balance": 39.01
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/customers?cpfCnpj=11144477735",
+    "status": 200,
+    "responseBody": {
+      "object": "list",
+      "hasMore": false,
+      "totalCount": 0,
+      "limit": 10,
+      "offset": 0,
+      "data": []
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/customers",
+    "requestBody": {
+      "name": "Comprador de Teste da Vitrine",
+      "cpfCnpj": "11144477735",
+      "email": "comprador-spike@vitrine.dev.br",
+      "notificationDisabled": true
+    },
+    "status": 200,
+    "responseBody": {
+      "object": "customer",
+      "id": "cus_000009961250",
+      "dateCreated": "2026-11-13",
+      "name": "Comprador de Teste da Vitrine",
+      "email": "comprador-spike@vitrine.dev.br",
+      "company": null,
+      "phone": null,
+      "mobilePhone": null,
+      "address": null,
+      "addressNumber": null,
+      "complement": null,
+      "province": null,
+      "postalCode": null,
+      "cpfCnpj": "11144477735",
+      "personType": "FISICA",
+      "deleted": false,
+      "additionalEmails": null,
+      "externalReference": null,
+      "notificationDisabled": true,
+      "observations": null,
+      "municipalInscription": null,
+      "stateInscription": null,
+      "canDelete": true,
+      "cannotBeDeletedReason": null,
+      "canEdit": true,
+      "cannotEditReason": null,
+      "city": null,
+      "cityName": null,
+      "state": null,
+      "country": "Brasil"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/payments",
+    "requestBody": {
+      "customer": "cus_000009961250",
+      "billingType": "PIX",
+      "value": 50,
+      "dueDate": "2026-11-13",
+      "description": "Spike Asaas: cobrança Pix",
+      "externalReference": "spike:pix-recebido"
+    },
+    "status": 200,
+    "responseBody": {
+      "object": "payment",
+      "id": "pay_0_tfsjkpk8qvav8i",
+      "dateCreated": "2026-11-13",
+      "customer": "cus_000009961250",
+      "checkoutSession": null,
+      "paymentLink": null,
+      "value": 50,
+      "netValue": 49.01,
+      "originalValue": null,
+      "interestValue": null,
+      "description": "Spike Asaas: cobrança Pix",
+      "billingType": "PIX",
+      "pixTransaction": null,
+      "status": "PENDING",
+      "dueDate": "2026-11-13",
+      "originalDueDate": "2026-11-13",
+      "paymentDate": null,
+      "clientPaymentDate": null,
+      "installmentNumber": null,
+      "invoiceUrl": "https://sandbox.asaas.com/i/0_tfsjkpk8qvav8i",
+      "invoiceNumber": "21246339",
+      "externalReference": "spike:pix-recebido",
+      "deleted": false,
+      "anticipated": false,
+      "anticipable": false,
+      "creditDate": null,
+      "estimatedCreditDate": null,
+      "transactionReceiptUrl": null,
+      "nossoNumero": null,
+      "bankSlipUrl": null,
+      "lastInvoiceViewedDate": null,
+      "lastBankSlipViewedDate": null,
+      "discount": {
+        "value": 0,
+        "limitDate": null,
+        "dueDateLimitDays": 0,
+        "type": "FIXED"
+      },
+      "fine": {
+        "value": 0,
+        "type": "FIXED"
+      },
+      "interest": {
+        "value": 0,
+        "type": "PERCENTAGE"
+      },
+      "postalService": false,
+      "escrow": null,
+      "refunds": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/sandbox/payment/pay_0_tfsjkpk8qvav8i/confirm",
+    "status": 200,
+    "responseBody": {
+      "object": "payment",
+      "id": "pay_0_tfsjkpk8qvav8i",
+      "dateCreated": "2026-11-13",
+      "customer": "cus_000009961250",
+      "checkoutSession": null,
+      "paymentLink": null,
+      "value": 50,
+      "netValue": 49.01,
+      "originalValue": null,
+      "interestValue": null,
+      "description": "Spike Asaas: cobrança Pix",
+      "billingType": "PIX",
+      "confirmedDate": "2026-11-13",
+      "pixTransaction": "8b160588-b158-411b-8f8b-06f3e5d7f6bc",
+      "pixQrCodeId": "4b6c21ea-e24e-4c61-a760-31f0f132393b",
+      "status": "RECEIVED",
+      "dueDate": "2026-11-13",
+      "originalDueDate": "2026-11-13",
+      "paymentDate": "2026-11-13",
+      "clientPaymentDate": "2026-11-13",
+      "installmentNumber": null,
+      "invoiceUrl": "https://sandbox.asaas.com/i/0_tfsjkpk8qvav8i",
+      "invoiceNumber": "21246339",
+      "externalReference": "spike:pix-recebido",
+      "deleted": false,
+      "anticipated": false,
+      "anticipable": false,
+      "creditDate": "2026-11-13",
+      "estimatedCreditDate": "2026-11-13",
+      "transactionReceiptUrl": "https://sandbox.asaas.com/000/comprovantes/h/UEFZTUVOVF9SRUNFSVZFRDpwYXlfMF90ZnNqa3BrOHF2YXY4aQ%3D%3D",
+      "nossoNumero": null,
+      "bankSlipUrl": null,
+      "lastInvoiceViewedDate": null,
+      "lastBankSlipViewedDate": null,
+      "discount": {
+        "value": 0,
+        "limitDate": null,
+        "dueDateLimitDays": 0,
+        "type": "FIXED"
+      },
+      "fine": {
+        "value": 0,
+        "type": "FIXED"
+      },
+      "interest": {
+        "value": 0,
+        "type": "PERCENTAGE"
+      },
+      "postalService": false,
+      "escrow": null,
+      "refunds": null
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/payments/pay_0_tfsjkpk8qvav8i",
+    "status": 200,
+    "responseBody": {
+      "object": "payment",
+      "id": "pay_0_tfsjkpk8qvav8i",
+      "dateCreated": "2026-11-13",
+      "customer": "cus_000009961250",
+      "checkoutSession": null,
+      "paymentLink": null,
+      "value": 50,
+      "netValue": 49.01,
+      "originalValue": null,
+      "interestValue": null,
+      "description": "Spike Asaas: cobrança Pix",
+      "billingType": "PIX",
+      "confirmedDate": "2026-11-13",
+      "pixTransaction": "8b160588-b158-411b-8f8b-06f3e5d7f6bc",
+      "pixQrCodeId": "4b6c21ea-e24e-4c61-a760-31f0f132393b",
+      "status": "RECEIVED",
+      "dueDate": "2026-11-13",
+      "originalDueDate": "2026-11-13",
+      "paymentDate": "2026-11-13",
+      "clientPaymentDate": "2026-11-13",
+      "installmentNumber": null,
+      "invoiceUrl": "https://sandbox.asaas.com/i/0_tfsjkpk8qvav8i",
+      "invoiceNumber": "21246339",
+      "externalReference": "spike:pix-recebido",
+      "deleted": false,
+      "anticipated": false,
+      "anticipable": false,
+      "creditDate": "2026-11-13",
+      "estimatedCreditDate": "2026-11-13",
+      "transactionReceiptUrl": "https://sandbox.asaas.com/000/comprovantes/h/UEFZTUVOVF9SRUNFSVZFRDpwYXlfMF90ZnNqa3BrOHF2YXY4aQ%3D%3D",
+      "nossoNumero": null,
+      "bankSlipUrl": null,
+      "lastInvoiceViewedDate": null,
+      "lastBankSlipViewedDate": null,
+      "discount": {
+        "value": 0,
+        "limitDate": null,
+        "dueDateLimitDays": 0,
+        "type": "FIXED"
+      },
+      "fine": {
+        "value": 0,
+        "type": "FIXED"
+      },
+      "interest": {
+        "value": 0,
+        "type": "PERCENTAGE"
+      },
+      "postalService": false,
+      "escrow": null,
+      "refunds": null
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/finance/balance",
+    "status": 200,
+    "responseBody": {
+      "balance": 88.02
+    }
+  }
+]
