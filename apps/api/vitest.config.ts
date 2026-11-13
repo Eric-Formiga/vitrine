@@ -8,8 +8,10 @@ export default defineConfig({
     name: 'api',
     environment: 'node',
     include: ['src/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
+    // Um Postgres só para a rodada; cada arquivo ganha uma cópia do banco-modelo.
+    globalSetup: ['test/support/global-postgres.ts'],
     // Ambiente dos testes: válido e silencioso. Cada teste pode sobrescrever via createApp({ env }).
-    // O banco padrão não existe de propósito; quem precisa de banco sobe um com Testcontainers.
+    // O banco padrão não existe de propósito; quem precisa de banco pede uma cópia com startTestDatabase().
     env: {
       NODE_ENV: 'test',
       LOG_LEVEL: 'silent',
