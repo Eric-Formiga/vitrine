@@ -21,9 +21,17 @@ export interface Cassette {
   fetch: typeof fetch;
   /** Interações desta execução (gravadas ou reproduzidas), em ordem. */
   readonly calls: readonly Interaction[];
+  /**
+   * Valor que precisa ser novo a cada gravação (ex.: referência de um repasse, que o
+   * provedor não aceita repetir) e igual ao gravado na reprodução.
+   */
+  value: (name: string, generate: () => string) => string;
   /** Grava o arquivo (no modo gravação) ou confere que todas as gravadas foram usadas. */
   done: () => void;
 }
+
+/** Arquivo do cassete: só a lista de interações, ou ela mais os valores gerados na gravação. */
+type CassetteFile = Interaction[] | { values: Record<string, string>; interactions: Interaction[] };
 
 const REDACTED = '[removida]';
 /** Campos de resposta que dão acesso a algo (chave de API, token de cartão para cobrar de novo). */
@@ -61,12 +69,15 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
       // A resposta real segue para o código; só a cópia gravada é limpa.
       return new Response(text, { status: response.status, headers: response.headers });
     };
+    const values: Record<string, string> = {};
     return {
       fetch: recordingFetch,
       calls,
+      value: (name, generate) => (values[name] ??= generate()),
       done: () => {
+        const stored: CassetteFile = Object.keys(values).length ? { values, interactions: calls } : calls;
         mkdirSync(dirname(path), { recursive: true });
-        writeFileSync(path, `${JSON.stringify(calls, null, 2)}\n`);
+        writeFileSync(path, `${JSON.stringify(stored, null, 2)}\n`);
       },
     };
   }
@@ -74,7 +85,9 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
   if (!existsSync(path)) {
     throw new Error(`Cassete não encontrado: ${path}. Grave com ASAAS_RECORD=1 (precisa da ASAAS_API_KEY do sandbox no .env).`);
   }
-  const recorded = JSON.parse(readFileSync(path, 'utf8')) as Interaction[];
+  const stored = JSON.parse(readFileSync(path, 'utf8')) as CassetteFile;
+  const recorded = Array.isArray(stored) ? stored : stored.interactions;
+  const recordedValues = Array.isArray(stored) ? {} : stored.values;
   let next = 0;
 
   const replayingFetch: typeof fetch = async (input, init) => {
@@ -104,6 +117,11 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
   return {
     fetch: replayingFetch,
     calls,
+    value: (name) => {
+      const recordedValue = recordedValues[name];
+      if (recordedValue === undefined) throw new Error(`O cassete ${path} não tem o valor "${name}". Regrave com ASAAS_RECORD=1.`);
+      return recordedValue;
+    },
     done: () => {
       if (next !== recorded.length) {
         throw new Error(`O cassete ${path} tem ${recorded.length} requisições, mas só ${next} foram feitas. Regrave com ASAAS_RECORD=1.`);

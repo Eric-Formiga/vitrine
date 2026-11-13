@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 
+import { RefundNotAllowedError } from '../../src/modules/payments/domain/payment-errors.js';
 import type { PixKey } from '../../src/modules/payments/domain/pix-key.js';
 import { AsaasHttpClient } from '../../src/modules/payments/infra/asaas/asaas-http.client.js';
 import { AsaasGateway } from '../../src/modules/payments/infra/asaas/asaas.gateway.js';
@@ -52,6 +53,30 @@ export function sandboxGateway(scenario: string): SandboxKit {
 export async function confirmPaymentInSandbox(client: AsaasHttpClient, paymentId: string): Promise<void> {
   await client.post(`/sandbox/payment/${encodeURIComponent(paymentId)}/confirm`);
 }
+
+/**
+ * O sandbox recusa estorno logo depois do recebimento ("Tente novamente em alguns
+ * instantes"; ~4 s na sondagem de 13/11/2026). Tenta de novo, esperando só na gravação:
+ * na reprodução, as recusas gravadas voltam na hora.
+ */
+export async function whenRefundable<T>(attempt: () => Promise<T>): Promise<T> {
+  for (let tries = 1; ; tries += 1) {
+    try {
+      return await attempt();
+    } catch (error) {
+      const early = error instanceof RefundNotAllowedError && /tente novamente/i.test(error.message);
+      if (!early || tries >= 20) throw error;
+      if (RECORDING) await new Promise((resolve) => setTimeout(resolve, 2_000));
+    }
+  }
+}
+
+/**
+ * Chave Pix de teste do Banco Central: destino das transferências no sandbox. O Asaas
+ * recusa, no mesmo dia, outra transferência de mesmo valor para a mesma chave (409); para
+ * regravar no mesmo dia de outra gravação, troque o número (cliente-a00001, a00002...).
+ */
+export const CHAVE_PIX_BCB: PixKey = { type: 'EMAIL', key: 'cliente-a00003@pix.bcb.gov.br' };
 
 /** Data de hoje (AAAA-MM-DD) no fuso de São Paulo, como o Asaas espera no vencimento. */
 export function todayInSaoPaulo(): string {

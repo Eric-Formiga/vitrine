@@ -1,11 +1,11 @@
 {
   "feature": "spike-asaas",
-  "timestamp": "2026-11-13T19:11:48.310Z",
-  "gitRev": "3f7cbd4",
+  "timestamp": "2026-11-13T19:29:20.285Z",
+  "gitRev": "2442828",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 94,
+  "testsParsed": 97,
   "results": {
     "AC-034": {
       "status": "pass",
@@ -25,6 +25,16 @@
     "AC-037": {
       "status": "pass",
       "testName": "US-015 — Adaptador do Asaas no sandbox: chave Pix e cobranças AC-037: Checkout hospedado criado com Pix e cartão e ligado ao pedido @spec:AC-037 AC-037: Checkout hospedado criado com Pix e cartão e ligado ao pedido @spec:AC-037",
+      "method": "vitest-json"
+    },
+    "AC-038": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: repasse por Pix e estorno AC-038: repasse por Pix enviado uma única vez @spec:AC-038 AC-038: repasse por Pix enviado uma única vez @spec:AC-038",
+      "method": "vitest-json"
+    },
+    "AC-039": {
+      "status": "pass",
+      "testName": "US-015 — Adaptador do Asaas no sandbox: repasse por Pix e estorno AC-039: estorno parcial de um Pix recebido e excesso recusado @spec:AC-039 AC-039: estorno parcial de um Pix recebido e excesso recusado @spec:AC-039",
       "method": "vitest-json"
     }
   },
