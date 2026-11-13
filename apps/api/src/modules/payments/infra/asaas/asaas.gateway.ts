@@ -7,8 +7,20 @@ import type {
   PaymentGateway,
   PaymentMethod,
   PaymentStatus,
+  PixTransfer,
+  PixTransferStatus,
+  Refund,
+  RefundInput,
+  RefundStatus,
+  TransferPixInput,
 } from '../../application/payment-gateway.port.js';
-import { PaymentDeclinedError, PaymentProviderError, PixKeyNotFoundError } from '../../domain/payment-errors.js';
+import {
+  PaymentDeclinedError,
+  PaymentProviderError,
+  PixKeyNotFoundError,
+  PixTransferDuplicateError,
+  RefundNotAllowedError,
+} from '../../domain/payment-errors.js';
 import type { PixKey, PixKeyOwner } from '../../domain/pix-key.js';
 import type { AsaasHttpClient } from './asaas-http.client.js';
 
@@ -18,7 +30,26 @@ interface AsaasPixKeyLookup {
 }
 
 interface AsaasList<T> {
-  data: T[];
+  /** O Asaas devolve `null` (e não []) em algumas listas vazias. */
+  data: T[] | null;
+  hasMore?: boolean;
+}
+
+interface AsaasRefund {
+  value: number;
+  status: string;
+  dateCreated: string;
+}
+
+interface AsaasTransfer {
+  id: string;
+  status: string;
+  value: number;
+  transferFee: number | null;
+  externalReference: string | null;
+  scheduleDate: string | null;
+  effectiveDate: string | null;
+  failReason: string | null;
 }
 
 interface AsaasCustomer {
@@ -37,6 +68,7 @@ interface AsaasPayment {
   confirmedDate: string | null;
   paymentDate: string | null;
   estimatedCreditDate: string | null;
+  refunds?: AsaasRefund[] | null;
 }
 
 interface AsaasCheckout {
@@ -77,13 +109,54 @@ const STATUS: Record<string, PaymentStatus> = {
   AWAITING_CHARGEBACK_REVERSAL: 'CHARGEBACK',
 };
 
+const REFUND_STATUS: Record<string, RefundStatus> = {
+  PENDING: 'PENDING',
+  AWAITING_CRITICAL_ACTION_AUTHORIZATION: 'AWAITING_AUTHORIZATION',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED',
+};
+
+const TRANSFER_STATUS: Record<string, PixTransferStatus> = {
+  PENDING: 'PENDING',
+  AWAITING_CRITICAL_ACTION_AUTHORIZATION: 'AWAITING_AUTHORIZATION',
+  BANK_PROCESSING: 'PROCESSING',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED',
+};
+
+/** Tamanho de página da listagem de transferências (máximo do Asaas). */
+const TRANSFERS_PAGE_SIZE = 100;
+
 const toCents = (reais: number) => Math.round(reais * 100);
 const toReais = (cents: number) => cents / 100;
 const onlyDigits = (value: string) => value.replace(/\D/g, '');
 const toMethod = (billingType: string): PaymentMethod =>
   billingType === 'PIX' || billingType === 'CREDIT_CARD' ? billingType : 'OTHER';
 
+function toRefund(refund: AsaasRefund): Refund {
+  return {
+    amountCents: toCents(refund.value),
+    status: REFUND_STATUS[refund.status] ?? 'UNKNOWN',
+    requestedAt: refund.dateCreated,
+  };
+}
+
+function toTransfer(transfer: AsaasTransfer): PixTransfer {
+  return {
+    id: transfer.id,
+    status: TRANSFER_STATUS[transfer.status] ?? 'UNKNOWN',
+    amountCents: toCents(transfer.value),
+    feeCents: toCents(transfer.transferFee ?? 0),
+    reference: transfer.externalReference ?? null,
+    scheduledOn: transfer.scheduleDate ?? null,
+    doneOn: transfer.effectiveDate ?? null,
+    failReason: transfer.failReason ?? null,
+  };
+}
+
 function toPayment(payment: AsaasPayment): Payment {
+  const refunds = (payment.refunds ?? []).map(toRefund);
   return {
     id: payment.id,
     method: toMethod(payment.billingType),
@@ -95,6 +168,10 @@ function toPayment(payment: AsaasPayment): Payment {
     confirmedOn: payment.confirmedDate ?? null,
     receivedOn: payment.paymentDate ?? null,
     expectedCreditOn: payment.estimatedCreditDate ?? null,
+    refunds,
+    refundedAmountCents: refunds
+      .filter((refund) => refund.status !== 'CANCELLED')
+      .reduce((sum, refund) => sum + refund.amountCents, 0),
   };
 }
 
@@ -117,7 +194,7 @@ export class AsaasGateway implements PaymentGateway {
   async ensureCustomer({ name, document, email }: PaymentCustomer): Promise<string> {
     const cpfCnpj = onlyDigits(document);
     const found = await this.http.get<AsaasList<AsaasCustomer>>('/customers', { cpfCnpj });
-    const existing = found.data[0];
+    const existing = found.data?.[0];
     if (existing) return existing.id;
     // Os avisos ao comprador são da Vitrine (spec 09): o Asaas não manda e-mail nem SMS.
     const created = await this.http.post<AsaasCustomer>('/customers', { name, cpfCnpj, email, notificationDisabled: true });
@@ -196,6 +273,65 @@ export class AsaasGateway implements PaymentGateway {
   async getAvailableBalanceCents(): Promise<number> {
     const { balance } = await this.http.get<{ balance: number }>('/finance/balance');
     return toCents(balance);
+  }
+
+  async refund({ paymentId, amountCents, description }: RefundInput): Promise<Payment> {
+    try {
+      const refunded = await this.http.post<AsaasPayment>(`/payments/${encodeURIComponent(paymentId)}/refund`, {
+        value: toReais(amountCents),
+        ...(description ? { description } : {}),
+      });
+      return toPayment(refunded);
+    } catch (error) {
+      // O Asaas recusa estorno com 400 invalid_action (ex.: valor acima do que sobrou).
+      if (error instanceof PaymentProviderError && error.providerStatus === 400) {
+        throw new RefundNotAllowedError(error.providerMessages);
+      }
+      throw error;
+    }
+  }
+
+  async transferPix({ pixKey, amountCents, reference, description }: TransferPixInput): Promise<PixTransfer> {
+    const existing = await this.findTransferByReference(reference);
+    if (existing) return toTransfer(existing);
+
+    try {
+      const created = await this.http.post<AsaasTransfer>('/transfers', {
+        value: toReais(amountCents),
+        operationType: 'PIX',
+        pixAddressKey: pixKey.key,
+        pixAddressKeyType: pixKey.type,
+        externalReference: reference,
+        ...(description ? { description } : {}),
+      });
+      return toTransfer(created);
+    } catch (error) {
+      // Mesmo valor para a mesma chave no mesmo dia, ainda que com outra referência.
+      if (error instanceof PaymentProviderError && error.providerCodes.includes('checkout.already.requested')) {
+        throw new PixTransferDuplicateError(error.providerMessages);
+      }
+      throw error;
+    }
+  }
+
+  async getTransfer(transferId: string): Promise<PixTransfer> {
+    return toTransfer(await this.http.get<AsaasTransfer>(`/transfers/${encodeURIComponent(transferId)}`));
+  }
+
+  /**
+   * O GET /transfers ignora o filtro `externalReference` (sondagem de 13/11/2026: devolve
+   * todas as transferências). Por isso a busca percorre as páginas e compara a referência
+   * aqui. Confiar no filtro faria um repasse "achar" a transferência de outra loja e nunca
+   * sair. Na Fase 3, o registro do repasse no banco da Vitrine é a primeira defesa; esta
+   * busca cobre a falha entre "transferiu" e "gravou".
+   */
+  private async findTransferByReference(reference: string): Promise<AsaasTransfer | undefined> {
+    for (let offset = 0; ; offset += TRANSFERS_PAGE_SIZE) {
+      const page = await this.http.get<AsaasList<AsaasTransfer>>('/transfers', { offset, limit: TRANSFERS_PAGE_SIZE });
+      const found = (page.data ?? []).find((transfer) => transfer.externalReference === reference);
+      if (found) return found;
+      if (!page.hasMore) return undefined;
+    }
   }
 }
 

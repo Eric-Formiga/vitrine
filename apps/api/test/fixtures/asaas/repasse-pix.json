@@ -1,0 +1,728 @@
+{
+  "values": {
+    "referencia": "spike:repasse:1794597699952"
+  },
+  "interactions": [
+    {
+      "method": "GET",
+      "path": "/finance/balance",
+      "status": 200,
+      "responseBody": {
+        "balance": 164.05
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/transfers?offset=0&limit=100",
+      "status": 200,
+      "responseBody": {
+        "object": "list",
+        "hasMore": false,
+        "totalCount": 4,
+        "limit": 100,
+        "offset": 0,
+        "data": [
+          {
+            "object": "transfer",
+            "id": "4b2173f3-61bd-4875-89cf-8d780437ba50",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c4:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva Silva",
+              "cpfCnpj": "***.922.222-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00002@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "c8cb3c20-9f4d-463a-ae30-6a4a28531456",
+            "value": 11,
+            "netValue": 11,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c2:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "a972e182-d19e-4193-8fc5-8eede9cf67f2",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sondagem",
+            "externalReference": "sondagem:1794597297595",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "18ef4510-a76a-49a0-8018-842c7f0d32bd",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-12",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sonda repasse",
+            "externalReference": "sonda-2",
+            "authorized": false,
+            "scheduleDate": "2026-11-12",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/transfers",
+      "requestBody": {
+        "value": 10,
+        "operationType": "PIX",
+        "pixAddressKey": "cliente-a00003@pix.bcb.gov.br",
+        "pixAddressKeyType": "EMAIL",
+        "externalReference": "spike:repasse:1794597699952",
+        "description": "Spike Asaas: repasse"
+      },
+      "status": 200,
+      "responseBody": {
+        "object": "transfer",
+        "id": "7b5d3169-e106-4868-844c-2e005f8d5cdc",
+        "value": 10,
+        "netValue": 10,
+        "transferFee": 0,
+        "dateCreated": "2026-11-13",
+        "status": "PENDING",
+        "effectiveDate": null,
+        "confirmedDate": null,
+        "endToEndIdentifier": null,
+        "transactionReceiptUrl": null,
+        "operationType": "PIX",
+        "failReason": null,
+        "walletId": null,
+        "description": "Spike Asaas: repasse",
+        "externalReference": "spike:repasse:1794597699952",
+        "authorized": false,
+        "scheduleDate": "2026-11-13",
+        "type": "BANK_ACCOUNT",
+        "bankAccount": {
+          "bank": {
+            "code": null,
+            "name": "Banco Virtual - BACEN",
+            "ispb": "99999004"
+          },
+          "accountName": null,
+          "ownerName": "Jose Silva",
+          "cpfCnpj": "***.933.333-**",
+          "type": "CHECKING_ACCOUNT",
+          "agency": "0",
+          "agencyDigit": null,
+          "account": "0000000",
+          "accountDigit": "0",
+          "pixAddressKey": "cliente-a00003@pix.bcb.gov.br"
+        },
+        "recurring": null,
+        "canBeCancelled": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/transfers?offset=0&limit=100",
+      "status": 200,
+      "responseBody": {
+        "object": "list",
+        "hasMore": false,
+        "totalCount": 5,
+        "limit": 100,
+        "offset": 0,
+        "data": [
+          {
+            "object": "transfer",
+            "id": "7b5d3169-e106-4868-844c-2e005f8d5cdc",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "Spike Asaas: repasse",
+            "externalReference": "spike:repasse:1794597699952",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Jose Silva",
+              "cpfCnpj": "***.933.333-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00003@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "4b2173f3-61bd-4875-89cf-8d780437ba50",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c4:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva Silva",
+              "cpfCnpj": "***.922.222-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00002@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "c8cb3c20-9f4d-463a-ae30-6a4a28531456",
+            "value": 11,
+            "netValue": 11,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c2:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "a972e182-d19e-4193-8fc5-8eede9cf67f2",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sondagem",
+            "externalReference": "sondagem:1794597297595",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "18ef4510-a76a-49a0-8018-842c7f0d32bd",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-12",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sonda repasse",
+            "externalReference": "sonda-2",
+            "authorized": false,
+            "scheduleDate": "2026-11-12",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/transfers/7b5d3169-e106-4868-844c-2e005f8d5cdc",
+      "status": 200,
+      "responseBody": {
+        "object": "transfer",
+        "id": "7b5d3169-e106-4868-844c-2e005f8d5cdc",
+        "value": 10,
+        "netValue": 10,
+        "transferFee": 0,
+        "dateCreated": "2026-11-13",
+        "status": "PENDING",
+        "effectiveDate": null,
+        "confirmedDate": null,
+        "endToEndIdentifier": null,
+        "transactionReceiptUrl": null,
+        "operationType": "PIX",
+        "failReason": null,
+        "walletId": null,
+        "description": "Spike Asaas: repasse",
+        "externalReference": "spike:repasse:1794597699952",
+        "authorized": false,
+        "scheduleDate": "2026-11-13",
+        "type": "BANK_ACCOUNT",
+        "bankAccount": {
+          "bank": {
+            "code": null,
+            "name": "Banco Virtual - BACEN",
+            "ispb": "99999004"
+          },
+          "accountName": null,
+          "ownerName": "Jose Silva",
+          "cpfCnpj": "***.933.333-**",
+          "type": "CHECKING_ACCOUNT",
+          "agency": "0",
+          "agencyDigit": null,
+          "account": "0000000",
+          "accountDigit": "0",
+          "pixAddressKey": "cliente-a00003@pix.bcb.gov.br"
+        },
+        "recurring": null,
+        "canBeCancelled": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/finance/balance",
+      "status": 200,
+      "responseBody": {
+        "balance": 154.05
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/transfers?offset=0&limit=100",
+      "status": 200,
+      "responseBody": {
+        "object": "list",
+        "hasMore": false,
+        "totalCount": 5,
+        "limit": 100,
+        "offset": 0,
+        "data": [
+          {
+            "object": "transfer",
+            "id": "7b5d3169-e106-4868-844c-2e005f8d5cdc",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "Spike Asaas: repasse",
+            "externalReference": "spike:repasse:1794597699952",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Jose Silva",
+              "cpfCnpj": "***.933.333-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00003@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "4b2173f3-61bd-4875-89cf-8d780437ba50",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c4:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva Silva",
+              "cpfCnpj": "***.922.222-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00002@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "c8cb3c20-9f4d-463a-ae30-6a4a28531456",
+            "value": 11,
+            "netValue": 11,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": null,
+            "externalReference": "sondagem-c2:1794597587434",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "a972e182-d19e-4193-8fc5-8eede9cf67f2",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-13",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sondagem",
+            "externalReference": "sondagem:1794597297595",
+            "authorized": false,
+            "scheduleDate": "2026-11-13",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          },
+          {
+            "object": "transfer",
+            "id": "18ef4510-a76a-49a0-8018-842c7f0d32bd",
+            "value": 10,
+            "netValue": 10,
+            "transferFee": 0,
+            "dateCreated": "2026-11-12",
+            "status": "PENDING",
+            "effectiveDate": null,
+            "confirmedDate": null,
+            "endToEndIdentifier": null,
+            "transactionReceiptUrl": null,
+            "operationType": "PIX",
+            "failReason": null,
+            "walletId": null,
+            "description": "sonda repasse",
+            "externalReference": "sonda-2",
+            "authorized": false,
+            "scheduleDate": "2026-11-12",
+            "type": "BANK_ACCOUNT",
+            "bankAccount": {
+              "bank": {
+                "code": null,
+                "name": "Banco Virtual - BACEN",
+                "ispb": "99999004"
+              },
+              "accountName": null,
+              "ownerName": "Joao Silva",
+              "cpfCnpj": "***.911.111-**",
+              "type": "CHECKING_ACCOUNT",
+              "agency": "0",
+              "agencyDigit": null,
+              "account": "0000000",
+              "accountDigit": "0",
+              "pixAddressKey": "cliente-a00001@pix.bcb.gov.br"
+            },
+            "recurring": null,
+            "canBeCancelled": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/transfers",
+      "requestBody": {
+        "value": 10,
+        "operationType": "PIX",
+        "pixAddressKey": "cliente-a00003@pix.bcb.gov.br",
+        "pixAddressKeyType": "EMAIL",
+        "externalReference": "spike:repasse:1794597699952:outro",
+        "description": "Spike Asaas: repasse"
+      },
+      "status": 409,
+      "responseBody": {
+        "errors": [
+          {
+            "code": "checkout.already.requested",
+            "description": "Saque 7b5d3169-e106-4868-844c-2e005f8d5cdc já solicitado"
+          }
+        ]
+      }
+    }
+  ]
+}

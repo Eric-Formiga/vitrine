@@ -38,6 +38,32 @@ export class PaymentDeclinedError extends DomainError {
   }
 }
 
+/**
+ * O provedor recusou o estorno: valor acima do que sobrou na cobrança, cobrança que não
+ * pode ser estornada, ou estorno pedido cedo demais (logo após o recebimento).
+ */
+export class RefundNotAllowedError extends DomainError {
+  readonly code = 'REFUND_NOT_ALLOWED';
+
+  constructor(readonly providerMessages: string[]) {
+    super(`Estorno recusado: ${providerMessages.join('; ') || 'o provedor não permitiu o estorno'}.`);
+  }
+}
+
+/**
+ * O provedor recusou a transferência por parecer repetida: já existe uma transferência
+ * de mesmo valor para a mesma chave Pix no mesmo dia (Asaas: 409 checkout.already.requested),
+ * mesmo com outra referência.
+ */
+export class PixTransferDuplicateError extends DomainError {
+  readonly code = 'PIX_TRANSFER_DUPLICATE';
+  override readonly status = 409;
+
+  constructor(readonly providerMessages: string[]) {
+    super(`Transferência recusada como repetida: ${providerMessages.join('; ') || 'mesmo valor e mesma chave no mesmo dia'}.`);
+  }
+}
+
 /** O provedor recusou o pedido ou falhou; a mensagem dele vai junto, sem dados sensíveis. */
 export class PaymentProviderError extends DomainError {
   readonly code = 'PAYMENT_PROVIDER_ERROR';
