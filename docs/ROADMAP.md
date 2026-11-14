@@ -18,7 +18,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 
 ## Fase 1 — Catálogo
 - [x] Categorias (admin) e seed — feature `categorias`
-- [ ] Candidatura de vendedor + chave Pix de recebimento conferida + aprovação admin — feature `vendedores`
+- [ ] Candidatura de vendedor + chave Pix de recebimento conferida + aprovação admin; suspensão, comissão por loja, troca da chave Pix e configuração de frete da loja — feature `vendedores` (em andamento)
 - [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
 - [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
 - [ ] Busca FTS + facetas — feature `busca`
@@ -28,7 +28,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 
 ## Fase 2 — Compra
 - [ ] Carrinho visitante/logado + merge
-- [ ] Endereços com ViaCEP; frete por loja
+- [ ] Endereços com ViaCEP; cálculo do frete por loja no carrinho (a configuração da loja vem da feature `vendedores`)
 - [ ] Checkout com reserva de estoque, idempotência e Checkout hospedado do Asaas (Pix e cartão)
 - [ ] Webhook do Asaas, outbox + relay pg-boss, e-mails de pedido
 - [ ] Expiração de reservas
