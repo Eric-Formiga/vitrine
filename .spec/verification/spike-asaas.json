@@ -1,11 +1,11 @@
 {
   "feature": "spike-asaas",
-  "timestamp": "2026-11-15T15:21:44.711Z",
-  "gitRev": "f54eaf1",
+  "timestamp": "2026-11-15T15:29:51.014Z",
+  "gitRev": "b9ea5cf",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 138,
+  "testsParsed": 154,
   "results": {
     "AC-034": {
       "status": "pass",
