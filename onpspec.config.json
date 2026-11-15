@@ -1,5 +1,5 @@
 {
-  "testCommand": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "testCommand": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "reporterOutputFile": ".spec/verification/vitest-report.json",
   "testGlobs": [
