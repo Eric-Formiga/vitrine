@@ -16,7 +16,7 @@ Documentação interativa gerada automaticamente em `/docs` (Swagger UI) a parti
 | Concorrência | `ETag`/`If-Match` em edição de produto (evitar sobrescrita) |
 | Rate limit | headers `RateLimit-*`; 429 com `Retry-After` |
 
-Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
+Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `SELLER_NOT_FOUND`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
 
 Rotas `/admin/*` respondem 404 (e não 403) para quem não é admin, e toda escrita bem-sucedida grava `audit_logs`.
 
@@ -98,9 +98,9 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 ### Admin
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
-| GET | `/admin/sellers` | 🛡️ | Lista com filtro por status |
-| POST | `/admin/sellers/{id}/approve` · `/reject` · `/suspend` · `/reinstate` | 🛡️ | |
-| PATCH | `/admin/sellers/{id}/commission` | 🛡️ | Comissão customizada |
+| GET | `/admin/sellers?status=` | 🛡️ | Lojas de uma situação (`status` obrigatório), da candidatura mais antiga para a mais nova, com o CPF/CNPJ completo, a conta dona e o titular da chave Pix |
+| POST | `/admin/sellers/{id}/approve` · `/reject` · `/suspend` · `/reinstate` | 🛡️ | `PENDING → APPROVED \| REJECTED`, `APPROVED → SUSPENDED`, `SUSPENDED → APPROVED`; o resto é `INVALID_STATE_TRANSITION` (422). `reject` e `suspend` exigem `{ reason }`. Aprovar dá o papel `seller` na hora |
+| PATCH | `/admin/sellers/{id}/commission` | 🛡️ | `{ commissionBps }` de 0 a 10000 (800 = 8%), ou `null` para a padrão; a resposta traz `effectiveCommissionBps` |
 | GET / POST / PATCH / DELETE | `/admin/categories[/{id}]` | 🛡️ | Árvore com as arquivadas; DELETE arquiva em cascata (204) |
 | POST | `/admin/categories/{id}/restore` | 🛡️ | Restaura só a categoria (exige a pai ativa) |
 | POST | `/admin/products/{id}/suspend` · `/reinstate` | 🛡️ | Moderação |

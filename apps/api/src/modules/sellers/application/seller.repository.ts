@@ -1,4 +1,22 @@
-import type { Seller, VerifiedPixKey } from '../domain/seller.js';
+import type { Role } from '../../../shared/auth/roles.decorator.js';
+import type { Seller, SellerStatus, SellerStatusChange, VerifiedPixKey } from '../domain/seller.js';
+
+/** A loja com a conta dona, como o admin vê (AC-050). */
+export interface SellerWithOwner extends Seller {
+  owner: { id: string; name: string | null; email: string };
+}
+
+/** O que dá para mudar numa loja dentro de uma escrita do admin. */
+export type SellerChanges = Partial<SellerStatusChange> & { commissionBps?: number | null };
+
+/** Uma transação sobre UMA loja: tudo aqui entra junto, ou nada entra. */
+export interface SellerWriteSession {
+  /** Lê a loja travando a linha até o fim da transação (duas decisões ao mesmo tempo não se cruzam). */
+  lockById(id: string): Promise<SellerWithOwner | null>;
+  update(id: string, changes: SellerChanges): Promise<SellerWithOwner>;
+  grantRole(userId: string, role: Role): Promise<void>;
+  audit(entityId: string, before: unknown, after: unknown): Promise<void>;
+}
 
 /** Dados de uma candidatura, já validados e com a chave Pix conferida. `document`: só dígitos. */
 export interface SellerApplicationData {
@@ -28,6 +46,10 @@ export interface SellerRepository {
   reapply(sellerId: string, data: SellerApplicationData): Promise<Seller>;
   /** A loja já configurou o frete? (a tabela de frete chega na T-018) */
   hasShipping(sellerId: string): Promise<boolean>;
+  /** Lojas numa situação, da candidatura mais antiga para a mais nova (AC-050). */
+  listByStatus(status: SellerStatus): Promise<SellerWithOwner[]>;
+  /** Transação de escrita do admin sobre uma loja. */
+  write<T>(work: (session: SellerWriteSession) => Promise<T>): Promise<T>;
 }
 
 export const SELLER_REPOSITORY = Symbol('SELLER_REPOSITORY');

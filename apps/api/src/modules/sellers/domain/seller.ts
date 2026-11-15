@@ -1,5 +1,6 @@
 // Loja da Vitrine (spec 02): regras puras, sem Nest nem banco.
 import type { PixKeyType } from '../../payments/domain/pix-key.js';
+import { InvalidStateTransitionError } from './seller-errors.js';
 
 export const SELLER_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'] as const;
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
@@ -64,4 +65,79 @@ export interface SellerChecklist {
 /** O que falta para a loja vender: dados (sempre ok depois da candidatura), chave Pix conferida e frete. */
 export function checklistOf(seller: Seller, hasShipping: boolean): SellerChecklist {
   return { store: true, pixKey: Boolean(seller.pixKey.verifiedAt), shipping: hasShipping };
+}
+
+// ── Decisões do admin (US-018, US-019) ───────────────────────────────────────
+
+export type SellerDecision =
+  | { kind: 'approve' }
+  | { kind: 'reject'; reason: string }
+  | { kind: 'suspend'; reason: string }
+  | { kind: 'reinstate' };
+
+export type SellerDecisionKind = SellerDecision['kind'];
+
+/** De onde cada decisão pode partir e aonde leva. O resto é INVALID_STATE_TRANSITION. */
+const TRANSITIONS: Record<SellerDecisionKind, { from: SellerStatus; to: SellerStatus }> = {
+  approve: { from: 'PENDING', to: 'APPROVED' },
+  reject: { from: 'PENDING', to: 'REJECTED' },
+  suspend: { from: 'APPROVED', to: 'SUSPENDED' },
+  reinstate: { from: 'SUSPENDED', to: 'APPROVED' },
+};
+
+/** Campos da loja que uma decisão do admin muda. */
+export interface SellerStatusChange {
+  status: SellerStatus;
+  approvedAt?: Date;
+  rejectedAt?: Date;
+  rejectionReason?: string;
+  suspendedAt?: Date | null;
+  suspensionReason?: string | null;
+}
+
+/** Aplica a decisão: devolve o que muda, ou recusa se a loja não está na situação de partida. */
+export function decide(seller: Pick<Seller, 'status'>, decision: SellerDecision, now: Date): SellerStatusChange {
+  const { from, to } = TRANSITIONS[decision.kind];
+  if (seller.status !== from) throw new InvalidStateTransitionError(decision.kind, seller.status);
+
+  switch (decision.kind) {
+    case 'approve':
+      return { status: to, approvedAt: now };
+    case 'reject':
+      return { status: to, rejectedAt: now, rejectionReason: decision.reason };
+    case 'suspend':
+      return { status: to, suspendedAt: now, suspensionReason: decision.reason };
+    case 'reinstate':
+      // A data da primeira aprovação fica; a suspensão sai (o histórico está na auditoria).
+      return { status: to, suspendedAt: null, suspensionReason: null };
+  }
+}
+
+// ── Comissão (US-020) ────────────────────────────────────────────────────────
+
+/** Comissão padrão da plataforma, em pontos-base (12%, RN-3). */
+export const DEFAULT_COMMISSION_BPS = 1200;
+export const MAX_COMMISSION_BPS = 10_000;
+
+/** A comissão que vale para a loja: a própria, ou a padrão. */
+export function effectiveCommissionBps(seller: Pick<Seller, 'commissionBps'>): number {
+  return seller.commissionBps ?? DEFAULT_COMMISSION_BPS;
+}
+
+/**
+ * O que vai para a trilha de auditoria: a situação, as decisões e a comissão.
+ * Nunca o CPF/CNPJ (a trilha não é cifrada) nem a chave Pix.
+ */
+export function auditViewOf(seller: Seller) {
+  return {
+    status: seller.status,
+    storeName: seller.storeName,
+    slug: seller.slug,
+    commissionBps: seller.commissionBps,
+    approvedAt: seller.approvedAt,
+    rejectedAt: seller.rejectedAt,
+    rejectionReason: seller.rejectionReason,
+    suspendedAt: seller.suspendedAt,
+    suspensionReason: seller.suspensionReason,
+  };
 }
