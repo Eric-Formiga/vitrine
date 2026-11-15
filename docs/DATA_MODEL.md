@@ -61,7 +61,7 @@ erDiagram
 ### Vendedores
 **sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `instagram`, `main_category_id` (categoria ativa), `logo_url`, `banner_url` (feature `vitrine`), `document_encrypted` (CPF/CNPJ cifrado com AES-256-GCM; chave em `SELLER_DOCUMENT_KEY`), `document_hash` (HMAC-SHA256 dos dígitos, **único**: uma loja por documento), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `pix_key_type` (`CPF`,`CNPJ`,`EMAIL`,`PHONE`,`EVP`), `pix_key` (destino dos repasses, ADR-0012), `pix_key_owner_name`, `pix_key_owner_document` (mascarado, como o Asaas devolve), `pix_key_verified_at` (a chave só é gravada depois de conferida), `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count` (feature `vitrine`), `applied_at`, `approved_at`, `rejected_at`, `rejection_reason`, `suspended_at`, `suspension_reason`.
 
-**shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents`, `handling_days`.
+**shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents` (nulo = sem frete grátis), `handling_days` (1 a 5). Os limites também são `CHECK` no banco; a loja substitui a configuração inteira a cada `PUT`.
 
 ### Catálogo
 **categories** — `id`, `parent_id`, `name`, `slug` (único na árvore inteira, inclusive entre arquivadas), `position`, `size_type` (`CLOTHING`, `SHOES`, `ONE_SIZE`: define a grade de tamanhos das variantes), `size_chart jsonb` (`{ columns, rows }`), `archived_at` (arquivada junto com as descendentes; nunca apagada).

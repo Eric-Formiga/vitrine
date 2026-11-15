@@ -77,6 +77,30 @@ export class SellerNotFoundError extends DomainError {
   }
 }
 
+/** A pessoa tem o papel seller, mas a loja não está aprovada (ex.: suspensa). Spec 01 H3. */
+export class SellerNotActiveError extends DomainError {
+  readonly code = 'SELLER_NOT_ACTIVE';
+  override readonly status = 403;
+
+  constructor(status: string | null) {
+    super(
+      status === 'SUSPENDED'
+        ? 'Sua loja está suspensa. Fale com a equipe da Vitrine para entender o motivo.'
+        : 'Sua loja não está aprovada para vender.',
+      status ? { sellerStatus: status } : undefined,
+    );
+  }
+}
+
+export class ShippingNotConfiguredError extends DomainError {
+  readonly code = 'SHIPPING_NOT_CONFIGURED';
+  override readonly status = 404;
+
+  constructor() {
+    super('A loja ainda não configurou o frete.');
+  }
+}
+
 export class SellerApplicationNotFoundError extends DomainError {
   readonly code = 'SELLER_APPLICATION_NOT_FOUND';
   override readonly status = 404;

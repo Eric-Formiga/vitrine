@@ -12,7 +12,8 @@ import type {
   SellerWithOwner,
   SellerWriteSession,
 } from '../application/seller.repository.js';
-import type { Seller, SellerStatus } from '../domain/seller.js';
+import type { Seller, SellerStatus, VerifiedPixKey } from '../domain/seller.js';
+import type { ShippingSettings } from '../domain/shipping.js';
 import { DocumentTakenError, SellerApplicationExistsError, SellerSlugTakenError } from '../domain/seller-errors.js';
 
 type Row = Prisma.SellerGetPayload<object>;
@@ -49,8 +50,14 @@ export class PrismaSellerRepository implements SellerRepository {
         const row = await tx.seller.findUnique({ where: { id }, include: WITH_OWNER });
         return row ? this.toSellerWithOwner(row) : null;
       },
-      update: async (id: string, changes: SellerChanges) =>
-        this.toSellerWithOwner(await tx.seller.update({ where: { id }, data: changes, include: WITH_OWNER })),
+      update: async (id: string, { pixKey, ...changes }: SellerChanges) =>
+        this.toSellerWithOwner(
+          await tx.seller.update({
+            where: { id },
+            data: { ...changes, ...(pixKey ? pixKeyColumns(pixKey) : {}) },
+            include: WITH_OWNER,
+          }),
+        ),
       grantRole: (userId, role) => this.userRoles.grant(tx, userId, role),
       audit: (entityId: string, before: unknown, after: unknown) =>
         this.trail.record(tx, { entityType: 'seller', entityId, before, after }),
@@ -102,9 +109,23 @@ export class PrismaSellerRepository implements SellerRepository {
     return this.toSeller(row);
   }
 
-  // A tabela de frete chega na T-018; até lá, nenhuma loja tem frete configurado.
-  hasShipping(): Promise<boolean> {
-    return Promise.resolve(false);
+  async hasShipping(sellerId: string): Promise<boolean> {
+    return (await this.prisma.shippingSettings.count({ where: { sellerId } })) > 0;
+  }
+
+  async findShipping(sellerId: string): Promise<ShippingSettings | null> {
+    const row = await this.prisma.shippingSettings.findUnique({ where: { sellerId } });
+    return row ? toShipping(row) : null;
+  }
+
+  async saveShipping(sellerId: string, settings: ShippingSettings): Promise<ShippingSettings> {
+    const data = { ...settings, rates: settings.rates as unknown as Prisma.InputJsonObject };
+    const row = await this.prisma.shippingSettings.upsert({
+      where: { sellerId },
+      create: { sellerId, ...data },
+      update: data,
+    });
+    return toShipping(row);
   }
 
   private columns(data: SellerApplicationData) {
@@ -118,11 +139,7 @@ export class PrismaSellerRepository implements SellerRepository {
       mainCategoryId: data.mainCategoryId,
       documentEncrypted: sealed.encrypted,
       documentHash: sealed.hash,
-      pixKeyType: data.pixKey.type,
-      pixKey: data.pixKey.key,
-      pixKeyOwnerName: data.pixKey.ownerName,
-      pixKeyOwnerDocument: data.pixKey.ownerDocument,
-      pixKeyVerifiedAt: data.pixKey.verifiedAt,
+      ...pixKeyColumns(data.pixKey),
     };
   }
 
@@ -153,6 +170,25 @@ export class PrismaSellerRepository implements SellerRepository {
       suspensionReason: row.suspensionReason,
     };
   }
+}
+
+function pixKeyColumns(pixKey: VerifiedPixKey) {
+  return {
+    pixKeyType: pixKey.type,
+    pixKey: pixKey.key,
+    pixKeyOwnerName: pixKey.ownerName,
+    pixKeyOwnerDocument: pixKey.ownerDocument,
+    pixKeyVerifiedAt: pixKey.verifiedAt,
+  };
+}
+
+function toShipping(row: Prisma.ShippingSettingsGetPayload<object>): ShippingSettings {
+  return {
+    originZip: row.originZip,
+    rates: row.rates as ShippingSettings['rates'],
+    freeShippingThresholdCents: row.freeShippingThresholdCents,
+    handlingDays: row.handlingDays,
+  };
 }
 
 /**

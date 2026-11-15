@@ -1,13 +1,14 @@
 import type { Role } from '../../../shared/auth/roles.decorator.js';
 import type { Seller, SellerStatus, SellerStatusChange, VerifiedPixKey } from '../domain/seller.js';
+import type { ShippingSettings } from '../domain/shipping.js';
 
 /** A loja com a conta dona, como o admin vê (AC-050). */
 export interface SellerWithOwner extends Seller {
   owner: { id: string; name: string | null; email: string };
 }
 
-/** O que dá para mudar numa loja dentro de uma escrita do admin. */
-export type SellerChanges = Partial<SellerStatusChange> & { commissionBps?: number | null };
+/** O que dá para mudar numa loja dentro de uma escrita (admin ou a própria loja). */
+export type SellerChanges = Partial<SellerStatusChange> & { commissionBps?: number | null; pixKey?: VerifiedPixKey };
 
 /** Uma transação sobre UMA loja: tudo aqui entra junto, ou nada entra. */
 export interface SellerWriteSession {
@@ -44,8 +45,11 @@ export interface SellerRepository {
   createApplication(data: SellerApplicationData): Promise<Seller>;
   /** Loja rejeitada volta para análise com os dados novos (AC-047). */
   reapply(sellerId: string, data: SellerApplicationData): Promise<Seller>;
-  /** A loja já configurou o frete? (a tabela de frete chega na T-018) */
+  /** A loja já configurou o frete? */
   hasShipping(sellerId: string): Promise<boolean>;
+  findShipping(sellerId: string): Promise<ShippingSettings | null>;
+  /** Cria ou substitui a configuração de frete da loja (AC-057). */
+  saveShipping(sellerId: string, settings: ShippingSettings): Promise<ShippingSettings>;
   /** Lojas numa situação, da candidatura mais antiga para a mais nova (AC-050). */
   listByStatus(status: SellerStatus): Promise<SellerWithOwner[]>;
   /** Transação de escrita do admin sobre uma loja. */

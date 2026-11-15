@@ -16,7 +16,7 @@ Documentação interativa gerada automaticamente em `/docs` (Swagger UI) a parti
 | Concorrência | `ETag`/`If-Match` em edição de produto (evitar sobrescrita) |
 | Rate limit | headers `RateLimit-*`; 429 com `Retry-After` |
 
-Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `SELLER_NOT_FOUND`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
+Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE` (403, a pessoa tem o papel seller mas a loja está suspensa), `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `SELLER_NOT_FOUND`, `SHIPPING_NOT_CONFIGURED`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
 
 Rotas `/admin/*` respondem 404 (e não 403) para quem não é admin, e toda escrita bem-sucedida grava `audit_logs`.
 
@@ -76,8 +76,8 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 |---|---|---|---|
 | GET / POST | `/seller/application` | 👤 | Candidatura e situação da própria loja (qualquer pessoa logada). O POST confere o titular da chave Pix no Asaas antes de gravar |
 | GET / PATCH | `/seller/me` | 🏪 | Dados da loja |
-| GET / PUT | `/seller/pix-key` | 🏪 | Chave Pix de recebimento; o PUT confere o titular no Asaas (`PIX_KEY_NOT_FOUND`, `PIX_KEY_OWNER_MISMATCH`) |
-| PUT | `/seller/shipping` | 🏪 | Configuração de frete |
+| GET / PUT | `/seller/pix-key` | 🏪 | Chave Pix de recebimento; o PUT confere o titular no Asaas com os mesmos erros da candidatura (`PIX_KEY_NOT_FOUND`, `PIX_KEY_OWNER_MISMATCH`, `PIX_KEY_CHECK_UNAVAILABLE`); se falhar, a chave antiga continua. Auditado (`seller.pix_key_change`) |
+| GET / PUT | `/seller/shipping` | 🏪 | Frete da loja: `originZip` (8 dígitos), `rates { N, NE, CO, SE, S }` em centavos, `freeShippingThresholdCents` (opcional, > 0), `handlingDays` (1 a 5). O PUT substitui tudo; o GET sem configuração responde 404 `SHIPPING_NOT_CONFIGURED` |
 | GET / POST | `/seller/products` | 🏪 | Listar/criar |
 | GET / PATCH / DELETE | `/seller/products/{id}` | 🏪 | Detalhe/editar/arquivar |
 | POST | `/seller/products/{id}/publish` | 🏪 | Publicar |

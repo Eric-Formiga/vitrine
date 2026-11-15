@@ -111,11 +111,29 @@ model Seller {
   createdAt           DateTime     @default(now()) @map("created_at")
   updatedAt           DateTime     @updatedAt @map("updated_at")
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  mainCategory Category @relation(fields: [mainCategoryId], references: [id], onDelete: Restrict)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  mainCategory Category          @relation(fields: [mainCategoryId], references: [id], onDelete: Restrict)
+  shipping     ShippingSettings?
 
   @@index([status, appliedAt])
   @@map("sellers")
+}
+
+// Frete da loja (spec 02): uma configuração por loja. O cálculo no carrinho é da Fase 2.
+// Os limites (CEP, valores ≥ 0, prazo de 1 a 5 dias) também são CHECK no banco.
+model ShippingSettings {
+  sellerId                   String   @id @map("seller_id") @db.Uuid
+  originZip                  String   @map("origin_zip") @db.Char(8)
+  /// Centavos por região: { "N": 2990, "NE": 2490, "CO": 2290, "SE": 1590, "S": 1990 }
+  rates                      Json
+  freeShippingThresholdCents Int?     @map("free_shipping_threshold_cents")
+  handlingDays               Int      @map("handling_days")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("shipping_settings")
 }
 
 // Quem fez o quê na área de admin, com o estado antes e depois (RF-ADM-5, spec 10).

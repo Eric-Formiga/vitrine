@@ -1,7 +1,7 @@
 | confirmada | confirmado pelo dono do produto em 14/11/2026; o roadmap foi atualizado || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 || confirmada | confirmado pelo dono do produto em 14/11/2026 |# Spec: Vendedores — candidatura, chave Pix conferida e gestão das lojas
 
 > feature: vendedores
-> status: rascunho
+> status: auditada
 
 <!--
   Como ler este arquivo (o formato é verificado por `onp-spec audit`):
