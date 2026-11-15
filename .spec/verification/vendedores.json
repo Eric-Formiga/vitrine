@@ -1,11 +1,11 @@
 {
   "feature": "vendedores",
-  "timestamp": "2026-11-15T00:44:17.321Z",
-  "gitRev": "a18f990",
+  "timestamp": "2026-11-15T15:18:36.838Z",
+  "gitRev": "3866895",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 121,
+  "testsParsed": 138,
   "results": {
     "AC-043": {
       "status": "pass",
@@ -40,6 +40,31 @@
     "AC-049": {
       "status": "pass",
       "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-049: a pessoa acompanha a própria candidatura @spec:AC-049 AC-049: a pessoa acompanha a própria candidatura @spec:AC-049",
+      "method": "vitest-json"
+    },
+    "AC-050": {
+      "status": "pass",
+      "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-050: admin lista as lojas de uma situação, da mais antiga para a mais nova @spec:AC-050 AC-050: admin lista as lojas de uma situação, da mais antiga para a mais nova @spec:AC-050",
+      "method": "vitest-json"
+    },
+    "AC-051": {
+      "status": "pass",
+      "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-051: aprovar dá o papel de vendedor já na próxima chamada da dona @spec:AC-051 AC-051: aprovar dá o papel de vendedor já na próxima chamada da dona @spec:AC-051",
+      "method": "vitest-json"
+    },
+    "AC-052": {
+      "status": "pass",
+      "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-052: rejeitar exige motivo, e decisão fora de hora é recusada @spec:AC-052 AC-052: rejeitar exige motivo, e decisão fora de hora é recusada @spec:AC-052",
+      "method": "vitest-json"
+    },
+    "AC-053": {
+      "status": "pass",
+      "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-053: suspender e reativar, sempre com registro @spec:AC-053 AC-053: suspender e reativar, sempre com registro @spec:AC-053",
+      "method": "vitest-json"
+    },
+    "AC-054": {
+      "status": "pass",
+      "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-054: comissão própria da loja, ou de volta à padrão @spec:AC-054 AC-054: comissão própria da loja, ou de volta à padrão @spec:AC-054",
       "method": "vitest-json"
     }
   },
