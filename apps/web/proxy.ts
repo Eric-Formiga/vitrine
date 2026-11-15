@@ -3,7 +3,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 // Áreas que exigem login. O resto do site (loja, busca, lojas) é público (AC-010).
 // Casa /conta e /conta/..., mas não /contato: '/conta(.*)' pegaria qualquer prefixo.
-const isPrivateRoute = createRouteMatcher([/^\/(conta|seller|admin)(\/|$)/]);
+// /vender e /minha-loja são as telas do vendedor (AC-058, AC-059).
+const isPrivateRoute = createRouteMatcher([/^\/(conta|vender|minha-loja|seller|admin)(\/|$)/]);
 
 type SessionReader = () => Promise<{ userId: string | null }>;
 

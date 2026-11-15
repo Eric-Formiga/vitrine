@@ -1,11 +1,11 @@
 {
   "feature": "vendedores",
-  "timestamp": "2026-11-15T15:23:46.260Z",
-  "gitRev": "f54eaf1",
+  "timestamp": "2026-11-15T15:29:53.019Z",
+  "gitRev": "b9ea5cf",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 138,
+  "testsParsed": 154,
   "results": {
     "AC-043": {
       "status": "pass",
@@ -65,6 +65,16 @@
     "AC-054": {
       "status": "pass",
       "testName": "US-018 a US-020 — Admin decide, suspende e define a comissão das lojas AC-054: comissão própria da loja, ou de volta à padrão @spec:AC-054 AC-054: comissão própria da loja, ou de volta à padrão @spec:AC-054",
+      "method": "vitest-json"
+    },
+    "AC-058": {
+      "status": "pass",
+      "testName": "US-022 — As telas do vendedor exigem login AC-059: /minha-loja e /vender sem login levam ao login guardando o endereço de volta @spec:AC-059 @spec:AC-058 AC-059: /minha-loja e /vender sem login levam ao login guardando o endereço de volta @spec:AC-059 @spec:AC-058",
+      "method": "vitest-json"
+    },
+    "AC-059": {
+      "status": "pass",
+      "testName": "US-022 — As telas do vendedor exigem login AC-059: /minha-loja e /vender sem login levam ao login guardando o endereço de volta @spec:AC-059 @spec:AC-058 AC-059: /minha-loja e /vender sem login levam ao login guardando o endereço de volta @spec:AC-059 @spec:AC-058",
       "method": "vitest-json"
     }
   },

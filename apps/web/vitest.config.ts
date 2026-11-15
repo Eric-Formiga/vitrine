@@ -1,6 +1,10 @@
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // O mesmo atalho `@/` do tsconfig, para os testes renderizarem componentes que usam os outros.
+  resolve: { alias: [{ find: /^@\//, replacement: fileURLToPath(new URL('./', import.meta.url)) }] },
   test: {
     name: 'web',
     environment: 'node',

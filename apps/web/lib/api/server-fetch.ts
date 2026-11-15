@@ -1,8 +1,20 @@
 import 'server-only';
 
 import { auth } from '@clerk/nextjs/server';
+import { type ApiClient, createApiClient } from '@vitrine/api-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333';
+
+// Cliente tipado com o token da sessão, para as rotas de quem está logado.
+// Os tipos vêm do contrato OpenAPI (ADR-0008), como no `publicApi`.
+export async function serverApi(): Promise<ApiClient> {
+  const { getToken } = await auth();
+  const token = await getToken();
+  return createApiClient(API_URL, {
+    headers: token ? { authorization: `Bearer ${token}` } : {},
+    cache: 'no-store',
+  });
+}
 
 export class ApiError extends Error {
   constructor(
