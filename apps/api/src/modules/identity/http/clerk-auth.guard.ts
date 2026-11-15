@@ -7,22 +7,21 @@ import { IS_PUBLIC } from '../../../shared/auth/public.decorator.js';
 import { ENV } from '../../../shared/config/config.module.js';
 import type { Env } from '../../../shared/config/env.js';
 import { ProvisionUserUseCase } from '../application/provision-user.use-case.js';
+import { SessionUserCache } from '../application/session-user-cache.js';
 import type { CurrentUserData } from './current-user.decorator.js';
 
-const CACHE_TTL_MS = 60_000;
 const UNAUTHORIZED = 'É preciso entrar para acessar este recurso.';
 
 // Guard global: toda rota exige login, a não ser as marcadas com @Public() (AC-007).
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
-  // Cache curto para não ir ao banco a cada requisição (spec 01). Os papéis podem levar
-  // até 60 s para refletir uma mudança; a invalidação explícita chega na Fase 1.
-  private readonly cache = new Map<string, { user: CurrentUserData; expiresAt: number }>();
-
+  // Cache curto (60 s) para não ir ao banco a cada requisição (spec 01). Quem muda papéis
+  // usa o UserRolesService, que apaga a entrada da pessoa (AC-051).
   constructor(
     private readonly reflector: Reflector,
     @Inject(ENV) private readonly env: Env,
     private readonly provisionUser: ProvisionUserUseCase,
+    private readonly cache: SessionUserCache,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -53,13 +52,13 @@ export class ClerkAuthGuard implements CanActivate {
   // O token só diz QUEM é; o que a pessoa pode fazer vem sempre do banco (AC-008).
   private async loadUser(clerkId: string): Promise<CurrentUserData> {
     const cached = this.cache.get(clerkId);
-    if (cached && cached.expiresAt > Date.now()) return cached.user;
+    if (cached) return cached;
 
     const user = await this.provisionUser.execute(clerkId);
     if (!user) throw new UnauthorizedException(UNAUTHORIZED);
 
     const current: CurrentUserData = { id: user.id, clerkId: user.clerkId, email: user.email, name: user.name, roles: user.roles };
-    this.cache.set(clerkId, { user: current, expiresAt: Date.now() + CACHE_TTL_MS });
+    this.cache.set(current);
     return current;
   }
 }

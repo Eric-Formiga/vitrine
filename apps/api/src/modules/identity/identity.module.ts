@@ -5,8 +5,10 @@ import { RolesGuard } from '../../shared/auth/roles.guard.js';
 import { CLERK_GATEWAY, type ClerkGateway } from './application/clerk-gateway.port.js';
 import { GrantAdminUseCase } from './application/grant-admin.use-case.js';
 import { ProvisionUserUseCase } from './application/provision-user.use-case.js';
+import { SessionUserCache } from './application/session-user-cache.js';
 import { SyncClerkUserUseCase } from './application/sync-clerk-user.use-case.js';
 import { USER_REPOSITORY } from './application/user.repository.js';
+import { UserRolesService } from './application/user-roles.service.js';
 import { ClerkAuthGuard } from './http/clerk-auth.guard.js';
 import { ClerkWebhookController } from './http/clerk-webhook.controller.js';
 import { MeController } from './http/me.controller.js';
@@ -23,10 +25,14 @@ export class IdentityModule {
   static forRoot({ clerkGateway }: IdentityModuleOptions = {}): DynamicModule {
     return {
       module: IdentityModule,
+      // Global: outros módulos dão papéis (UserRolesService) sem reimportar o forRoot.
+      global: true,
       controllers: [ClerkWebhookController, MeController],
       providers: [
         SyncClerkUserUseCase,
         ProvisionUserUseCase,
+        SessionUserCache,
+        UserRolesService,
         { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
         clerkGateway
           ? { provide: CLERK_GATEWAY, useValue: clerkGateway }
@@ -36,7 +42,7 @@ export class IdentityModule {
         { provide: APP_GUARD, useClass: ClerkAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
       ],
-      exports: [GrantAdminUseCase],
+      exports: [GrantAdminUseCase, UserRolesService],
     };
   }
 }

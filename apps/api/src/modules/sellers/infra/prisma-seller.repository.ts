@@ -1,20 +1,65 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Prisma } from '../../../generated/prisma/client.js';
+import { AuditTrail } from '../../../shared/audit/audit-trail.js';
 import { PrismaService } from '../../../shared/prisma/prisma.service.js';
+import { UserRolesService } from '../../identity/application/user-roles.service.js';
 import { DOCUMENT_VAULT, type DocumentVault } from '../application/document-vault.port.js';
-import type { SellerApplicationData, SellerRepository } from '../application/seller.repository.js';
-import type { Seller } from '../domain/seller.js';
+import type {
+  SellerApplicationData,
+  SellerChanges,
+  SellerRepository,
+  SellerWithOwner,
+  SellerWriteSession,
+} from '../application/seller.repository.js';
+import type { Seller, SellerStatus } from '../domain/seller.js';
 import { DocumentTakenError, SellerApplicationExistsError, SellerSlugTakenError } from '../domain/seller-errors.js';
 
 type Row = Prisma.SellerGetPayload<object>;
+
+const WITH_OWNER = { user: { select: { id: true, name: true, email: true } } } as const;
+type RowWithOwner = Prisma.SellerGetPayload<{ include: typeof WITH_OWNER }>;
 
 @Injectable()
 export class PrismaSellerRepository implements SellerRepository {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(DOCUMENT_VAULT) private readonly vault: DocumentVault,
+    private readonly trail: AuditTrail,
+    private readonly userRoles: UserRolesService,
   ) {}
+
+  async listByStatus(status: SellerStatus): Promise<SellerWithOwner[]> {
+    const rows = await this.prisma.seller.findMany({
+      where: { status },
+      include: WITH_OWNER,
+      orderBy: [{ appliedAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map((row) => this.toSellerWithOwner(row));
+  }
+
+  write<T>(work: (session: SellerWriteSession) => Promise<T>): Promise<T> {
+    return this.prisma.$transaction((tx) => work(this.session(tx)));
+  }
+
+  private session(tx: Prisma.TransactionClient): SellerWriteSession {
+    return {
+      lockById: async (id: string) => {
+        await tx.$executeRaw`SELECT 1 FROM sellers WHERE id = ${id}::uuid FOR UPDATE`;
+        const row = await tx.seller.findUnique({ where: { id }, include: WITH_OWNER });
+        return row ? this.toSellerWithOwner(row) : null;
+      },
+      update: async (id: string, changes: SellerChanges) =>
+        this.toSellerWithOwner(await tx.seller.update({ where: { id }, data: changes, include: WITH_OWNER })),
+      grantRole: (userId, role) => this.userRoles.grant(tx, userId, role),
+      audit: (entityId: string, before: unknown, after: unknown) =>
+        this.trail.record(tx, { entityType: 'seller', entityId, before, after }),
+    };
+  }
+
+  private toSellerWithOwner({ user, ...row }: RowWithOwner): SellerWithOwner {
+    return { ...this.toSeller(row), owner: user };
+  }
 
   async findByUserId(userId: string): Promise<Seller | null> {
     const row = await this.prisma.seller.findUnique({ where: { userId } });

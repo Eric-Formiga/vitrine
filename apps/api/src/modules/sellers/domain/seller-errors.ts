@@ -44,6 +44,39 @@ export class PixKeyCheckUnavailableError extends DomainError {
   }
 }
 
+const DECISION_LABEL = {
+  approve: 'aprovar',
+  reject: 'rejeitar',
+  suspend: 'suspender',
+  reinstate: 'reativar',
+} as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: 'em análise',
+  APPROVED: 'aprovada',
+  REJECTED: 'rejeitada',
+  SUSPENDED: 'suspensa',
+};
+
+/** A decisão não vale para a situação atual da loja (ex.: aprovar uma loja já rejeitada). */
+export class InvalidStateTransitionError extends DomainError {
+  readonly code = 'INVALID_STATE_TRANSITION';
+  override readonly status = 422;
+
+  constructor(decision: keyof typeof DECISION_LABEL, current: string) {
+    super(`Não dá para ${DECISION_LABEL[decision]} uma loja ${STATUS_LABEL[current] ?? current}.`, { currentStatus: current });
+  }
+}
+
+export class SellerNotFoundError extends DomainError {
+  readonly code = 'SELLER_NOT_FOUND';
+  override readonly status = 404;
+
+  constructor() {
+    super('Loja não encontrada.');
+  }
+}
+
 export class SellerApplicationNotFoundError extends DomainError {
   readonly code = 'SELLER_APPLICATION_NOT_FOUND';
   override readonly status = 404;
