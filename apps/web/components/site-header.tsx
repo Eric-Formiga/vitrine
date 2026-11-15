@@ -16,7 +16,10 @@ async function DepartmentsMenu() {
 // "Vender", ou "Minha loja" para quem já tem candidatura (GET /v1/seller/application).
 // Se a API não responder, mostra "Vender": a página /vender leva a /minha-loja quem já tem loja.
 async function SellerLink() {
-  const { href, label } = await sellerNavLink(await serverApi());
+  return <NavLink {...await sellerNavLink(await serverApi())} />;
+}
+
+function NavLink({ href, label }: { href: string; label: string }) {
   return (
     <Button asChild variant="ghost" size="sm">
       <Link href={href}>{label}</Link>
@@ -45,7 +48,10 @@ export function SiteHeader() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
-              <SellerLink />
+              {/* Suspense próprio: a conta e o avatar não esperam a chamada à API. */}
+              <Suspense fallback={<NavLink href="/vender" label="Vender" />}>
+                <SellerLink />
+              </Suspense>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/conta">Minha conta</Link>
               </Button>
