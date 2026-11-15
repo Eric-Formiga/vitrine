@@ -601,6 +601,294 @@
         ]
       }
     },
+    "/v1/seller/pix-key": {
+      "get": {
+        "description": "Com o titular conferido no Asaas.",
+        "operationId": "SellerAreaController_pixKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedPixKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Chave Pix de recebimento",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "put": {
+        "description": "Confere o titular no Asaas, como na candidatura. Se falhar, a chave antiga continua: 422 PIX_KEY_OWNER_MISMATCH ou PIX_KEY_NOT_FOUND; 503 PIX_KEY_CHECK_UNAVAILABLE.",
+        "operationId": "SellerAreaController_replacePixKey",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PixKeyInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedPixKey"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Trocar a chave Pix",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
+    "/v1/seller/shipping": {
+      "get": {
+        "description": "404 SHIPPING_NOT_CONFIGURED se ainda não foi feita.",
+        "operationId": "SellerAreaController_shippingSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Configuração de frete",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "put": {
+        "description": "Substitui a configuração inteira.",
+        "operationId": "SellerAreaController_configureShipping",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShippingSettingsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Configurar o frete",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
     "/v1/admin/sellers": {
       "get": {
         "description": "Da candidatura mais antiga para a mais nova, com o CPF/CNPJ completo.",
@@ -1721,6 +2009,139 @@
           "rejection",
           "suspension",
           "checklist"
+        ],
+        "additionalProperties": false
+      },
+      "ShippingSettingsInput": {
+        "type": "object",
+        "properties": {
+          "originZip": {
+            "description": "CEP de onde a loja posta, com ou sem hífen.",
+            "type": "string"
+          },
+          "rates": {
+            "type": "object",
+            "properties": {
+              "N": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "NE": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "CO": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "SE": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "S": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "N",
+              "NE",
+              "CO",
+              "SE",
+              "S"
+            ],
+            "additionalProperties": false,
+            "description": "Centavos por região de destino (0 = grátis)."
+          },
+          "freeShippingThresholdCents": {
+            "description": "Frete grátis a partir deste valor do pedido (centavos). Omitido ou null: nunca grátis.",
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "handlingDays": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Dias úteis até a postagem (1 a 5)."
+          }
+        },
+        "required": [
+          "originZip",
+          "rates",
+          "freeShippingThresholdCents",
+          "handlingDays"
+        ],
+        "additionalProperties": false
+      },
+      "ShippingSettings": {
+        "type": "object",
+        "properties": {
+          "originZip": {
+            "type": "string",
+            "description": "8 dígitos."
+          },
+          "rates": {
+            "type": "object",
+            "properties": {
+              "N": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "NE": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "CO": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "SE": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "S": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "N",
+              "NE",
+              "CO",
+              "SE",
+              "S"
+            ],
+            "additionalProperties": false
+          },
+          "freeShippingThresholdCents": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "handlingDays": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "originZip",
+          "rates",
+          "freeShippingThresholdCents",
+          "handlingDays"
         ],
         "additionalProperties": false
       },

@@ -114,6 +114,7 @@ export const shippingSettingsInputSchema = z
     originZip: z
       .string({ error: 'Informe o CEP de origem.' })
       .transform(zipDigits)
+      .pipe(z.string())
       .describe('CEP de onde a loja posta, com ou sem hífen.'),
     rates: regionRates((region) => z.int({ error: `Informe o frete para a região ${region}, em centavos.` }))
       .strict()
@@ -122,6 +123,7 @@ export const shippingSettingsInputSchema = z
       .int({ error: 'Use um valor em centavos, ou null.' })
       .nullish()
       .transform((value) => value ?? null)
+      .pipe(z.int().nullable())
       .describe('Frete grátis a partir deste valor do pedido (centavos). Omitido ou null: nunca grátis.'),
     handlingDays: z
       .int({ error: 'Informe o prazo de postagem, em dias úteis.' })
