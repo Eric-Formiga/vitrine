@@ -1,8 +1,8 @@
 {
   "feature": "vendedores",
-  "timestamp": "2026-11-15T15:18:36.838Z",
-  "gitRev": "3866895",
-  "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "timestamp": "2026-11-15T15:23:46.260Z",
+  "gitRev": "f54eaf1",
+  "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
   "testsParsed": 138,

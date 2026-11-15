@@ -22,6 +22,8 @@ Thumbs.db
 # onp-spec: artefatos locais
 # - relatório bruto do Vitest (a prova versionada é .spec/verification/<feature>.json)
 .spec/verification/vitest-report.json
+# - carimbo do relatório (impressão digital do código da última rodada, ver scripts/spec-tests.mjs)
+.spec/verification/vitest-report.stamp.json
 # - histórico de sinais: muda a cada audit e geraria conflito entre branches
 .spec/verification/sinais.json
 # - plano de execução gerado (regenere com `onp-spec plano <feature>`)
