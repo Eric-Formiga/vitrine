@@ -5,10 +5,23 @@ import { Suspense } from 'react';
 import { CategoryMenu } from '@/components/category-menu';
 import { Button } from '@/components/ui/button';
 import { loadDepartments } from '@/lib/api/categories';
+import { sellerNavLink } from '@/lib/api/seller';
+import { serverApi } from '@/lib/api/server-fetch';
 
 // Busca os departamentos no servidor. Fica em Suspense: a página não espera o menu.
 async function DepartmentsMenu() {
   return <CategoryMenu departments={await loadDepartments()} />;
+}
+
+// "Vender", ou "Minha loja" para quem já tem candidatura (GET /v1/seller/application).
+// Se a API não responder, mostra "Vender": a página /vender leva a /minha-loja quem já tem loja.
+async function SellerLink() {
+  const { href, label } = await sellerNavLink(await serverApi());
+  return (
+    <Button asChild variant="ghost" size="sm">
+      <Link href={href}>{label}</Link>
+    </Button>
+  );
 }
 
 export function SiteHeader() {
@@ -32,6 +45,7 @@ export function SiteHeader() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
+              <SellerLink />
               <Button asChild variant="ghost" size="sm">
                 <Link href="/conta">Minha conta</Link>
               </Button>

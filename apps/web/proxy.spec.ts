@@ -39,3 +39,24 @@ describe('US-004 — O site protege as áreas privadas', () => {
     expect(await abrir('/conta', comSessao)).toBeUndefined();
   });
 });
+
+describe('US-022 — As telas do vendedor exigem login', () => {
+  // Dado: um visitante sem sessão
+  // Quando: ele abre /minha-loja (ou /vender)
+  // Então: vai para o login, como as outras áreas privadas
+  it('AC-059: /minha-loja e /vender sem login levam ao login guardando o endereço de volta @spec:AC-059 @spec:AC-058', async () => {
+    for (const path of ['/minha-loja', '/vender']) {
+      const res = await abrir(path);
+
+      expect(res?.status, path).toBe(307);
+      const destino = new URL(res!.headers.get('location')!);
+      expect(destino.pathname).toBe('/sign-in');
+      expect(destino.searchParams.get('redirect_url')).toBe(`http://localhost:3000${path}`);
+    }
+  });
+
+  it('AC-059: logado, a pessoa abre /minha-loja e /vender @spec:AC-059 @spec:AC-058', async () => {
+    expect(await abrir('/minha-loja', comSessao)).toBeUndefined();
+    expect(await abrir('/vender', comSessao)).toBeUndefined();
+  });
+});
