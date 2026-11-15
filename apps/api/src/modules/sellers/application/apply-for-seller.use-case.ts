@@ -1,20 +1,18 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { slugify } from '../../../shared/text/slugify.js';
-import { PAYMENT_GATEWAY, type PaymentGateway } from '../../payments/application/payment-gateway.port.js';
-import { PixKeyNotFoundError } from '../../payments/domain/payment-errors.js';
-import { assertPixKeyOwner, type PixKey } from '../../payments/domain/pix-key.js';
-import { applicationBlock, type Seller, type VerifiedPixKey } from '../domain/seller.js';
+import type { PixKey } from '../../payments/domain/pix-key.js';
+import { applicationBlock, type Seller } from '../domain/seller.js';
 import {
   DocumentTakenError,
   mainCategoryNotFound,
-  PixKeyCheckUnavailableError,
   SellerApplicationExistsError,
   SellerSlugTakenError,
   slugRequired,
 } from '../domain/seller-errors.js';
 import { taxIdDigits } from '../domain/tax-id.js';
 import { DOCUMENT_VAULT, type DocumentVault } from './document-vault.port.js';
+import { PixKeyVerifier } from './pix-key-verifier.js';
 import { SELLER_REPOSITORY, type SellerRepository } from './seller.repository.js';
 
 export interface SellerApplicationInput {
@@ -35,12 +33,10 @@ export interface SellerApplicationInput {
 // é externa e pode falhar. Nada é gravado sem a chave Pix conferida (Q-007).
 @Injectable()
 export class ApplyForSellerUseCase {
-  private readonly logger = new Logger('Candidaturas');
-
   constructor(
     @Inject(SELLER_REPOSITORY) private readonly sellers: SellerRepository,
     @Inject(DOCUMENT_VAULT) private readonly vault: DocumentVault,
-    @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    private readonly pixKeys: PixKeyVerifier,
   ) {}
 
   async execute(input: SellerApplicationInput): Promise<Seller> {
@@ -62,7 +58,7 @@ export class ApplyForSellerUseCase {
     if (conflicts.documentTaken) throw new DocumentTakenError();
     if (conflicts.slugTaken) throw new SellerSlugTakenError(slug);
 
-    const pixKey = await this.verifyPixKey(input.pixKey, document);
+    const pixKey = await this.pixKeys.verify(input.pixKey, document);
     const data = {
       userId: input.userId,
       storeName: input.storeName,
@@ -74,23 +70,5 @@ export class ApplyForSellerUseCase {
       pixKey,
     };
     return existing ? this.sellers.reapply(existing.id, data) : this.sellers.createApplication(data);
-  }
-
-  /**
-   * Consulta o titular no Asaas e confere com o documento da loja (ADR-0012). Chave
-   * inexistente e titular diferente passam como estão (422); qualquer outra falha do
-   * provedor vira "tente depois" (503), sem gravar nada.
-   */
-  async verifyPixKey(pixKey: PixKey, document: string): Promise<VerifiedPixKey> {
-    let owner;
-    try {
-      owner = await this.gateway.lookupPixKey(pixKey);
-    } catch (error) {
-      if (error instanceof PixKeyNotFoundError) throw error;
-      this.logger.warn({ err: error, msg: 'conferência de chave Pix indisponível' });
-      throw new PixKeyCheckUnavailableError();
-    }
-    assertPixKeyOwner(owner, document);
-    return { ...pixKey, ownerName: owner.name, ownerDocument: owner.maskedDocument, verifiedAt: new Date() };
   }
 }

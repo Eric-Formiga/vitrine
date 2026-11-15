@@ -14,6 +14,8 @@ export const CPF_CARLA = '39053344705';
 export const CHAVE_DA_ANA: PixKey = { type: 'EMAIL', key: 'ana@atelie.dev.br' };
 export const CHAVE_DO_BRUNO: PixKey = { type: 'PHONE', key: '11988887777' };
 export const CHAVE_DA_CARLA: PixKey = { type: 'CPF', key: CPF_CARLA };
+/** Segunda chave da Ana (o próprio CPF), para a troca de chave (AC-056). */
+export const CHAVE_CPF_DA_ANA: PixKey = { type: 'CPF', key: CPF_ANA };
 export const CHAVE_INEXISTENTE: PixKey = { type: 'EVP', key: '00000000-0000-0000-0000-000000000000' };
 
 /**
@@ -27,6 +29,7 @@ export class FakePixDirectory implements Pick<PaymentGateway, 'lookupPixKey'> {
     [CHAVE_DA_ANA.key, { name: 'Ana Souza', maskedDocument: '***.444.777-**' }],
     [CHAVE_DO_BRUNO.key, { name: 'Bruno Lima', maskedDocument: '***.982.247-**' }],
     [CHAVE_DA_CARLA.key, { name: 'Carla Dias', maskedDocument: '***.533.447-**' }],
+    [CHAVE_CPF_DA_ANA.key, { name: 'Ana Souza', maskedDocument: '***.444.777-**' }],
   ]);
 
   lookupPixKey(pixKey: PixKey): Promise<PixKeyOwner> {

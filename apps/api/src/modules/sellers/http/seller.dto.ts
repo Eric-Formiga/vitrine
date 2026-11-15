@@ -10,7 +10,9 @@ import {
   SELLER_STATUSES,
   type Seller,
   type SellerChecklist,
+  type VerifiedPixKey,
 } from '../domain/seller.js';
+import { HANDLING_DAYS_MAX, HANDLING_DAYS_MIN, type Region, REGIONS, shippingIssues, zipDigits } from '../domain/shipping.js';
 import { isValidTaxId, maskTaxId } from '../domain/tax-id.js';
 
 // Formatos de entrada e saída das rotas de lojas. Cada schema com .meta({ id }) vira
@@ -23,6 +25,8 @@ export const pixKeySchema = z
   })
   .strict()
   .meta({ id: 'PixKeyInput', description: 'Chave Pix de recebimento; o titular é conferido no Asaas.' });
+
+export type PixKeyBody = z.output<typeof pixKeySchema>;
 
 // ── Entrada ───────────────────────────────────────────────────────────────────
 
@@ -56,7 +60,7 @@ export type SellerApplicationBody = z.output<typeof sellerApplicationSchema>;
 
 // ── Saída ─────────────────────────────────────────────────────────────────────
 
-const verifiedPixKeySchema = z
+export const verifiedPixKeySchema = z
   .object({
     type: z.enum(PIX_KEY_TYPES),
     key: z.string(),
@@ -91,6 +95,56 @@ export const myApplicationSchema = z
   .meta({ id: 'MySellerApplication' });
 
 export type MyApplicationResponse = z.output<typeof myApplicationSchema>;
+
+// ── Área do vendedor (US-021) ─────────────────────────────────────────────────
+
+export type VerifiedPixKeyResponse = z.output<typeof verifiedPixKeySchema>;
+
+export function toVerifiedPixKey(pixKey: VerifiedPixKey): VerifiedPixKeyResponse {
+  return { ...pixKey, verifiedAt: pixKey.verifiedAt.toISOString() };
+}
+
+const regionRates = <T extends z.ZodType>(rate: (region: Region) => T) =>
+  z.object(Object.fromEntries(REGIONS.map((region) => [region, rate(region)])) as Record<Region, T>);
+
+// O Zod confere o formato (tipos e campos obrigatórios); as faixas (CEP com 8 dígitos,
+// valores sem sinal, prazo de 1 a 5) são a regra do domínio, aplicada aqui no superRefine.
+export const shippingSettingsInputSchema = z
+  .object({
+    originZip: z
+      .string({ error: 'Informe o CEP de origem.' })
+      .transform(zipDigits)
+      .describe('CEP de onde a loja posta, com ou sem hífen.'),
+    rates: regionRates((region) => z.int({ error: `Informe o frete para a região ${region}, em centavos.` }))
+      .strict()
+      .describe('Centavos por região de destino (0 = grátis).'),
+    freeShippingThresholdCents: z
+      .int({ error: 'Use um valor em centavos, ou null.' })
+      .nullish()
+      .transform((value) => value ?? null)
+      .describe('Frete grátis a partir deste valor do pedido (centavos). Omitido ou null: nunca grátis.'),
+    handlingDays: z
+      .int({ error: 'Informe o prazo de postagem, em dias úteis.' })
+      .describe(`Dias úteis até a postagem (${HANDLING_DAYS_MIN} a ${HANDLING_DAYS_MAX}).`),
+  })
+  .strict()
+  .superRefine((settings, ctx) => {
+    for (const issue of shippingIssues(settings)) {
+      ctx.addIssue({ code: 'custom', path: issue.field.split('.'), message: issue.message });
+    }
+  })
+  .meta({ id: 'ShippingSettingsInput' });
+
+export type ShippingSettingsBody = z.output<typeof shippingSettingsInputSchema>;
+
+export const shippingSettingsSchema = z
+  .object({
+    originZip: z.string().describe('8 dígitos.'),
+    rates: regionRates(() => z.int()),
+    freeShippingThresholdCents: z.int().nullable(),
+    handlingDays: z.int(),
+  })
+  .meta({ id: 'ShippingSettings' });
 
 // ── Admin (US-018 a US-020) ───────────────────────────────────────────────────
 
