@@ -26,6 +26,7 @@ model User {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   auditLogs AuditLog[]
+  seller    Seller?
 
   @@map("users")
 }
@@ -55,9 +56,66 @@ model Category {
 
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
   children Category[] @relation("CategoryTree")
+  sellers  Seller[]
 
   @@index([parentId, position])
   @@map("categories")
+}
+
+enum SellerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+
+  @@map("seller_status")
+}
+
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  EVP
+
+  @@map("pix_key_type")
+}
+
+// Lojas (spec 02). Uma por conta e uma por CPF/CNPJ. O documento nunca fica em texto
+// puro: vai cifrado (AES-256-GCM) e, para a unicidade, como hash com chave (ASM-016).
+// A chave Pix só é gravada depois de o titular ser conferido no Asaas (ADR-0012).
+model Seller {
+  id                  String       @id @default(uuid(7)) @db.Uuid
+  userId              String       @unique @map("user_id") @db.Uuid
+  storeName           String       @map("store_name")
+  slug                String       @unique
+  bio                 String
+  instagram           String?
+  mainCategoryId      String       @map("main_category_id") @db.Uuid
+  documentEncrypted   String       @map("document_encrypted")
+  documentHash        String       @unique @map("document_hash")
+  status              SellerStatus @default(PENDING)
+  pixKeyType          PixKeyType   @map("pix_key_type")
+  pixKey              String       @map("pix_key")
+  pixKeyOwnerName     String       @map("pix_key_owner_name")
+  pixKeyOwnerDocument String       @map("pix_key_owner_document")
+  pixKeyVerifiedAt    DateTime     @map("pix_key_verified_at")
+  // Nulo = comissão padrão da plataforma (RN-3).
+  commissionBps       Int?         @map("commission_bps")
+  appliedAt           DateTime     @default(now()) @map("applied_at")
+  approvedAt          DateTime?    @map("approved_at")
+  rejectedAt          DateTime?    @map("rejected_at")
+  rejectionReason     String?      @map("rejection_reason")
+  suspendedAt         DateTime?    @map("suspended_at")
+  suspensionReason    String?      @map("suspension_reason")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  mainCategory Category @relation(fields: [mainCategoryId], references: [id], onDelete: Restrict)
+
+  @@index([status, appliedAt])
+  @@map("sellers")
 }
 
 // Quem fez o quê na área de admin, com o estado antes e depois (RF-ADM-5, spec 10).

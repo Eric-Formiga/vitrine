@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { type Category, type CategoryNode, SIZE_TYPES } from '../domain/category.js';
 import { isRectangular } from '../domain/size-chart.js';
-import { SLUG_PATTERN } from '../domain/slugify.js';
+import { SLUG_PATTERN } from '../../../shared/text/slugify.js';
 
 // Formatos de entrada e saída das rotas de categorias. Cada schema com .meta({ id })
 // vira um componente do contrato OpenAPI e um tipo do @vitrine/api-client (ADR-0008).

@@ -165,6 +165,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/seller/application": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Situação da minha loja
+         * @description 404 se a pessoa ainda não se candidatou.
+         */
+        get: operations["SellerApplicationController_mine"];
+        put?: never;
+        /**
+         * Candidatar-se a vender
+         * @description Confere no Asaas se o titular da chave Pix é o CPF/CNPJ da loja. Sem a conferência, nada é gravado: 422 PIX_KEY_OWNER_MISMATCH ou PIX_KEY_NOT_FOUND; 503 PIX_KEY_CHECK_UNAVAILABLE se o Asaas não responder.
+         */
+        post: operations["SellerApplicationController_apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -282,6 +306,73 @@ export interface components {
             name: string | null;
             /** @description Papéis guardados na Vitrine: customer, seller, admin. */
             roles: string[];
+        };
+        /** @description Chave Pix de recebimento; o titular é conferido no Asaas. */
+        PixKeyInput: {
+            /** @enum {string} */
+            type: "CPF" | "CNPJ" | "EMAIL" | "PHONE" | "EVP";
+            key: string;
+        };
+        SellerApplicationInput: {
+            storeName: string;
+            /** @description Endereço da loja (/loja/{slug}). Gerado do nome quando omitido. */
+            slug?: string;
+            bio: string;
+            /** @description CPF ou CNPJ da loja, com ou sem pontuação. */
+            document: string;
+            /** Format: uuid */
+            mainCategoryId: string;
+            instagram?: string | null;
+            pixKey: components["schemas"]["PixKeyInput"];
+        };
+        VerifiedPixKey: {
+            /** @enum {string} */
+            type: "CPF" | "CNPJ" | "EMAIL" | "PHONE" | "EVP";
+            key: string;
+            /** @description Titular devolvido pelo Asaas. */
+            ownerName: string;
+            /** @description Documento do titular, mascarado pelo Asaas. */
+            ownerDocument: string;
+            /** Format: date-time */
+            verifiedAt: string;
+        };
+        MySellerApplication: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
+            storeName: string;
+            slug: string;
+            bio: string;
+            instagram: string | null;
+            /** Format: uuid */
+            mainCategoryId: string;
+            /** @description CPF/CNPJ mascarado. */
+            document: string;
+            pixKey: components["schemas"]["VerifiedPixKey"];
+            /** Format: date-time */
+            appliedAt: string;
+            /** Format: date-time */
+            approvedAt: string | null;
+            /** @description Preenchido quando a loja foi rejeitada. */
+            rejection: {
+                reason: string;
+                /** Format: date-time */
+                rejectedAt: string;
+                /** Format: date-time */
+                canReapplyAt: string;
+            } | null;
+            suspension: {
+                reason: string;
+                /** Format: date-time */
+                suspendedAt: string;
+            } | null;
+            /** @description O que já está pronto para a loja vender. */
+            checklist: {
+                store: boolean;
+                pixKey: boolean;
+                shipping: boolean;
+            };
         };
     };
     responses: never;
@@ -671,6 +762,113 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    SellerApplicationController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MySellerApplication"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerApplicationController_apply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellerApplicationInput"];
+            };
+        };
+        responses: {
+            /** @description Loja criada em análise */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MySellerApplication"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflito com o que já existe */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
             };
         };
     };

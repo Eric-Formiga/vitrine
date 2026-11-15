@@ -1,11 +1,11 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-13T20:43:01.956Z",
-  "gitRev": "69cb522",
+  "timestamp": "2026-11-15T00:41:23.933Z",
+  "gitRev": "a18f990",
   "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 103,
+  "testsParsed": 121,
   "results": {
     "AC-019": {
       "status": "pass",

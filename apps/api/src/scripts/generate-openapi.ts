@@ -51,6 +51,7 @@ const PLACEHOLDER_ENV = {
   CLERK_WEBHOOK_SECRET: 'whsec_' + Buffer.from('so-para-gerar-o-contrato').toString('base64'),
   CLERK_JWT_KEY: 'nao-usada-para-gerar-o-contrato',
   CLERK_SECRET_KEY: 'sk_' + 'nao_usada',
+  SELLER_DOCUMENT_KEY: Buffer.alloc(32).toString('base64'),
 };
 
 // Rodando como comando (node dist/scripts/generate-openapi.js), e não importado pelos testes.

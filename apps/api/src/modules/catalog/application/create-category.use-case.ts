@@ -4,7 +4,7 @@ import { RequestValidationError } from '../../../shared/errors/domain-error.js';
 import type { Category, SizeType } from '../domain/category.js';
 import { InvalidCategoryParentError, parentNotFound } from '../domain/category-errors.js';
 import type { SizeChart } from '../domain/size-chart.js';
-import { slugify } from '../domain/slugify.js';
+import { slugify } from '../../../shared/text/slugify.js';
 import { CATEGORY_REPOSITORY, type CategoryRepository } from './category.repository.js';
 
 export interface CreateCategoryInput {

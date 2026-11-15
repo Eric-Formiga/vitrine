@@ -1,0 +1,47 @@
+{
+  "feature": "vendedores",
+  "timestamp": "2026-11-15T00:44:17.321Z",
+  "gitRev": "a18f990",
+  "command": "node -e \"require('fs').rmSync('.spec/verification/vitest-report.json',{force:true})\" && pnpm vitest run --reporter=default --reporter=json --outputFile.json=.spec/verification/vitest-report.json",
+  "reporter": "vitest-json",
+  "exitCode": 0,
+  "testsParsed": 121,
+  "results": {
+    "AC-043": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-043: candidatura válida cria a loja em análise com a chave conferida @spec:AC-043 AC-043: candidatura válida cria a loja em análise com a chave conferida @spec:AC-043",
+      "method": "vitest-json"
+    },
+    "AC-044": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-044: dados inválidos são recusados com o motivo de cada campo, sem consultar o Asaas @spec:AC-044 AC-044: dados inválidos são recusados com o motivo de cada campo, sem consultar o Asaas @spec:AC-044",
+      "method": "vitest-json"
+    },
+    "AC-045": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-045: chave Pix de outro titular, ou que não existe, é recusada sem gravar nada @spec:AC-045 AC-045: chave Pix de outro titular, ou que não existe, é recusada sem gravar nada @spec:AC-045",
+      "method": "vitest-json"
+    },
+    "AC-046": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-046: sem resposta do Asaas, a candidatura responde 503 e não grava nada @spec:AC-046 AC-046: sem resposta do Asaas, a candidatura responde 503 e não grava nada @spec:AC-046",
+      "method": "vitest-json"
+    },
+    "AC-047": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-047: uma candidatura ativa por conta; nova só 7 dias depois da rejeição @spec:AC-047 AC-047: uma candidatura ativa por conta; nova só 7 dias depois da rejeição @spec:AC-047",
+      "method": "vitest-json"
+    },
+    "AC-048": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-048: uma loja por CPF/CNPJ, com o documento guardado criptografado @spec:AC-048 AC-048: uma loja por CPF/CNPJ, com o documento guardado criptografado @spec:AC-048",
+      "method": "vitest-json"
+    },
+    "AC-049": {
+      "status": "pass",
+      "testName": "US-017 — Quem quer vender pede para abrir uma loja AC-049: a pessoa acompanha a própria candidatura @spec:AC-049 AC-049: a pessoa acompanha a própria candidatura @spec:AC-049",
+      "method": "vitest-json"
+    }
+  },
+  "principles": {}
+}

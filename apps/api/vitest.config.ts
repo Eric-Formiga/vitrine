@@ -22,6 +22,8 @@ export default defineConfig({
       CLERK_JWT_KEY: 'chave-publica-de-teste',
       CLERK_SECRET_KEY: 'sk_' + 'test_' + 'marcador',
       CLERK_AUTHORIZED_PARTIES: 'http://localhost:3000',
+      // Chave fixa de teste (32 bytes): os documentos das lojas de teste são cifrados com ela.
+      SELLER_DOCUMENT_KEY: Buffer.alloc(32, 7).toString('base64'),
     },
     // Subir o Postgres em Docker leva alguns segundos (mais na primeira vez, que baixa a imagem).
     hookTimeout: 180_000,

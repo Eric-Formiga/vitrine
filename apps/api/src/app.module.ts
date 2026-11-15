@@ -7,6 +7,7 @@ import type { PaymentGateway } from './modules/payments/application/payment-gate
 import { CatalogModule } from './modules/catalog/catalog.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
+import { SellersModule } from './modules/sellers/sellers.module.js';
 import { AuditModule } from './shared/audit/audit.module.js';
 import { ConfigModule } from './shared/config/config.module.js';
 import type { Env } from './shared/config/env.js';
@@ -39,6 +40,7 @@ export class AppModule {
         IdentityModule.forRoot({ clerkGateway }),
         CatalogModule,
         PaymentsModule.forRoot({ paymentGateway }),
+        SellersModule,
         ...imports,
       ],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],

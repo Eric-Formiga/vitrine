@@ -1,6 +1,7 @@
 import type { INestApplication, ModuleMetadata } from '@nestjs/common';
 
 import { createApp } from '../../src/create-app.js';
+import type { PaymentGateway } from '../../src/modules/payments/application/payment-gateway.port.js';
 import { PrismaService } from '../../src/shared/prisma/prisma.service.js';
 import { sessionToken, TEST_JWT_PUBLIC_KEY, TEST_WEB_ORIGIN } from './clerk-test-kit.js';
 import { startTestDatabase, type TestDatabase } from './postgres-container.js';
@@ -13,7 +14,11 @@ export interface TestApp {
 }
 
 // API completa sobre um Postgres descartável, aceitando os tokens assinados pelo kit do Clerk.
-export async function startTestApp(imports: ModuleMetadata['imports'] = []): Promise<TestApp> {
+// `paymentGateway` troca o Asaas por um falso (ex.: o da conferência de chave Pix das lojas).
+export async function startTestApp(
+  imports: ModuleMetadata['imports'] = [],
+  { paymentGateway }: { paymentGateway?: PaymentGateway } = {},
+): Promise<TestApp> {
   const db = await startTestDatabase();
   const app = await createApp({
     env: {
@@ -23,6 +28,7 @@ export async function startTestApp(imports: ModuleMetadata['imports'] = []): Pro
       CLERK_AUTHORIZED_PARTIES: TEST_WEB_ORIGIN,
     },
     imports,
+    paymentGateway,
   });
   await app.init();
   return {

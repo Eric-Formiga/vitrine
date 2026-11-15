@@ -28,6 +28,11 @@ const envSchema = z.object({
   ASAAS_API_URL: z.url({ protocol: /^https$/ }).default('https://api-sandbox.asaas.com/v3'),
   // Token que o Asaas manda no cabeçalho asaas-access-token dos webhooks (32 a 255 caracteres).
   ASAAS_WEBHOOK_TOKEN: z.string().min(32).max(255).optional(),
+  // Chave que protege o CPF/CNPJ das lojas (ASM-016): 32 bytes em base64.
+  // Gere com: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+  SELLER_DOCUMENT_KEY: z
+    .base64()
+    .refine((key) => Buffer.from(key, 'base64').length === 32, 'Precisa ter 32 bytes em base64.'),
 });
 
 export type Env = z.infer<typeof envSchema>;

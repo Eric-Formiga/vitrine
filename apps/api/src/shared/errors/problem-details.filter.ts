@@ -6,6 +6,7 @@ import type { Request, Response } from 'express';
 import { DomainError, type FieldError, RequestValidationError } from './domain-error.js';
 
 interface ProblemDetails {
+  [extension: string]: unknown;
   type: string;
   title: string;
   status: number;
@@ -43,6 +44,8 @@ export class ProblemDetailsFilter implements ExceptionFilter {
 
     if (exception instanceof DomainError) {
       return {
+        // Extensões primeiro: os campos padrão nunca são sobrescritos por elas.
+        ...exception.extensions,
         type: `/problems/${exception.code.toLowerCase().replace(/_/g, '-')}`,
         title: STATUS_CODES[exception.status] ?? 'Error',
         status: exception.status,

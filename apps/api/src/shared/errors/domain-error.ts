@@ -3,10 +3,16 @@
 export abstract class DomainError extends Error {
   abstract readonly code: string;
   readonly status: number = 422;
+  /**
+   * Campos extras do problem+json (membros de extensão da RFC 9457), para dados que o
+   * cliente usa além da mensagem. Ex.: a data a partir da qual dá para tentar de novo.
+   */
+  readonly extensions?: Record<string, unknown>;
 
-  constructor(message: string) {
+  constructor(message: string, extensions?: Record<string, unknown>) {
     super(message);
     this.name = new.target.name;
+    if (extensions) this.extensions = extensions;
   }
 }
 

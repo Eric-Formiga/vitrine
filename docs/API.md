@@ -16,7 +16,7 @@ Documentação interativa gerada automaticamente em `/docs` (Swagger UI) a parti
 | Concorrência | `ETag`/`If-Match` em edição de produto (evitar sobrescrita) |
 | Rate limit | headers `RateLimit-*`; 429 com `Retry-After` |
 
-Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`.
+Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE`, `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
 
 Rotas `/admin/*` respondem 404 (e não 403) para quem não é admin, e toda escrita bem-sucedida grava `audit_logs`.
 
@@ -74,7 +74,7 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 ### Vendedor
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
-| POST | `/seller/application` | 👤 | Candidatura |
+| GET / POST | `/seller/application` | 👤 | Candidatura e situação da própria loja (qualquer pessoa logada). O POST confere o titular da chave Pix no Asaas antes de gravar |
 | GET / PATCH | `/seller/me` | 🏪 | Dados da loja |
 | GET / PUT | `/seller/pix-key` | 🏪 | Chave Pix de recebimento; o PUT confere o titular no Asaas (`PIX_KEY_NOT_FOUND`, `PIX_KEY_OWNER_MISMATCH`) |
 | PUT | `/seller/shipping` | 🏪 | Configuração de frete |
