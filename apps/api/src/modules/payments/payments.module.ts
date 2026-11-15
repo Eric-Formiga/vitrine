@@ -22,6 +22,9 @@ export class PaymentsModule {
   static forRoot({ paymentGateway }: PaymentsModuleOptions = {}): DynamicModule {
     return {
       module: PaymentsModule,
+      // Global: a porta PaymentGateway (inclusive a falsa dos testes) serve a aplicação inteira,
+      // como na conferência da chave Pix das lojas (sellers).
+      global: true,
       controllers: [AsaasWebhookController],
       providers: [
         paymentGateway

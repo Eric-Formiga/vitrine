@@ -7,6 +7,7 @@ const VALID = {
   CLERK_WEBHOOK_SECRET: 'whsec_' + 'teste',
   CLERK_JWT_KEY: '-----BEGIN PUBLIC KEY-----\\nabc\\n-----END PUBLIC KEY-----',
   CLERK_SECRET_KEY: 'sk_' + 'teste',
+  SELLER_DOCUMENT_KEY: Buffer.alloc(32, 1).toString('base64'),
 };
 
 describe('US-007 — A API não sobe com configuração errada', () => {
@@ -46,7 +47,18 @@ describe('US-007 — A API não sobe com configuração errada', () => {
       CLERK_SECRET_KEY: VALID.CLERK_SECRET_KEY,
       CLERK_AUTHORIZED_PARTIES: ['http://localhost:3000'],
       ASAAS_API_URL: 'https://api-sandbox.asaas.com/v3',
+      SELLER_DOCUMENT_KEY: VALID.SELLER_DOCUMENT_KEY,
     });
+  });
+
+  it('a chave dos documentos das lojas é obrigatória e precisa ter 32 bytes em base64', () => {
+    const semChave: Record<string, string> = { ...VALID };
+    delete semChave.SELLER_DOCUMENT_KEY;
+    expect(() => loadEnv(semChave)).toThrow(/SELLER_DOCUMENT_KEY \(ausente\)/);
+    expect(() => loadEnv({ ...VALID, SELLER_DOCUMENT_KEY: Buffer.alloc(16).toString('base64') })).toThrow(
+      /SELLER_DOCUMENT_KEY \(inválida\)/,
+    );
+    expect(() => loadEnv({ ...VALID, SELLER_DOCUMENT_KEY: 'não é base64!' })).toThrow(/SELLER_DOCUMENT_KEY \(inválida\)/);
   });
 
   it('sem as variáveis do Asaas a API sobe; o token do webhook precisa de 32 caracteres', () => {

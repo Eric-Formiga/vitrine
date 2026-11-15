@@ -59,7 +59,7 @@ erDiagram
 **addresses** — `id`, `user_id`, `label`, `recipient`, `zip_code`, `street`, `number`, `complement`, `district`, `city`, `state` (UF), `is_default`.
 
 ### Vendedores
-**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `logo_url`, `banner_url`, `document` (CPF/CNPJ, criptografado em repouso), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `pix_key_type` (`CPF`,`CNPJ`,`EMAIL`,`PHONE`,`EVP`), `pix_key` (destino dos repasses, ADR-0012), `pix_key_owner_name`, `pix_key_owner_document` (mascarado, como o Asaas devolve), `pix_key_verified_at`, `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count`, `approved_at`.
+**sellers** — `id`, `user_id` (único), `store_name`, `slug` (único), `bio`, `instagram`, `main_category_id` (categoria ativa), `logo_url`, `banner_url` (feature `vitrine`), `document_encrypted` (CPF/CNPJ cifrado com AES-256-GCM; chave em `SELLER_DOCUMENT_KEY`), `document_hash` (HMAC-SHA256 dos dígitos, **único**: uma loja por documento), `status` (`PENDING`,`APPROVED`,`REJECTED`,`SUSPENDED`), `pix_key_type` (`CPF`,`CNPJ`,`EMAIL`,`PHONE`,`EVP`), `pix_key` (destino dos repasses, ADR-0012), `pix_key_owner_name`, `pix_key_owner_document` (mascarado, como o Asaas devolve), `pix_key_verified_at` (a chave só é gravada depois de conferida), `commission_bps` (nulo = padrão; 1200 = 12%), `rating_avg`, `rating_count` (feature `vitrine`), `applied_at`, `approved_at`, `rejected_at`, `rejection_reason`, `suspended_at`, `suspension_reason`.
 
 **shipping_settings** — `seller_id` (PK), `origin_zip`, `rates jsonb` (por região: `{ "SE": 1990, "S": 2490, ... }`), `free_shipping_threshold_cents`, `handling_days`.
 
