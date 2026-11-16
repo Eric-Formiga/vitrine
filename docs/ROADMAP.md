@@ -19,7 +19,7 @@ Fases incrementais: cada fase termina com algo **deployado e demonstrável**.
 ## Fase 1 — Catálogo
 - [x] Categorias (admin) e seed — feature `categorias`
 - [x] Candidatura de vendedor + chave Pix de recebimento conferida + aprovação admin; suspensão, comissão por loja, troca da chave Pix e configuração de frete da loja; telas `/vender` e `/minha-loja` — feature `vendedores`
-- [ ] CRUD de produtos, variantes e upload de imagens — feature `produtos`
+- [ ] CRUD de produtos, variantes e upload de imagens; ajuste rápido de estoque, moderação do admin e limpeza das imagens órfãs; telas "Meus produtos" e formulário em etapas — feature `produtos`
 - [ ] PLP, PDP, página da loja com cache e revalidação — feature `vitrine`
 - [ ] Busca FTS + facetas — feature `busca`
 - [ ] Seed com 6 lojas e ~200 produtos — feature `vitrine`

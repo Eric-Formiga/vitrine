@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "proximoId": 2,
+  "licoes": [
+    {
+      "id": "L-001",
+      "texto": "Ao mover, extrair ou criar um arquivo fora do plano, atualize no mesmo commit o campo Arquivos de toda tarefa que cita o caminho antigo ou que passa a usar o novo",
+      "chave": "ARQUIVO_INEXISTENTE::ao mover extrair ou criar um arquivo fora do plano atualize no mesmo commit o campo arquivos de toda tarefa que cita o caminho antigo ou que passa a usar o novo",
+      "sinal": "ARQUIVO_INEXISTENTE",
+      "escopo": null,
+      "status": "candidata",
+      "recorrencia": 1,
+      "features": [
+        "vendedores"
+      ],
+      "evidencias": [
+        {
+          "fonte": "T-016",
+          "feature": "vendedores",
+          "quando": "2026-11-15T15:48:04.828Z",
+          "gitRev": "a18f990"
+        }
+      ],
+      "penalidades": 0,
+      "criadaEm": "2026-11-15T15:48:04.828Z",
+      "ultimaVez": "2026-11-15T15:48:04.828Z"
+    }
+  ]
+}
