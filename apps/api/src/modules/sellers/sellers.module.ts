@@ -35,5 +35,7 @@ import { PrismaSellerRepository } from './infra/prisma-seller.repository.js';
     { provide: SELLER_REPOSITORY, useClass: PrismaSellerRepository },
     { provide: DOCUMENT_VAULT, useClass: AesDocumentVault },
   ],
+  // As rotas /seller/* de outros módulos (produtos) usam o mesmo guard da loja aprovada.
+  exports: [ApprovedSellerGuard, SELLER_REPOSITORY],
 })
 export class SellersModule {}

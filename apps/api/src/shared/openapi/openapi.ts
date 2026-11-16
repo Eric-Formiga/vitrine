@@ -38,7 +38,9 @@ const PROBLEM_DESCRIPTIONS: Record<number, string> = {
   401: 'É preciso entrar (token ausente, inválido ou vencido)',
   404: 'Não encontrado (inclusive para quem não tem o papel exigido)',
   409: 'Conflito com o que já existe',
+  412: 'A versão em If-Match não é mais a atual: recarregue antes de gravar',
   422: 'A regra de negócio não permite',
+  428: 'Falta o cabeçalho If-Match',
 };
 
 // ── Esquemas Zod → OpenAPI ────────────────────────────────────────────────────

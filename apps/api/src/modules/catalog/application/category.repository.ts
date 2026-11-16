@@ -25,10 +25,14 @@ export interface CategoryWriteSession {
   audit(entityId: string, before: unknown, after: unknown): Promise<void>;
 }
 
+/** Uma categoria e se ela tem filhas ativas (produto só vai numa "folha", ASM-023). */
+export type CategoryWithChildren = Category & { hasActiveChildren: boolean };
+
 // Porta: os casos de uso dependem disto, não do Prisma.
 export interface CategoryRepository {
   /** Todas as categorias, inclusive as arquivadas. */
   findAll(): Promise<Category[]>;
+  findById(id: string): Promise<CategoryWithChildren | null>;
   /**
    * Executa uma escrita numa transação que trava a árvore: duas escritas nunca se
    * cruzam, então a checagem de ciclo (ler a árvore e depois mover) não fica obsoleta.

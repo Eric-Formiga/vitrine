@@ -6,6 +6,8 @@ generator client {
   output              = "../src/generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
+  // SKU único só entre as variantes ativas da loja (ASM-024): índice único parcial.
+  previewFeatures     = ["partialIndexes"]
 }
 
 datasource db {
@@ -57,6 +59,7 @@ model Category {
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
   children Category[] @relation("CategoryTree")
   sellers  Seller[]
+  products Product[]
 
   @@index([parentId, position])
   @@map("categories")
@@ -114,6 +117,9 @@ model Seller {
   user         User              @relation(fields: [userId], references: [id], onDelete: Restrict)
   mainCategory Category          @relation(fields: [mainCategoryId], references: [id], onDelete: Restrict)
   shipping     ShippingSettings?
+  products     Product[]
+  variants     ProductVariant[]
+  uploads      Upload[]
 
   @@index([status, appliedAt])
   @@map("sellers")
@@ -134,6 +140,121 @@ model ShippingSettings {
   seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
   @@map("shipping_settings")
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+  SUSPENDED
+
+  @@map("product_status")
+}
+
+enum ProductCondition {
+  NEW
+  USED
+
+  @@map("product_condition")
+}
+
+// Produtos das lojas (spec 03). Nunca são apagados: arquivar muda a situação (RN-17).
+// `version` sobe a cada escrita e vira o ETag; o If-Match evita que uma aba sobrescreva
+// a outra (ASM-026). `min_price_cents` acompanha a variante ativa mais barata.
+model Product {
+  id               String           @id @default(uuid(7)) @db.Uuid
+  sellerId         String           @map("seller_id") @db.Uuid
+  categoryId       String           @map("category_id") @db.Uuid
+  title            String
+  slug             String
+  description      String           @default("")
+  condition        ProductCondition
+  status           ProductStatus    @default(DRAFT)
+  version          Int              @default(1)
+  minPriceCents    Int?             @map("min_price_cents")
+  publishedAt      DateTime?        @map("published_at")
+  suspendedAt      DateTime?        @map("suspended_at")
+  suspensionReason String?          @map("suspension_reason")
+  archivedAt       DateTime?        @map("archived_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  seller   Seller           @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  category Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@unique([sellerId, slug])
+  @@index([sellerId, status, createdAt(sort: Desc)])
+  @@index([status, categoryId, minPriceCents])
+  @@map("products")
+}
+
+// Uma combinação de tamanho × cor. Sair da grade arquiva a variante (os pedidos da
+// Fase 2 apontam para ela); voltar reativa a mesma linha. `seller_id` é cópia do
+// produto, para o SKU ser único por loja. Os limites também são CHECK no banco.
+model ProductVariant {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  productId      String    @map("product_id") @db.Uuid
+  sellerId       String    @map("seller_id") @db.Uuid
+  sku            String
+  size           String
+  color          String
+  colorHex       String    @map("color_hex") @db.Char(7)
+  priceCents     Int       @map("price_cents")
+  compareAtCents Int?      @map("compare_at_cents")
+  stock          Int       @default(0)
+  // Reservado por checkouts em andamento (Fase 2); por ora, sempre 0.
+  reserved       Int       @default(0)
+  weightGrams    Int       @map("weight_grams")
+  archivedAt     DateTime? @map("archived_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  seller  Seller  @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, size, color])
+  @@unique([sellerId, sku], map: "product_variants_seller_id_sku_active_key", where: raw("archived_at IS NULL"))
+  @@map("product_variants")
+}
+
+// Fotos do produto, na ordem (a de posição 0 é a capa). `color` nulo = vale para todas
+// as cores. O arquivo é um upload registrado: a chave estrangeira impede a limpeza de
+// apagar um arquivo em uso.
+model ProductImage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  path      String
+  alt       String   @default("")
+  position  Int
+  color     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  upload  Upload  @relation(fields: [path], references: [path], onDelete: Restrict)
+
+  @@unique([productId, position])
+  @@index([path])
+  @@map("product_images")
+}
+
+// Arquivos enviados ao Storage pela URL assinada (spec 03 H2). Nunca usado há mais de
+// 24 h, ou desligado de um produto (`detached_at`) há mais de 24 h: a limpeza apaga.
+model Upload {
+  path        String    @id
+  sellerId    String    @map("seller_id") @db.Uuid
+  contentType String    @map("content_type")
+  sizeBytes   Int       @map("size_bytes")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  detachedAt  DateTime? @map("detached_at")
+
+  seller Seller         @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  images ProductImage[]
+
+  @@index([createdAt])
+  @@index([detachedAt])
+  @@map("uploads")
 }
 
 // Quem fez o quê na área de admin, com o estado antes e depois (RF-ADM-5, spec 10).

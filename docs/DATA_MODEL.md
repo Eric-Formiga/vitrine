@@ -66,12 +66,14 @@ erDiagram
 ### Catálogo
 **categories** — `id`, `parent_id`, `name`, `slug` (único na árvore inteira, inclusive entre arquivadas), `position`, `size_type` (`CLOTHING`, `SHOES`, `ONE_SIZE`: define a grade de tamanhos das variantes), `size_chart jsonb` (`{ columns, rows }`), `archived_at` (arquivada junto com as descendentes; nunca apagada).
 
-**products** — `id`, `seller_id`, `category_id`, `title`, `slug` (único por loja), `description`, `condition` (`NEW`,`USED`), `status` (`DRAFT`,`ACTIVE`,`ARCHIVED`,`SUSPENDED`), `search_vector tsvector` (gerado), `min_price_cents` (denormalizado p/ ordenação), `sold_count`, `rating_avg`, `rating_count`, `published_at`.
+**products** — `id`, `seller_id`, `category_id` (categoria sem subcategorias ativas), `title`, `slug` (único por loja; não muda com o título), `description` (texto puro, até 5.000), `condition` (`NEW`,`USED`), `status` (`DRAFT`,`ACTIVE`,`ARCHIVED`,`SUSPENDED`), `version` (sobe a cada escrita; é o `ETag`, e o `If-Match` evita sobrescrever), `min_price_cents` (denormalizado p/ ordenação), `published_at`, `suspended_at`, `suspension_reason`, `archived_at`. Feature `busca`/`vitrine`: `search_vector tsvector` (gerado), `sold_count`, `rating_avg`, `rating_count`.
 
-**product_variants** — `id`, `product_id`, `sku` (único por loja), `size`, `color`, `color_hex`, `price_cents`, `compare_at_cents`, `stock`, `reserved`, `weight_grams`, `archived_at`.
-Restrição: `CHECK (stock >= 0 AND reserved >= 0 AND reserved <= stock)`; `UNIQUE(product_id, size, color)`.
+**product_variants** — `id`, `product_id`, `seller_id` (cópia do produto, para o SKU único por loja), `sku`, `size`, `color`, `color_hex`, `price_cents`, `compare_at_cents`, `stock`, `reserved`, `weight_grams`, `archived_at` (sair da grade arquiva; voltar reativa a mesma linha).
+Restrição: `CHECK (stock >= 0 AND reserved >= 0 AND reserved <= stock)`, preço > 0, preço "de" > preço, peso de 1 a 30.000 g, `color_hex` `#RRGGBB`; `UNIQUE(product_id, size, color)`; SKU único entre as variantes ativas da loja (índice único parcial `(seller_id, sku) WHERE archived_at IS NULL`).
 
-**product_images** — `id`, `product_id`, `url`, `alt`, `position`, `color` (nulo = todas as cores).
+**product_images** — `id`, `product_id`, `path` (arquivo no Storage; chave estrangeira para `uploads`), `alt`, `position` (0 a 7, única por produto; 0 = capa), `color` (nulo = todas as cores). A URL pública sai do `path`.
+
+**uploads** — `path` (PK, `sellers/{sellerId}/...`), `seller_id`, `content_type`, `size_bytes`, `created_at`, `detached_at` (quando saiu de um produto). Nunca usado há mais de 24 h, ou desligado há mais de 24 h: a limpeza apaga do Storage e daqui.
 
 ### Carrinho
 **carts** — `id`, `user_id` (nulo para visitante, único quando presente), `anonymous_token` (único), `expires_at`.

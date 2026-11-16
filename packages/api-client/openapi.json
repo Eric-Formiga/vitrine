@@ -453,6 +453,473 @@
         ]
       }
     },
+    "/v1/seller/products": {
+      "post": {
+        "description": "O slug vem do título, único na loja. Responde com o ETag.",
+        "operationId": "SellerProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rascunho criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Criar produto (rascunho)",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "get": {
+        "description": "Do mais recente para o mais antigo.",
+        "operationId": "SellerProductsController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "SUSPENDED",
+                "ARCHIVED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SellerProductSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Meus produtos",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
+    "/v1/seller/products/{id}": {
+      "get": {
+        "description": "Responde com o ETag da versão atual.",
+        "operationId": "SellerProductsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProduct"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Um produto meu",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "patch": {
+        "description": "O slug não muda. 422 INVALID_STATE_TRANSITION se arquivado.",
+        "operationId": "SellerProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "O ETag da versão que você está editando, ex.: \"3\". Desatualizado: 412; ausente: 428.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductChangesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "A versão em If-Match não é mais a atual: recarregue antes de gravar",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Falta o cabeçalho If-Match",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Editar as informações",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "delete": {
+        "description": "Sai de cena sem ser apagado (RN-17), com as variantes e as imagens. É final.",
+        "operationId": "SellerProductsController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "O ETag da versão que você está editando, ex.: \"3\". Desatualizado: 412; ausente: 428.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "A versão em If-Match não é mais a atual: recarregue antes de gravar",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Falta o cabeçalho If-Match",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Arquivar",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
     "/v1/webhooks/asaas": {
       "post": {
         "operationId": "AsaasWebhookController_receive",
@@ -1425,344 +1892,6 @@
         ],
         "additionalProperties": false
       },
-      "SizeChart": {
-        "type": "object",
-        "properties": {
-          "columns": {
-            "minItems": 1,
-            "maxItems": 12,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 40
-            }
-          },
-          "rows": {
-            "maxItems": 60,
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "maxLength": 40
-              }
-            }
-          }
-        },
-        "required": [
-          "columns",
-          "rows"
-        ],
-        "additionalProperties": false,
-        "description": "Guia de medidas: cada linha tem o mesmo número de colunas."
-      },
-      "CreateCategory": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "sizeType": {
-            "type": "string",
-            "enum": [
-              "CLOTHING",
-              "SHOES",
-              "ONE_SIZE"
-            ],
-            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
-          },
-          "slug": {
-            "description": "Gerado do nome quando omitido.",
-            "type": "string",
-            "maxLength": 80,
-            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
-          },
-          "parentId": {
-            "description": "Categoria pai; omitido ou null = primeiro nível.",
-            "nullable": true,
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "position": {
-            "description": "Ordem entre as irmãs (padrão 0).",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000
-          },
-          "sizeChart": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SizeChart"
-              }
-            ]
-          }
-        },
-        "required": [
-          "name",
-          "sizeType"
-        ],
-        "additionalProperties": false
-      },
-      "UpdateCategory": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "sizeType": {
-            "type": "string",
-            "enum": [
-              "CLOTHING",
-              "SHOES",
-              "ONE_SIZE"
-            ],
-            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
-          },
-          "slug": {
-            "type": "string",
-            "maxLength": 80,
-            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
-          },
-          "parentId": {
-            "nullable": true,
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "position": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000
-          },
-          "sizeChart": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SizeChart"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "description": "Só os campos enviados mudam."
-      },
-      "PublicCategoryNode": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "sizeType": {
-            "type": "string",
-            "enum": [
-              "CLOTHING",
-              "SHOES",
-              "ONE_SIZE"
-            ],
-            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
-          },
-          "sizeChart": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SizeChart"
-              }
-            ]
-          },
-          "children": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublicCategoryNode"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "sizeType",
-          "sizeChart",
-          "children"
-        ],
-        "additionalProperties": false
-      },
-      "AdminCategory": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "parentId": {
-            "nullable": true,
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "position": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "sizeType": {
-            "type": "string",
-            "enum": [
-              "CLOTHING",
-              "SHOES",
-              "ONE_SIZE"
-            ],
-            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
-          },
-          "sizeChart": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SizeChart"
-              }
-            ]
-          },
-          "archivedAt": {
-            "nullable": true,
-            "description": "Preenchido quando a categoria está arquivada.",
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-          }
-        },
-        "required": [
-          "id",
-          "parentId",
-          "name",
-          "slug",
-          "position",
-          "sizeType",
-          "sizeChart",
-          "archivedAt"
-        ],
-        "additionalProperties": false
-      },
-      "AdminCategoryNode": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "parentId": {
-            "nullable": true,
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "position": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "sizeType": {
-            "type": "string",
-            "enum": [
-              "CLOTHING",
-              "SHOES",
-              "ONE_SIZE"
-            ],
-            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
-          },
-          "sizeChart": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SizeChart"
-              }
-            ]
-          },
-          "archivedAt": {
-            "nullable": true,
-            "description": "Preenchido quando a categoria está arquivada.",
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-          },
-          "children": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdminCategoryNode"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "parentId",
-          "name",
-          "slug",
-          "position",
-          "sizeType",
-          "sizeChart",
-          "archivedAt",
-          "children"
-        ],
-        "additionalProperties": false
-      },
-      "Me": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "email": {
-            "type": "string"
-          },
-          "name": {
-            "nullable": true,
-            "type": "string"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Papéis guardados na Vitrine: customer, seller, admin."
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "name",
-          "roles"
-        ],
-        "additionalProperties": false
-      },
       "PixKeyInput": {
         "type": "object",
         "properties": {
@@ -2322,6 +2451,611 @@
           "approvedAt",
           "rejection",
           "suspension"
+        ],
+        "additionalProperties": false
+      },
+      "SizeChart": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "minItems": 1,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
+          },
+          "rows": {
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 40
+              }
+            }
+          }
+        },
+        "required": [
+          "columns",
+          "rows"
+        ],
+        "additionalProperties": false,
+        "description": "Guia de medidas: cada linha tem o mesmo número de colunas."
+      },
+      "CreateCategory": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "sizeType": {
+            "type": "string",
+            "enum": [
+              "CLOTHING",
+              "SHOES",
+              "ONE_SIZE"
+            ],
+            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
+          },
+          "slug": {
+            "description": "Gerado do nome quando omitido.",
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "parentId": {
+            "description": "Categoria pai; omitido ou null = primeiro nível.",
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "position": {
+            "description": "Ordem entre as irmãs (padrão 0).",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "sizeChart": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SizeChart"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "sizeType"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateCategory": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "sizeType": {
+            "type": "string",
+            "enum": [
+              "CLOTHING",
+              "SHOES",
+              "ONE_SIZE"
+            ],
+            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "parentId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "sizeChart": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SizeChart"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "Só os campos enviados mudam."
+      },
+      "PublicCategoryNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "sizeType": {
+            "type": "string",
+            "enum": [
+              "CLOTHING",
+              "SHOES",
+              "ONE_SIZE"
+            ],
+            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
+          },
+          "sizeChart": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SizeChart"
+              }
+            ]
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicCategoryNode"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "sizeType",
+          "sizeChart",
+          "children"
+        ],
+        "additionalProperties": false
+      },
+      "AdminCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "parentId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "sizeType": {
+            "type": "string",
+            "enum": [
+              "CLOTHING",
+              "SHOES",
+              "ONE_SIZE"
+            ],
+            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
+          },
+          "sizeChart": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SizeChart"
+              }
+            ]
+          },
+          "archivedAt": {
+            "nullable": true,
+            "description": "Preenchido quando a categoria está arquivada.",
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "name",
+          "slug",
+          "position",
+          "sizeType",
+          "sizeChart",
+          "archivedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminCategoryNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "parentId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "sizeType": {
+            "type": "string",
+            "enum": [
+              "CLOTHING",
+              "SHOES",
+              "ONE_SIZE"
+            ],
+            "description": "Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U)."
+          },
+          "sizeChart": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SizeChart"
+              }
+            ]
+          },
+          "archivedAt": {
+            "nullable": true,
+            "description": "Preenchido quando a categoria está arquivada.",
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCategoryNode"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "name",
+          "slug",
+          "position",
+          "sizeType",
+          "sizeChart",
+          "archivedAt",
+          "children"
+        ],
+        "additionalProperties": false
+      },
+      "ProductInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "description": {
+            "description": "Texto puro; as quebras de linha são mantidas. Padrão: vazia.",
+            "type": "string",
+            "maxLength": 5000
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Categoria ativa e sem subcategorias."
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "USED"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "categoryId",
+          "condition"
+        ],
+        "additionalProperties": false
+      },
+      "ProductChangesInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "Texto puro; as quebras de linha são mantidas."
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Categoria ativa e sem subcategorias."
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "USED"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "Só os campos que mudam. Exige If-Match."
+      },
+      "SellerProduct": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "USED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUSPENDED",
+              "ARCHIVED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "A mesma do cabeçalho ETag; mande de volta em If-Match."
+          },
+          "minPriceCents": {
+            "nullable": true,
+            "description": "Preço da variante ativa mais barata, em centavos.",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "publishedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "suspension": {
+            "nullable": true,
+            "description": "Preenchido quando o admin suspendeu o produto.",
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "suspendedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "reason",
+              "suspendedAt"
+            ],
+            "additionalProperties": false
+          },
+          "archivedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "description",
+          "categoryId",
+          "condition",
+          "status",
+          "version",
+          "minPriceCents",
+          "publishedAt",
+          "suspension",
+          "archivedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "SellerProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUSPENDED",
+              "ARCHIVED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "coverUrl": {
+            "nullable": true,
+            "description": "URL pública da capa (a imagem de posição 0).",
+            "type": "string"
+          },
+          "minPriceCents": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "totalStock": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Soma do estoque das variantes ativas."
+          },
+          "suspension": {
+            "nullable": true,
+            "description": "Preenchido quando o admin suspendeu o produto.",
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "suspendedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "reason",
+              "suspendedAt"
+            ],
+            "additionalProperties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "status",
+          "version",
+          "coverUrl",
+          "minPriceCents",
+          "totalStock",
+          "suspension",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Papéis guardados na Vitrine: customer, seller, admin."
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "roles"
         ],
         "additionalProperties": false
       }

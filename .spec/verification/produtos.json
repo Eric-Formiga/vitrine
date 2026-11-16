@@ -1,0 +1,42 @@
+{
+  "feature": "produtos",
+  "timestamp": "2026-11-16T23:57:25.917Z",
+  "gitRev": "d545b51",
+  "command": "node scripts/spec-tests.mjs",
+  "reporter": "vitest-json",
+  "exitCode": 0,
+  "testsParsed": 173,
+  "results": {
+    "AC-060": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-060: criar o rascunho de um produto @spec:AC-060 @spec:US-023 AC-060: criar o rascunho de um produto @spec:AC-060 @spec:US-023",
+      "method": "vitest-json"
+    },
+    "AC-061": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-061: informações inválidas são recusadas com o motivo de cada campo @spec:AC-061 AC-061: informações inválidas são recusadas com o motivo de cada campo @spec:AC-061",
+      "method": "vitest-json"
+    },
+    "AC-062": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062 AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062",
+      "method": "vitest-json"
+    },
+    "AC-074": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-074: edição com a versão certa @spec:AC-074 AC-074: edição com a versão certa @spec:AC-074",
+      "method": "vitest-json"
+    },
+    "AC-075": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-075: versão desatualizada ou ausente é recusada @spec:AC-075 AC-075: versão desatualizada ou ausente é recusada @spec:AC-075",
+      "method": "vitest-json"
+    },
+    "AC-076": {
+      "status": "pass",
+      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-076: arquivar tira o produto de cena sem apagar @spec:AC-076 AC-076: arquivar tira o produto de cena sem apagar @spec:AC-076",
+      "method": "vitest-json"
+    }
+  },
+  "principles": {}
+}
