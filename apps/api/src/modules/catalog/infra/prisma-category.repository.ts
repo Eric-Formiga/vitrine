@@ -6,6 +6,7 @@ import { PrismaService } from '../../../shared/prisma/prisma.service.js';
 import type {
   CategoryChanges,
   CategoryRepository,
+  CategoryWithChildren,
   CategoryWriteSession,
   NewCategory,
 } from '../application/category.repository.js';
@@ -36,6 +37,16 @@ export class PrismaCategoryRepository implements CategoryRepository {
 
   findAll(): Promise<Category[]> {
     return findAll(this.prisma);
+  }
+
+  async findById(id: string): Promise<CategoryWithChildren | null> {
+    const row = await this.prisma.category.findUnique({
+      where: { id },
+      select: { ...COLUMNS, children: { where: { archivedAt: null }, select: { id: true }, take: 1 } },
+    });
+    if (!row) return null;
+    const { children, ...category } = row;
+    return { ...toCategory(category), hasActiveChildren: children.length > 0 };
   }
 
   write<T>(work: (session: CategoryWriteSession) => Promise<T>): Promise<T> {

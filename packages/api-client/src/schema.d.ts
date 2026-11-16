@@ -149,6 +149,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/seller/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Meus produtos
+         * @description Do mais recente para o mais antigo.
+         */
+        get: operations["SellerProductsController_list"];
+        put?: never;
+        /**
+         * Criar produto (rascunho)
+         * @description O slug vem do título, único na loja. Responde com o ETag.
+         */
+        post: operations["SellerProductsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/seller/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Um produto meu
+         * @description Responde com o ETag da versão atual.
+         */
+        get: operations["SellerProductsController_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Arquivar
+         * @description Sai de cena sem ser apagado (RN-17), com as variantes e as imagens. É final.
+         */
+        delete: operations["SellerProductsController_archive"];
+        options?: never;
+        head?: never;
+        /**
+         * Editar as informações
+         * @description O slug não muda. 422 INVALID_STATE_TRANSITION se arquivado.
+         */
+        patch: operations["SellerProductsController_update"];
+        trace?: never;
+    };
     "/v1/webhooks/asaas": {
         parameters: {
             query?: never;
@@ -373,105 +425,6 @@ export interface components {
                 message: string;
             }[];
         };
-        /** @description Guia de medidas: cada linha tem o mesmo número de colunas. */
-        SizeChart: {
-            columns: string[];
-            rows: string[][];
-        };
-        CreateCategory: {
-            name: string;
-            /**
-             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
-             * @enum {string}
-             */
-            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
-            /** @description Gerado do nome quando omitido. */
-            slug?: string;
-            /**
-             * Format: uuid
-             * @description Categoria pai; omitido ou null = primeiro nível.
-             */
-            parentId?: string | null;
-            /** @description Ordem entre as irmãs (padrão 0). */
-            position?: number;
-            sizeChart?: components["schemas"]["SizeChart"] | null;
-        };
-        /** @description Só os campos enviados mudam. */
-        UpdateCategory: {
-            name?: string;
-            /**
-             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
-             * @enum {string}
-             */
-            sizeType?: "CLOTHING" | "SHOES" | "ONE_SIZE";
-            slug?: string;
-            /** Format: uuid */
-            parentId?: string | null;
-            position?: number;
-            sizeChart?: components["schemas"]["SizeChart"] | null;
-        };
-        PublicCategoryNode: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            slug: string;
-            /**
-             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
-             * @enum {string}
-             */
-            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
-            sizeChart: components["schemas"]["SizeChart"] | null;
-            children: components["schemas"]["PublicCategoryNode"][];
-        };
-        AdminCategory: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            parentId: string | null;
-            name: string;
-            slug: string;
-            position: number;
-            /**
-             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
-             * @enum {string}
-             */
-            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
-            sizeChart: components["schemas"]["SizeChart"] | null;
-            /**
-             * Format: date-time
-             * @description Preenchido quando a categoria está arquivada.
-             */
-            archivedAt: string | null;
-        };
-        AdminCategoryNode: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            parentId: string | null;
-            name: string;
-            slug: string;
-            position: number;
-            /**
-             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
-             * @enum {string}
-             */
-            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
-            sizeChart: components["schemas"]["SizeChart"] | null;
-            /**
-             * Format: date-time
-             * @description Preenchido quando a categoria está arquivada.
-             */
-            archivedAt: string | null;
-            children: components["schemas"]["AdminCategoryNode"][];
-        };
-        Me: {
-            /** Format: uuid */
-            id: string;
-            email: string;
-            name: string | null;
-            /** @description Papéis guardados na Vitrine: customer, seller, admin. */
-            roles: string[];
-        };
         /** @description Chave Pix de recebimento; o titular é conferido no Asaas. */
         PixKeyInput: {
             /** @enum {string} */
@@ -615,6 +568,185 @@ export interface components {
                 /** Format: date-time */
                 suspendedAt: string;
             } | null;
+        };
+        /** @description Guia de medidas: cada linha tem o mesmo número de colunas. */
+        SizeChart: {
+            columns: string[];
+            rows: string[][];
+        };
+        CreateCategory: {
+            name: string;
+            /**
+             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
+             * @enum {string}
+             */
+            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
+            /** @description Gerado do nome quando omitido. */
+            slug?: string;
+            /**
+             * Format: uuid
+             * @description Categoria pai; omitido ou null = primeiro nível.
+             */
+            parentId?: string | null;
+            /** @description Ordem entre as irmãs (padrão 0). */
+            position?: number;
+            sizeChart?: components["schemas"]["SizeChart"] | null;
+        };
+        /** @description Só os campos enviados mudam. */
+        UpdateCategory: {
+            name?: string;
+            /**
+             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
+             * @enum {string}
+             */
+            sizeType?: "CLOTHING" | "SHOES" | "ONE_SIZE";
+            slug?: string;
+            /** Format: uuid */
+            parentId?: string | null;
+            position?: number;
+            sizeChart?: components["schemas"]["SizeChart"] | null;
+        };
+        PublicCategoryNode: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            slug: string;
+            /**
+             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
+             * @enum {string}
+             */
+            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
+            sizeChart: components["schemas"]["SizeChart"] | null;
+            children: components["schemas"]["PublicCategoryNode"][];
+        };
+        AdminCategory: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            parentId: string | null;
+            name: string;
+            slug: string;
+            position: number;
+            /**
+             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
+             * @enum {string}
+             */
+            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
+            sizeChart: components["schemas"]["SizeChart"] | null;
+            /**
+             * Format: date-time
+             * @description Preenchido quando a categoria está arquivada.
+             */
+            archivedAt: string | null;
+        };
+        AdminCategoryNode: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            parentId: string | null;
+            name: string;
+            slug: string;
+            position: number;
+            /**
+             * @description Grade de tamanhos: CLOTHING (PP–XGG), SHOES (33–46) ou ONE_SIZE (U).
+             * @enum {string}
+             */
+            sizeType: "CLOTHING" | "SHOES" | "ONE_SIZE";
+            sizeChart: components["schemas"]["SizeChart"] | null;
+            /**
+             * Format: date-time
+             * @description Preenchido quando a categoria está arquivada.
+             */
+            archivedAt: string | null;
+            children: components["schemas"]["AdminCategoryNode"][];
+        };
+        ProductInput: {
+            title: string;
+            /** @description Texto puro; as quebras de linha são mantidas. Padrão: vazia. */
+            description?: string;
+            /**
+             * Format: uuid
+             * @description Categoria ativa e sem subcategorias.
+             */
+            categoryId: string;
+            /** @enum {string} */
+            condition: "NEW" | "USED";
+        };
+        /** @description Só os campos que mudam. Exige If-Match. */
+        ProductChangesInput: {
+            title?: string;
+            /** @description Texto puro; as quebras de linha são mantidas. */
+            description?: string;
+            /**
+             * Format: uuid
+             * @description Categoria ativa e sem subcategorias.
+             */
+            categoryId?: string;
+            /** @enum {string} */
+            condition?: "NEW" | "USED";
+        };
+        SellerProduct: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            description: string;
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            condition: "NEW" | "USED";
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            /** @description A mesma do cabeçalho ETag; mande de volta em If-Match. */
+            version: number;
+            /** @description Preço da variante ativa mais barata, em centavos. */
+            minPriceCents: number | null;
+            /** Format: date-time */
+            publishedAt: string | null;
+            /** @description Preenchido quando o admin suspendeu o produto. */
+            suspension: {
+                reason: string;
+                /** Format: date-time */
+                suspendedAt: string;
+            } | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SellerProductSummary: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            version: number;
+            /** @description URL pública da capa (a imagem de posição 0). */
+            coverUrl: string | null;
+            minPriceCents: number | null;
+            /** @description Soma do estoque das variantes ativas. */
+            totalStock: number;
+            /** @description Preenchido quando o admin suspendeu o produto. */
+            suspension: {
+                reason: string;
+                /** Format: date-time */
+                suspendedAt: string;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        Me: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string | null;
+            /** @description Papéis guardados na Vitrine: customer, seller, admin. */
+            roles: string[];
         };
     };
     responses: never;
@@ -981,6 +1113,353 @@ export interface operations {
             };
             /** @description A regra de negócio não permite */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductsController_list: {
+        parameters: {
+            query?: {
+                status?: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProductSummary"][];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductInput"];
+            };
+        };
+        responses: {
+            /** @description Rascunho criado */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProduct"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProduct"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductsController_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description O ETag da versão que você está editando, ex.: "3". Desatualizado: 412; ausente: 428. */
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProduct"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A versão em If-Match não é mais a atual: recarregue antes de gravar */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Falta o cabeçalho If-Match */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductsController_update: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description O ETag da versão que você está editando, ex.: "3". Desatualizado: 412; ausente: 428. */
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductChangesInput"];
+            };
+        };
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProduct"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A versão em If-Match não é mais a atual: recarregue antes de gravar */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Falta o cabeçalho If-Match */
+            428: {
                 headers: {
                     [name: string]: unknown;
                 };

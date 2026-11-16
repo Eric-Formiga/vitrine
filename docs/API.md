@@ -16,7 +16,7 @@ Documentação interativa gerada automaticamente em `/docs` (Swagger UI) a parti
 | Concorrência | `ETag`/`If-Match` em edição de produto (evitar sobrescrita) |
 | Rate limit | headers `RateLimit-*`; 429 com `Retry-After` |
 
-Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE` (403, a pessoa tem o papel seller mas a loja está suspensa), `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `SELLER_NOT_FOUND`, `SHIPPING_NOT_CONFIGURED`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois).
+Códigos de erro de domínio (campo `code`): `OUT_OF_STOCK`, `PRICE_CHANGED`, `COUPON_INVALID`, `COUPON_NOT_APPLICABLE`, `SELLER_NOT_ACTIVE` (403, a pessoa tem o papel seller mas a loja está suspensa), `INVALID_STATE_TRANSITION`, `RETURN_WINDOW_EXPIRED`, `IDEMPOTENCY_CONFLICT`, `FORBIDDEN_RESOURCE`, `VALIDATION_FAILED` (400, com `errors: [{ field, message }]`), `SLUG_TAKEN`, `INVALID_CATEGORY_PARENT`, `CATEGORY_NOT_FOUND`, `SELLER_APPLICATION_EXISTS` (409; quando a loja foi rejeitada há menos de 7 dias, traz `canReapplyAt`), `SELLER_APPLICATION_NOT_FOUND`, `SELLER_NOT_FOUND`, `SHIPPING_NOT_CONFIGURED`, `DOCUMENT_TAKEN` (409, uma loja por CPF/CNPJ), `PIX_KEY_NOT_FOUND` e `PIX_KEY_OWNER_MISMATCH` (422), `PIX_KEY_CHECK_UNAVAILABLE` (503, o Asaas não respondeu: tente depois), `PRODUCT_NOT_FOUND`, `PRODUCT_VERSION_CONFLICT` (412, outra escrita gravou antes; traz `currentVersion`), `PRECONDITION_REQUIRED` (428, falta o `If-Match`).
 
 Rotas `/admin/*` respondem 404 (e não 403) para quem não é admin, e toda escrita bem-sucedida grava `audit_logs`.
 
@@ -78,8 +78,8 @@ Legenda de acesso: 🌐 público · 👤 autenticado · 🏪 vendedor · 🛡️
 | GET / PATCH | `/seller/me` | 🏪 | Dados da loja |
 | GET / PUT | `/seller/pix-key` | 🏪 | Chave Pix de recebimento; o PUT confere o titular no Asaas com os mesmos erros da candidatura (`PIX_KEY_NOT_FOUND`, `PIX_KEY_OWNER_MISMATCH`, `PIX_KEY_CHECK_UNAVAILABLE`); se falhar, a chave antiga continua. Auditado (`seller.pix_key_change`) |
 | GET / PUT | `/seller/shipping` | 🏪 | Frete da loja: `originZip` (8 dígitos), `rates { N, NE, CO, SE, S }` em centavos, `freeShippingThresholdCents` (opcional, > 0), `handlingDays` (1 a 5). O PUT substitui tudo; o GET sem configuração responde 404 `SHIPPING_NOT_CONFIGURED` |
-| GET / POST | `/seller/products` | 🏪 | Listar/criar |
-| GET / PATCH / DELETE | `/seller/products/{id}` | 🏪 | Detalhe/editar/arquivar |
+| GET / POST | `/seller/products` | 🏪 | Listar (`?status=`, do mais recente para o mais antigo, com capa, menor preço e estoque total) e criar o rascunho (slug do título, único na loja: `-2`, `-3`...). Categoria precisa ser ativa e sem subcategorias |
+| GET / PATCH / DELETE | `/seller/products/{id}` | 🏪 | Detalhe, editar as informações e arquivar (não apaga, RN-17; arquivado é final). O GET e as escritas respondem `ETag: "<versão>"`; PATCH e DELETE exigem `If-Match` (desatualizado: 412 `PRODUCT_VERSION_CONFLICT` com `currentVersion`; ausente: 428 `PRECONDITION_REQUIRED`). Produto de outra loja: 404 `PRODUCT_NOT_FOUND` |
 | POST | `/seller/products/{id}/publish` | 🏪 | Publicar |
 | PUT | `/seller/products/{id}/variants` | 🏪 | Substitui conjunto de variantes |
 | PATCH | `/seller/variants/{id}/stock` | 🏪 | Ajuste de estoque `{ delta \| absolute }` |
