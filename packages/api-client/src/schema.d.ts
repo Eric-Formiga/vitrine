@@ -201,6 +201,50 @@ export interface paths {
         patch: operations["SellerProductsController_update"];
         trace?: never;
     };
+    "/v1/seller/products/{id}/variants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Grade de variantes
+         * @description As ativas, com o ETag do produto.
+         */
+        get: operations["SellerVariantsController_list"];
+        /**
+         * Trocar a grade de variantes
+         * @description A chave é tamanho + cor: quem continua mantém o id, quem sai é arquivada e quem volta é reativada. Recalcula o menor preço. 409 SKU_TAKEN se outra variante ativa da loja usa o SKU.
+         */
+        put: operations["SellerVariantsController_replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/seller/variants/{id}/stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Ajustar o estoque
+         * @description Pela diferença (delta) ou pelo valor final (absolute). Sem If-Match e sem mudar a versão do produto. 422 STOCK_WOULD_BE_NEGATIVE se ficaria abaixo de zero.
+         */
+        patch: operations["SellerVariantsController_adjust"];
+        trace?: never;
+    };
     "/v1/webhooks/asaas": {
         parameters: {
             query?: never;
@@ -739,6 +783,53 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        VariantInput: {
+            /** @description Único entre as variantes ativas da loja; guardado em maiúsculas. Sem ele: SLUG-TAMANHO-COR. */
+            sku?: string;
+            /** @description Da grade do tipo da categoria: PP, P, M, G, GG, XGG; 33 a 46; ou U. */
+            size: string;
+            /** @description Nome da cor, como o comprador vê. "Preto" e "preto" são a mesma. */
+            color: string;
+            colorHex: string;
+            priceCents: number;
+            /** @description Preço "de", riscado; maior que o preço. */
+            compareAtCents?: number | null;
+            stock: number;
+            weightGrams: number;
+        };
+        /** @description A grade inteira: quem não vier é arquivada. Exige If-Match. */
+        VariantGridInput: {
+            variants: components["schemas"]["VariantInput"][];
+        };
+        StockAdjustmentInput: {
+            /** @description Soma ao estoque atual (negativo tira). */
+            delta?: number;
+            /** @description Novo estoque, no lugar do atual. */
+            absolute?: number;
+        };
+        SellerVariant: {
+            /** Format: uuid */
+            id: string;
+            sku: string;
+            size: string;
+            color: string;
+            colorHex: string;
+            priceCents: number;
+            compareAtCents: number | null;
+            stock: number;
+            /** @description Presas a checkouts em andamento; o estoque nunca fica abaixo disso. */
+            reserved: number;
+            weightGrams: number;
+        };
+        SellerVariantGrid: {
+            /** @description As ativas, na ordem da grade de tamanhos. */
+            variants: components["schemas"]["SellerVariant"][];
+        };
+        VariantStock: {
+            /** Format: uuid */
+            id: string;
+            stock: number;
         };
         Me: {
             /** Format: uuid */
@@ -1460,6 +1551,227 @@ export interface operations {
             };
             /** @description Falta o cabeçalho If-Match */
             428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerVariantsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerVariantGrid"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerVariantsController_replace: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description O ETag da versão do produto que você está editando, ex.: "3". Desatualizado: 412; ausente: 428. */
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VariantGridInput"];
+            };
+        };
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerVariantGrid"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflito com o que já existe */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A versão em If-Match não é mais a atual: recarregue antes de gravar */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Falta o cabeçalho If-Match */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerVariantsController_adjust: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockAdjustmentInput"];
+            };
+        };
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VariantStock"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

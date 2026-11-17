@@ -920,6 +920,304 @@
         ]
       }
     },
+    "/v1/seller/products/{id}/variants": {
+      "get": {
+        "description": "As ativas, com o ETag do produto.",
+        "operationId": "SellerVariantsController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerVariantGrid"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Grade de variantes",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "put": {
+        "description": "A chave é tamanho + cor: quem continua mantém o id, quem sai é arquivada e quem volta é reativada. Recalcula o menor preço. 409 SKU_TAKEN se outra variante ativa da loja usa o SKU.",
+        "operationId": "SellerVariantsController_replace",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "O ETag da versão do produto que você está editando, ex.: \"3\". Desatualizado: 412; ausente: 428.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantGridInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerVariantGrid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o que já existe",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "A versão em If-Match não é mais a atual: recarregue antes de gravar",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Falta o cabeçalho If-Match",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Trocar a grade de variantes",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
+    "/v1/seller/variants/{id}/stock": {
+      "patch": {
+        "description": "Pela diferença (delta) ou pelo valor final (absolute). Sem If-Match e sem mudar a versão do produto. 422 STOCK_WOULD_BE_NEGATIVE se ficaria abaixo de zero.",
+        "operationId": "SellerVariantsController_adjust",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockAdjustmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantStock"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Ajustar o estoque",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
     "/v1/webhooks/asaas": {
       "post": {
         "operationId": "AsaasWebhookController_receive",
@@ -3025,6 +3323,196 @@
           "suspension",
           "createdAt",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "VariantInput": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "description": "Único entre as variantes ativas da loja; guardado em maiúsculas. Sem ele: SLUG-TAMANHO-COR.",
+            "type": "string",
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "size": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Da grade do tipo da categoria: PP, P, M, G, GG, XGG; 33 a 46; ou U."
+          },
+          "color": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "Nome da cor, como o comprador vê. \"Preto\" e \"preto\" são a mesma."
+          },
+          "colorHex": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "compareAtCents": {
+            "description": "Preço \"de\", riscado; maior que o preço.",
+            "nullable": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "stock": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999
+          },
+          "weightGrams": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30000
+          }
+        },
+        "required": [
+          "size",
+          "color",
+          "colorHex",
+          "priceCents",
+          "stock",
+          "weightGrams"
+        ],
+        "additionalProperties": false
+      },
+      "VariantGridInput": {
+        "type": "object",
+        "properties": {
+          "variants": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantInput"
+            }
+          }
+        },
+        "required": [
+          "variants"
+        ],
+        "additionalProperties": false,
+        "description": "A grade inteira: quem não vier é arquivada. Exige If-Match."
+      },
+      "StockAdjustmentInput": {
+        "type": "object",
+        "properties": {
+          "delta": {
+            "description": "Soma ao estoque atual (negativo tira).",
+            "type": "integer",
+            "minimum": -99999,
+            "maximum": 99999
+          },
+          "absolute": {
+            "description": "Novo estoque, no lugar do atual.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99999
+          }
+        },
+        "additionalProperties": false
+      },
+      "SellerVariant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "colorHex": {
+            "type": "string"
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "compareAtCents": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "stock": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "reserved": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Presas a checkouts em andamento; o estoque nunca fica abaixo disso."
+          },
+          "weightGrams": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "sku",
+          "size",
+          "color",
+          "colorHex",
+          "priceCents",
+          "compareAtCents",
+          "stock",
+          "reserved",
+          "weightGrams"
+        ],
+        "additionalProperties": false
+      },
+      "SellerVariantGrid": {
+        "type": "object",
+        "properties": {
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SellerVariant"
+            },
+            "description": "As ativas, na ordem da grade de tamanhos."
+          }
+        },
+        "required": [
+          "variants"
+        ],
+        "additionalProperties": false
+      },
+      "VariantStock": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "stock": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "stock"
         ],
         "additionalProperties": false
       },
