@@ -238,8 +238,25 @@ Migrações: `prisma migrate deploy` como passo de *release* na Railway antes do
 Cuidados:
 - **Limite de gasto** configurado no Railway para nunca passar do crédito.
 - `NODE_OPTIONS=--max-old-space-size=256` para limitar memória.
-- **Supabase gratuito pausa após inatividade**: GitHub Action agendada chama `/health/ready` diariamente.
+- **Supabase gratuito pausa após 7 dias sem uso**: o workflow [Supabase acordado](#supabase-acordado) mantém o projeto ativo.
 - Valores de referência; revisar as páginas de preço antes de contratar.
+
+### Supabase acordado
+
+No plano grátis, o Supabase pausa o projeto depois de 7 dias sem uso. Com o banco pausado, a demo cai até alguém restaurar o projeto no painel. Isso é um risco real para um portfólio, que pode ficar semanas sem visitas.
+
+O workflow [`.github/workflows/supabase-acordado.yml`](../.github/workflows/supabase-acordado.yml) roda a cada 3 dias. Ele também pode ser disparado à mão, em Actions → Supabase acordado → Run workflow.
+
+1. **Consulta o Storage:** pede os dados do bucket `product-images` à API do Storage, que lê o banco do projeto. Uma resposta diferente de 200 faz o job falhar, e o GitHub avisa o dono do repositório por e-mail.
+2. **Renova o próprio agendamento:** o GitHub desliga os workflows agendados de um repositório público que fica 60 dias sem atividade, e os commits aqui podem ficar espaçados.
+   - Por isso, a cada execução, o job reativa a si mesmo pela API do GitHub (`PUT .../actions/workflows/supabase-acordado.yml/enable`), o que zera essa contagem. É a técnica do modo "API" da action *keepalive-workflow*, feita aqui sem código de terceiros.
+   - A documentação do GitHub não garante esse comportamento. Se um dia o agendamento parar mesmo assim, basta reativar em Actions. Depois de pronta, a API de produção também mantém o banco ativo, porque as filas do pg-boss o consultam o tempo todo.
+
+| Item | Onde fica |
+|---|---|
+| `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | Secrets do repositório no GitHub (os mesmos valores do `.env`; trocou a chave no Supabase, atualize lá também) |
+| Permissão do job | Só `actions: write`, para reativar o próprio agendamento; sem acesso ao código |
+| Histórico das execuções | GitHub → Actions → Supabase acordado |
 
 ## 11. CI/CD
 
