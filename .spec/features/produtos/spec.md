@@ -274,7 +274,7 @@ Como vendedor, quero cadastrar e acompanhar os meus produtos pelo site, em etapa
 
 - Listagem, página do produto, página da loja, cache e eventos de revalidação (`ProductPublished`, `revalidateTag`) → feature `vitrine`.
 - Busca textual (`search_vector`, trigram) e facetas → feature `busca`. Aqui só o `min_price_cents` passa a ser mantido.
-- Seed com 6 lojas e ~200 produtos → feature `vitrine`.
+- Seed com 6 lojas e ~48 produtos (8 por loja; decidido em 16/11/2026, para caber folgado no Storage grátis) → feature `vitrine`.
 - Reserva de estoque (`reserved`), revalidação do preço no checkout e preço congelado no pedido (RN-7) → Fase 2. A coluna `reserved` nasce aqui, sempre 0.
 - Exibição otimizada das imagens (`next/image` com AVIF/WebP) na vitrine → feature `vitrine`; nas telas do vendedor, a imagem aparece pela URL pública.
 - Lista de produtos para moderação no site do admin → Fase 4 (bônus). Aqui o admin age pelo identificador, via API ou `/docs`.
