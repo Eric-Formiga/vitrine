@@ -1,12 +1,14 @@
-# Mantém o projeto do Supabase acordado. No plano grátis, o projeto é pausado depois de
-# 7 dias sem uso, e a demo cairia. A cada 3 dias, este job consulta o bucket de imagens
-# pela API do Storage, que lê o banco do projeto. Se a chamada falhar, o job falha e o
-# GitHub avisa por e-mail.
+# Mantém o projeto do Supabase acordado (docs/ARCHITECTURE.md, seção 10). No plano grátis,
+# o projeto é pausado depois de 7 dias sem uso, e a demo cairia. A cada 3 dias, este job
+# consulta o bucket de imagens pela API do Storage, que lê o banco do projeto. Se a chamada
+# falhar, o job falha e o GitHub avisa por e-mail.
 #
 # Secrets do repositório: SUPABASE_URL e SUPABASE_SECRET_KEY (os mesmos valores do .env).
 # Trocou a chave no Supabase? Atualize o secret também.
-# Atenção: o GitHub desliga os agendamentos de um repositório público que fica 60 dias
-# sem commits. Se o projeto ficar parado esse tempo, reative em Actions → este workflow.
+#
+# O GitHub desliga os agendamentos de um repositório público que fica 60 dias sem
+# atividade. Como os commits podem ficar espaçados, o segundo passo reativa o próprio
+# workflow pela API a cada execução, o que zera essa contagem sem precisar de commit.
 name: Supabase acordado
 
 on:
@@ -14,7 +16,9 @@ on:
     - cron: '17 9 */3 * *'
   workflow_dispatch:
 
-permissions: {}
+# Só o necessário para reativar o próprio agendamento; nada de leitura ou escrita de código.
+permissions:
+  actions: write
 
 jobs:
   consultar-storage:
@@ -40,3 +44,12 @@ jobs:
             echo "::error::O Storage respondeu $status. Confira os secrets e se o projeto está pausado no painel do Supabase."
             exit 1
           fi
+
+      - name: Renova o agendamento (sem precisar de commit)
+        # Roda mesmo se a consulta falhar: o agendamento não pode morrer junto.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method PUT "repos/${{ github.repository }}/actions/workflows/supabase-acordado.yml/enable"
+          echo "Agendamento renovado: a contagem de 60 dias recomeça agora."
