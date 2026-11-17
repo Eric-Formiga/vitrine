@@ -67,6 +67,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/seller/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pedir uma URL de upload
+         * @description JPEG, PNG ou WebP de até 5 MB. O arquivo vai para sellers/{sellerId}/ com um nome aleatório. Sem uso num produto em 24 h, ele é apagado. 503 STORAGE_NOT_CONFIGURED sem o Supabase.
+         */
+        post: operations["SellerUploadsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/categories": {
         parameters: {
             query?: never;
@@ -243,6 +263,30 @@ export interface paths {
          * @description Pela diferença (delta) ou pelo valor final (absolute). Sem If-Match e sem mudar a versão do produto. 422 STOCK_WOULD_BE_NEGATIVE se ficaria abaixo de zero.
          */
         patch: operations["SellerVariantsController_adjust"];
+        trace?: never;
+    };
+    "/v1/seller/products/{id}/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fotos do produto
+         * @description Na ordem (a primeira é a capa), com o ETag do produto.
+         */
+        get: operations["SellerProductImagesController_list"];
+        /**
+         * Trocar as fotos
+         * @description De 0 a 8, já enviadas pela URL de upload. Cada arquivo é conferido no Storage (tipo e tamanho reais). 422 INVALID_IMAGE com `position` e `reason`. As que saíram vão para a limpeza.
+         */
+        put: operations["SellerProductImagesController_replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/webhooks/asaas": {
@@ -704,6 +748,36 @@ export interface components {
             archivedAt: string | null;
             children: components["schemas"]["AdminCategoryNode"][];
         };
+        ProductImageInput: {
+            /** @description O `path` devolvido por POST /v1/seller/uploads. */
+            path: string;
+            /**
+             * @description Texto alternativo, para quem usa leitor de tela.
+             * @default
+             */
+            alt: string;
+            /**
+             * @description Cor de uma variante ativa; nula vale para todas as cores.
+             * @default null
+             */
+            color: string | null;
+        };
+        /** @description A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match. */
+        ProductImagesInput: {
+            images: components["schemas"]["ProductImageInput"][];
+        };
+        ProductImage: {
+            path: string;
+            /** @description URL pública; nula sem o Storage configurado. */
+            url: string | null;
+            alt: string;
+            color: string | null;
+            /** @description 0 é a capa. */
+            position: number;
+        };
+        ProductImageList: {
+            images: components["schemas"]["ProductImage"][];
+        };
         ProductInput: {
             title: string;
             /** @description Texto puro; as quebras de linha são mantidas. Padrão: vazia. */
@@ -839,6 +913,26 @@ export interface components {
             /** @description Papéis guardados na Vitrine: customer, seller, admin. */
             roles: string[];
         };
+        /** @description O tipo e o tamanho do arquivo que o navegador vai enviar. */
+        UploadRequestInput: {
+            /** @enum {string} */
+            contentType: "image/jpeg" | "image/png" | "image/webp";
+            sizeBytes: number;
+        };
+        UploadTicket: {
+            /** @description Caminho no Storage; mande-o na lista de imagens do produto. */
+            path: string;
+            /**
+             * Format: uri
+             * @description Envie o arquivo com PUT e o cabeçalho Content-Type, sem login.
+             */
+            uploadUrl: string;
+            /**
+             * Format: date-time
+             * @description Até quando a URL aceita o envio.
+             */
+            expiresAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -919,6 +1013,75 @@ export interface operations {
             };
             /** @description É preciso entrar (token ausente, inválido ou vencido) */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerUploadsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequestInput"];
+            };
+        };
+        responses: {
+            /** @description URL assinada */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicket"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1772,6 +1935,156 @@ export interface operations {
             };
             /** @description A regra de negócio não permite */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductImagesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductImageList"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    SellerProductImagesController_replace: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description O ETag da versão do produto que você está editando, ex.: "3". Desatualizado: 412; ausente: 428. */
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductImagesInput"];
+            };
+        };
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductImageList"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A versão em If-Match não é mais a atual: recarregue antes de gravar */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Falta o cabeçalho If-Match */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

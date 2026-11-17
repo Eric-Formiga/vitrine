@@ -10,6 +10,8 @@ import { CreateProductUseCase } from './application/create-product.use-case.js';
 import { GetCategoryTreeUseCase } from './application/get-category-tree.use-case.js';
 import { ListMyProductsUseCase } from './application/list-my-products.use-case.js';
 import { PRODUCT_REPOSITORY } from './application/product.repository.js';
+import { PRODUCT_IMAGE_REPOSITORY } from './application/product-image.repository.js';
+import { ListImagesUseCase, ReplaceImagesUseCase } from './application/replace-images.use-case.js';
 import { ListVariantsUseCase, ReplaceVariantsUseCase } from './application/replace-variants.use-case.js';
 import { RestoreCategoryUseCase } from './application/restore-category.use-case.js';
 import { UpdateCategoryUseCase } from './application/update-category.use-case.js';
@@ -17,17 +19,26 @@ import { UpdateProductUseCase } from './application/update-product.use-case.js';
 import { VARIANT_REPOSITORY } from './application/variant.repository.js';
 import { AdminCategoriesController } from './http/admin-categories.controller.js';
 import { CategoriesController } from './http/categories.controller.js';
+import { SellerProductImagesController } from './http/seller-product-images.controller.js';
 import { SellerProductsController } from './http/seller-products.controller.js';
 import { SellerVariantsController } from './http/seller-variants.controller.js';
 import { PrismaCategoryRepository } from './infra/prisma-category.repository.js';
 import { PrismaProductRepository } from './infra/prisma-product.repository.js';
+import { PrismaProductImageRepository } from './infra/prisma-product-image.repository.js';
 import { PrismaVariantRepository } from './infra/prisma-variant.repository.js';
 
 // Catálogo: a árvore de categorias e os produtos das lojas (spec 03). As rotas do
-// vendedor usam o guard da loja aprovada, que vem do SellersModule.
+// vendedor usam o guard da loja aprovada, que vem do SellersModule; as fotos usam a porta
+// do Storage, que o MediaModule (global) fornece.
 @Module({
   imports: [SellersModule],
-  controllers: [CategoriesController, AdminCategoriesController, SellerProductsController, SellerVariantsController],
+  controllers: [
+    CategoriesController,
+    AdminCategoriesController,
+    SellerProductsController,
+    SellerVariantsController,
+    SellerProductImagesController,
+  ],
   providers: [
     GetCategoryTreeUseCase,
     CreateCategoryUseCase,
@@ -41,6 +52,9 @@ import { PrismaVariantRepository } from './infra/prisma-variant.repository.js';
     ListVariantsUseCase,
     ReplaceVariantsUseCase,
     AdjustStockUseCase,
+    ListImagesUseCase,
+    ReplaceImagesUseCase,
+    { provide: PRODUCT_IMAGE_REPOSITORY, useClass: PrismaProductImageRepository },
     { provide: CATEGORY_REPOSITORY, useClass: PrismaCategoryRepository },
     { provide: PRODUCT_REPOSITORY, useClass: PrismaProductRepository },
     { provide: VARIANT_REPOSITORY, useClass: PrismaVariantRepository },

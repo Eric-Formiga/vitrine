@@ -22,7 +22,7 @@ Vendedores cadastram produtos de moda com variantes; compradores encontram produ
 - Arquivar produto com pedidos mantém registro (RN-17); remove da vitrine.
 
 ### H2 — Upload de imagens
-- `POST /seller/uploads` → `{ uploadUrl, path }` (URL assinada do Supabase Storage, 60 s).
+- `POST /seller/uploads` → `{ uploadUrl, path }` (URL assinada do Supabase Storage, com a validade fixa dele, 2 h; ver ASM-032 em `.spec/features/produtos`).
 - Cliente envia direto ao Storage; depois confirma no produto. Backend valida que o `path` pertence ao prefixo da loja (`sellers/{sellerId}/...`).
 - Formatos jpeg/png/webp ≤ 5 MB; exibição via `next/image` (redimensionado, AVIF/WebP).
 - Job remove arquivos órfãos com mais de 24 h.

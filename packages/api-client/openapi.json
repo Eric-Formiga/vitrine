@@ -80,6 +80,94 @@
         ]
       }
     },
+    "/v1/seller/uploads": {
+      "post": {
+        "description": "JPEG, PNG ou WebP de até 5 MB. O arquivo vai para sellers/{sellerId}/ com um nome aleatório. Sem uso num produto em 24 h, ele é apagado. 503 STORAGE_NOT_CONFIGURED sem o Supabase.",
+        "operationId": "SellerUploadsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequestInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "URL assinada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicket"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Pedir uma URL de upload",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
     "/v1/categories": {
       "get": {
         "description": "Ordenada por posição e, empatadas, por nome.",
@@ -1213,6 +1301,207 @@
           }
         ],
         "summary": "Ajustar o estoque",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
+    "/v1/seller/products/{id}/images": {
+      "get": {
+        "description": "Na ordem (a primeira é a capa), com o ETag do produto.",
+        "operationId": "SellerProductImagesController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductImageList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Fotos do produto",
+        "tags": [
+          "vendedor"
+        ]
+      },
+      "put": {
+        "description": "De 0 a 8, já enviadas pela URL de upload. Cada arquivo é conferido no Storage (tipo e tamanho reais). 422 INVALID_IMAGE com `position` e `reason`. As que saíram vão para a limpeza.",
+        "operationId": "SellerProductImagesController_replace",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "O ETag da versão do produto que você está editando, ex.: \"3\". Desatualizado: 412; ausente: 428.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductImagesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductImageList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "A versão em If-Match não é mais a atual: recarregue antes de gravar",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Falta o cabeçalho If-Match",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Trocar as fotos",
         "tags": [
           "vendedor"
         ]
@@ -3059,6 +3348,101 @@
         ],
         "additionalProperties": false
       },
+      "ProductImageInput": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "O `path` devolvido por POST /v1/seller/uploads."
+          },
+          "alt": {
+            "default": "",
+            "description": "Texto alternativo, para quem usa leitor de tela.",
+            "type": "string",
+            "maxLength": 200
+          },
+          "color": {
+            "default": null,
+            "description": "Cor de uma variante ativa; nula vale para todas as cores.",
+            "nullable": true,
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "path",
+          "alt",
+          "color"
+        ],
+        "additionalProperties": false
+      },
+      "ProductImagesInput": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageInput"
+            }
+          }
+        },
+        "required": [
+          "images"
+        ],
+        "additionalProperties": false,
+        "description": "A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match."
+      },
+      "ProductImage": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "url": {
+            "nullable": true,
+            "description": "URL pública; nula sem o Storage configurado.",
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "color": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "0 é a capa."
+          }
+        },
+        "required": [
+          "path",
+          "url",
+          "alt",
+          "color",
+          "position"
+        ],
+        "additionalProperties": false
+      },
+      "ProductImageList": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImage"
+            }
+          }
+        },
+        "required": [
+          "images"
+        ],
+        "additionalProperties": false
+      },
       "ProductInput": {
         "type": "object",
         "properties": {
@@ -3544,6 +3928,56 @@
           "email",
           "name",
           "roles"
+        ],
+        "additionalProperties": false
+      },
+      "UploadRequestInput": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5242880
+          }
+        },
+        "required": [
+          "contentType",
+          "sizeBytes"
+        ],
+        "additionalProperties": false,
+        "description": "O tipo e o tamanho do arquivo que o navegador vai enviar."
+      },
+      "UploadTicket": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Caminho no Storage; mande-o na lista de imagens do produto."
+          },
+          "uploadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Envie o arquivo com PUT e o cabeçalho Content-Type, sem login."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Até quando a URL aceita o envio."
+          }
+        },
+        "required": [
+          "path",
+          "uploadUrl",
+          "expiresAt"
         ],
         "additionalProperties": false
       }

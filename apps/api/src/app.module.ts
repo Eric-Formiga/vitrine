@@ -3,9 +3,11 @@ import { APP_FILTER } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
 
 import type { ClerkGateway } from './modules/identity/application/clerk-gateway.port.js';
+import type { StorageGateway } from './modules/media/application/storage-gateway.port.js';
 import type { PaymentGateway } from './modules/payments/application/payment-gateway.port.js';
 import { CatalogModule } from './modules/catalog/catalog.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
+import { MediaModule } from './modules/media/media.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { SellersModule } from './modules/sellers/sellers.module.js';
 import { AuditModule } from './shared/audit/audit.module.js';
@@ -23,11 +25,12 @@ export interface AppModuleOptions {
   imports?: ModuleMetadata['imports'];
   clerkGateway?: ClerkGateway;
   paymentGateway?: PaymentGateway;
+  storageGateway?: StorageGateway;
 }
 
 @Module({})
 export class AppModule {
-  static forRoot({ env, logStream, imports = [], clerkGateway, paymentGateway }: AppModuleOptions): DynamicModule {
+  static forRoot({ env, logStream, imports = [], clerkGateway, paymentGateway, storageGateway }: AppModuleOptions): DynamicModule {
     return {
       module: AppModule,
       imports: [
@@ -38,6 +41,7 @@ export class AppModule {
         QueueModule,
         HealthModule,
         IdentityModule.forRoot({ clerkGateway }),
+        MediaModule.forRoot({ storageGateway }),
         CatalogModule,
         PaymentsModule.forRoot({ paymentGateway }),
         SellersModule,

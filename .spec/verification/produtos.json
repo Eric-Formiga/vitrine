@@ -1,11 +1,11 @@
 {
   "feature": "produtos",
-  "timestamp": "2026-11-17T22:22:40.570Z",
-  "gitRev": "590ed0d",
+  "timestamp": "2026-11-17T23:37:31.279Z",
+  "gitRev": "7bcff3d",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 186,
+  "testsParsed": 196,
   "results": {
     "AC-060": {
       "status": "pass",
@@ -19,7 +19,7 @@
     },
     "AC-062": {
       "status": "pass",
-      "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062 AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062",
+      "testName": "US-025 — O vendedor envia as fotos do produto AC-062: a lista \"Meus produtos\" traz a capa @spec:AC-062 AC-062: a lista \"Meus produtos\" traz a capa @spec:AC-062",
       "method": "vitest-json"
     },
     "AC-063": {
@@ -40,6 +40,26 @@
     "AC-066": {
       "status": "pass",
       "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-066: trocar a grade preserva as variantes que continuam @spec:AC-066 AC-066: trocar a grade preserva as variantes que continuam @spec:AC-066",
+      "method": "vitest-json"
+    },
+    "AC-067": {
+      "status": "pass",
+      "testName": "US-025 — O vendedor envia as fotos do produto AC-067: pedir uma URL de upload @spec:AC-067 AC-067: pedir uma URL de upload @spec:AC-067",
+      "method": "vitest-json"
+    },
+    "AC-068": {
+      "status": "pass",
+      "testName": "US-025 — O vendedor envia as fotos do produto AC-068: salvar as imagens do produto @spec:AC-068 @spec:US-025 AC-068: salvar as imagens do produto @spec:AC-068 @spec:US-025",
+      "method": "vitest-json"
+    },
+    "AC-069": {
+      "status": "pass",
+      "testName": "US-025 — O vendedor envia as fotos do produto AC-069: imagens inválidas são recusadas @spec:AC-069 AC-069: imagens inválidas são recusadas @spec:AC-069",
+      "method": "vitest-json"
+    },
+    "AC-070": {
+      "status": "pass",
+      "testName": "US-025 — Adaptador do Supabase Storage AC-070: o caminho real funciona contra o Supabase Storage @spec:AC-070 AC-070: o caminho real funciona contra o Supabase Storage @spec:AC-070",
       "method": "vitest-json"
     },
     "AC-074": {

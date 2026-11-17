@@ -1,0 +1,108 @@
+{
+  "values": {
+    "caminho": "sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png"
+  },
+  "interactions": [
+    {
+      "method": "POST",
+      "path": "/storage/v1/object/upload/sign/product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+      "status": 200,
+      "responseBody": {
+        "url": "/object/upload/sign/product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png?token=eyJraWQiOiIzYzU0YzRmMi04OGFjLTRkNzYtODMxMS1lMTAyZWQ2NmExOTEiLCJhbGciOiJFUzI1NiJ9.eyJ1cmwiOiJwcm9kdWN0LWltYWdlcy9zZWxsZXJzLzAwMDAwMDAwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwYzBkZS8zNGYzZDM0Yi05ZDhiLTRiMzEtOTgwNi01ZTU3NjM5M2YyZGQucG5nIiwidXBzZXJ0IjpmYWxzZSwic2NvcGUiOiJ1cGxvYWQiLCJpYXQiOjE3OTQ5NTQ2NDEsImV4cCI6MTc5NDk2MTg0MX0.assinatura-removida",
+        "token": "eyJraWQiOiIzYzU0YzRmMi04OGFjLTRkNzYtODMxMS1lMTAyZWQ2NmExOTEiLCJhbGciOiJFUzI1NiJ9.eyJ1cmwiOiJwcm9kdWN0LWltYWdlcy9zZWxsZXJzLzAwMDAwMDAwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwYzBkZS8zNGYzZDM0Yi05ZDhiLTRiMzEtOTgwNi01ZTU3NjM5M2YyZGQucG5nIiwidXBzZXJ0IjpmYWxzZSwic2NvcGUiOiJ1cGxvYWQiLCJpYXQiOjE3OTQ5NTQ2NDEsImV4cCI6MTc5NDk2MTg0MX0.assinatura-removida"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/storage/v1/object/upload/sign/product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png?token=eyJraWQiOiIzYzU0YzRmMi04OGFjLTRkNzYtODMxMS1lMTAyZWQ2NmExOTEiLCJhbGciOiJFUzI1NiJ9.eyJ1cmwiOiJwcm9kdWN0LWltYWdlcy9zZWxsZXJzLzAwMDAwMDAwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwYzBkZS8zNGYzZDM0Yi05ZDhiLTRiMzEtOTgwNi01ZTU3NjM5M2YyZGQucG5nIiwidXBzZXJ0IjpmYWxzZSwic2NvcGUiOiJ1cGxvYWQiLCJpYXQiOjE3OTQ5NTQ2NDEsImV4cCI6MTc5NDk2MTg0MX0.assinatura-removida",
+      "requestBody": {
+        "binaryBytes": 70
+      },
+      "status": 200,
+      "responseBody": {
+        "Key": "product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+        "version": "805b3055-7a2d-45e3-b006-c75e26523628"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/storage/v1/object/info/product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+      "status": 200,
+      "responseBody": {
+        "id": "b58dd042-167c-4c14-b307-a75b6d83fc31",
+        "name": "sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+        "version": "805b3055-7a2d-45e3-b006-c75e26523628",
+        "bucket_id": "product-images",
+        "size": 70,
+        "content_type": "image/png",
+        "cache_control": "no-cache",
+        "content_encoding": null,
+        "etag": "\"f829b914fc47cfc9c0747c119c27cf1b\"",
+        "metadata": {},
+        "last_modified": "2026-11-17T22:30:42.250Z",
+        "created_at": "2026-11-17T22:30:42.250Z",
+        "archived_at": null,
+        "is_delete_marker": false,
+        "is_versioned": false
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/storage/v1/object/product-images",
+      "requestBody": {
+        "prefixes": [
+          "sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png"
+        ]
+      },
+      "status": 200,
+      "responseBody": [
+        {
+          "name": "sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+          "bucket_id": "product-images",
+          "owner": "",
+          "owner_id": "",
+          "version": "805b3055-7a2d-45e3-b006-c75e26523628",
+          "id": "b58dd042-167c-4c14-b307-a75b6d83fc31",
+          "updated_at": "2026-11-17T22:30:42.250Z",
+          "created_at": "2026-11-17T22:30:42.250Z",
+          "last_accessed_at": "2026-11-17T22:30:42.250Z",
+          "metadata": {
+            "eTag": "\"f829b914fc47cfc9c0747c119c27cf1b\"",
+            "size": 70,
+            "mimetype": "image/png",
+            "cacheControl": "no-cache",
+            "lastModified": "2026-11-17T22:30:43.000Z",
+            "contentLength": 70,
+            "httpStatusCode": 200
+          },
+          "user_metadata": {},
+          "archived_at": null,
+          "is_delete_marker": false,
+          "is_versioned": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/storage/v1/object/info/product-images/sellers/00000000-0000-7000-8000-00000000c0de/34f3d34b-9d8b-4b31-9806-5e576393f2dd.png",
+      "status": 400,
+      "responseBody": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/storage/v1/object/info/product-images/sellers/00000000-0000-7000-8000-00000000c0de/nunca-enviado.png",
+      "status": 400,
+      "responseBody": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      }
+    }
+  ]
+}
