@@ -70,7 +70,12 @@ export function productOf(categoryId: string, overrides: Record<string, unknown>
   };
 }
 
-/** Variante direto no banco (a grade pela API é da T-021). */
+/** Uma linha válida da grade (PUT .../variants), para os testes mudarem só o que interessa. */
+export function variantOf(size: string, color = 'Preto', overrides: Record<string, unknown> = {}) {
+  return { size, color, colorHex: '#1A1A1A', priceCents: 19900, stock: 5, weightGrams: 300, ...overrides };
+}
+
+/** Variante direto no banco, sem passar pela grade (para a lista e o arquivamento). */
 export async function insertVariant(
   prisma: TestApp['prisma'],
   store: TestStore,

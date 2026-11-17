@@ -51,9 +51,9 @@
     - **Capa:** a lista devolve `coverUrl: null` até a T-022 ligar o caminho da capa à URL pública (`toSellerProductSummary` recebe a função).
     - **Testes:** o `product-test-kit.ts` cria a loja direto no banco, com o documento cifrado pelo cofre da própria API.
 
-## T-021 — Grade de variantes e ajuste rápido de estoque [pendente]
+## T-021 — Grade de variantes e ajuste rápido de estoque [concluida]
 - Refs: US-024, AC-063, AC-064, AC-065, AC-066, US-028, AC-077, AC-078
-- Arquivos: apps/api/src/modules/catalog/catalog.module.ts, apps/api/src/modules/catalog/application/update-product.use-case.ts, apps/api/src/modules/catalog/domain/size-grid.ts, apps/api/src/modules/catalog/domain/variant.ts, apps/api/src/modules/catalog/domain/variant.spec.ts, apps/api/src/modules/catalog/application/variant.repository.ts, apps/api/src/modules/catalog/application/replace-variants.use-case.ts, apps/api/src/modules/catalog/application/adjust-stock.use-case.ts, apps/api/src/modules/catalog/infra/prisma-variant.repository.ts, apps/api/src/modules/catalog/http/variant.dto.ts, apps/api/src/modules/catalog/http/seller-variants.controller.ts, apps/api/test/support/product-test-kit.ts, apps/api/test/seller-variants.e2e-spec.ts, packages/api-client/openapi.json, packages/api-client/src/schema.d.ts, docs/API.md
+- Arquivos: apps/api/src/modules/catalog/catalog.module.ts, apps/api/src/modules/catalog/application/create-product.use-case.ts, apps/api/src/modules/catalog/application/update-product.use-case.ts, apps/api/src/modules/catalog/domain/size-grid.ts, apps/api/src/modules/catalog/domain/variant.ts, apps/api/src/modules/catalog/domain/variant-errors.ts, apps/api/src/modules/catalog/domain/variant.spec.ts, apps/api/src/modules/catalog/application/variant.repository.ts, apps/api/src/modules/catalog/application/replace-variants.use-case.ts, apps/api/src/modules/catalog/application/adjust-stock.use-case.ts, apps/api/src/modules/catalog/infra/prisma-variant.repository.ts, apps/api/src/modules/catalog/http/variant.dto.ts, apps/api/src/modules/catalog/http/seller-variants.controller.ts, apps/api/test/support/product-test-kit.ts, apps/api/test/seller-variants.e2e-spec.ts, packages/api-client/openapi.json, packages/api-client/src/schema.d.ts, docs/API.md
 - Notas:
   - **Depende da T-020.**
   - Grade de tamanhos por `sizeType`, em `size-grid.ts`: `CLOTHING` = PP, P, M, G, GG, XGG; `SHOES` = 33 a 46; `ONE_SIZE` = U.
@@ -80,6 +80,16 @@
     - não muda a versão do produto.
   - AC-078 roda os 10 ajustes com `Promise.all`.
   - Vindo da T-020: trocar a categoria de um produto com variantes ativas por uma de outro `sizeType` precisa ser recusado (422), senão a grade fica com tamanhos fora da lista. A regra entra no `UpdateProductUseCase`.
+  - Feito assim:
+    - **Grade:** `planGrid` (domínio) confere a grade inteira e monta a troca: criar, atualizar (inclui reativar), arquivar, as cores que ficam e o menor preço.
+      - O formato (limites, hex, SKU) fica no Zod, com as constantes do domínio. O que depende do produto fica no `planGrid`: tamanho da categoria, combinação repetida, preço "de", SKU repetido na grade e estoque abaixo do reservado.
+      - A cor não diferencia maiúsculas ("Preto" e "preto" são a mesma variante); o nome novo é gravado.
+      - A variante que continua sem SKU informado guarda o SKU que já tinha.
+    - **Gravação:** a grade roda dentro do `ProductRepository.write`. O repositório confere o SKU nas outras variantes ativas da loja antes de gravar (409 com o SKU exato); o índice parcial segura uma corrida (409 sem o SKU). Arquiva primeiro, para liberar o SKU de quem sai.
+    - **Leitura:** `GET /v1/seller/products/{id}/variants` devolve a grade ativa com o ETag, para a tela da T-025 editar.
+    - **Estoque:** um `UPDATE ... FROM products` só, com o produto não arquivado e o novo valor entre o reservado e 99.999. Sem linha gravada, uma leitura decide o erro: 404, 422 `INVALID_STATE_TRANSITION` (produto arquivado), 422 `STOCK_WOULD_BE_NEGATIVE` (com `currentStock`) ou 400 no campo (passaria de 99.999).
+    - **Categoria:** 422 `SIZE_GRID_MISMATCH`, com o `sizeType` novo. Com a grade vazia, a troca passa.
+    - **Prova por mutação:** 10 defeitos injetados (ajuste que lê e grava separado, apagar em vez de arquivar, SKU de outro produto, cor da foto, e outros); os 10 derrubaram algum teste.
 
 ## T-022 — Imagens: Supabase Storage, URL de upload e imagens do produto [pendente]
 - Refs: US-025, AC-062, AC-067, AC-068, AC-069, AC-070

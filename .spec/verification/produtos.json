@@ -1,11 +1,11 @@
 {
   "feature": "produtos",
-  "timestamp": "2026-11-17T00:17:30.404Z",
-  "gitRev": "53ecaf4",
+  "timestamp": "2026-11-17T22:22:40.570Z",
+  "gitRev": "590ed0d",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 173,
+  "testsParsed": 186,
   "results": {
     "AC-060": {
       "status": "pass",
@@ -22,6 +22,26 @@
       "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062 AC-062: o vendedor lista e abre só os próprios produtos @spec:AC-062",
       "method": "vitest-json"
     },
+    "AC-063": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-063: salvar a grade de variantes @spec:AC-063 @spec:US-024 AC-063: salvar a grade de variantes @spec:AC-063 @spec:US-024",
+      "method": "vitest-json"
+    },
+    "AC-064": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-064: grade inválida é recusada inteira @spec:AC-064 AC-064: grade inválida é recusada inteira @spec:AC-064",
+      "method": "vitest-json"
+    },
+    "AC-065": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-065: o SKU é único dentro da loja @spec:AC-065 AC-065: o SKU é único dentro da loja @spec:AC-065",
+      "method": "vitest-json"
+    },
+    "AC-066": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-066: trocar a grade preserva as variantes que continuam @spec:AC-066 AC-066: trocar a grade preserva as variantes que continuam @spec:AC-066",
+      "method": "vitest-json"
+    },
     "AC-074": {
       "status": "pass",
       "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-074: edição com a versão certa @spec:AC-074 AC-074: edição com a versão certa @spec:AC-074",
@@ -35,6 +55,16 @@
     "AC-076": {
       "status": "pass",
       "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-076: arquivar tira o produto de cena sem apagar @spec:AC-076 AC-076: arquivar tira o produto de cena sem apagar @spec:AC-076",
+      "method": "vitest-json"
+    },
+    "AC-077": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-077: ajustar por diferença ou por valor final @spec:AC-077 @spec:US-028 AC-077: ajustar por diferença ou por valor final @spec:AC-077 @spec:US-028",
+      "method": "vitest-json"
+    },
+    "AC-078": {
+      "status": "pass",
+      "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-078: ajustes simultâneos não se perdem e o estoque nunca fica negativo @spec:AC-078 AC-078: ajustes simultâneos não se perdem e o estoque nunca fica negativo @spec:AC-078",
       "method": "vitest-json"
     }
   },

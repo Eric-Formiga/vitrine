@@ -1,11 +1,11 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-17T00:17:25.324Z",
-  "gitRev": "53ecaf4",
+  "timestamp": "2026-11-17T22:22:33.896Z",
+  "gitRev": "590ed0d",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 173,
+  "testsParsed": 186,
   "results": {
     "AC-001": {
       "status": "pass",
