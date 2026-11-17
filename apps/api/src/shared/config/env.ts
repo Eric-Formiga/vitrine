@@ -28,6 +28,12 @@ const envSchema = z.object({
   ASAAS_API_URL: z.url({ protocol: /^https$/ }).default('https://api-sandbox.asaas.com/v3'),
   // Token que o Asaas manda no cabeçalho asaas-access-token dos webhooks (32 a 255 caracteres).
   ASAAS_WEBHOOK_TOKEN: z.string().min(32).max(255).optional(),
+  // Supabase Storage (ADR-0004), para as imagens dos produtos. Opcionais: sem a URL e a
+  // chave, a API sobe e só as rotas de imagem respondem 503 STORAGE_NOT_CONFIGURED.
+  SUPABASE_URL: z.url({ protocol: /^https$/ }).optional(),
+  // Secret key (sb_secret_...): acesso total ao projeto, só no servidor.
+  SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+  SUPABASE_STORAGE_BUCKET: z.string().min(1).default('product-images'),
   // Chave que protege o CPF/CNPJ das lojas (ASM-016): 32 bytes em base64.
   // Gere com: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
   SELLER_DOCUMENT_KEY: z

@@ -43,7 +43,7 @@ Base:
 - [spec 03](../../../docs/specs/03-catalogo-e-busca.md): modelo de produto, H1 e H2;
 - [API](../../../docs/API.md): `/seller/products`, `/seller/variants`, `/seller/uploads` e `/admin/products`;
 - [DATA_MODEL](../../../docs/DATA_MODEL.md): `products`, `product_variants` e `product_images`;
-- [ARCHITECTURE](../../../docs/ARCHITECTURE.md): uploads com URL assinada de 60 s, jpeg/png/webp de até 5 MB, e a porta `StorageGateway`.
+- [ARCHITECTURE](../../../docs/ARCHITECTURE.md): uploads com URL assinada (2 h no Supabase, ASM-032), jpeg/png/webp de até 5 MB, e a porta `StorageGateway`.
 
 ## Histórias
 
@@ -112,7 +112,7 @@ Como vendedor, quero enviar até 8 fotos, escolher a ordem e dizer de qual cor �
 
 - **Dado** um vendedor com loja aprovada
 - **Quando** ele pede uma URL de upload (`POST /v1/seller/uploads`) com o tipo (`image/jpeg`, `image/png` ou `image/webp`) e o tamanho do arquivo (até 5 MB)
-- **Então** a resposta traz a URL assinada do Storage, válida por 60 segundos, e o caminho do arquivo dentro da pasta da loja (`sellers/{sellerId}/...`)
+- **Então** a resposta traz a URL assinada do Storage, com a validade que o Storage dá a ela (`expiresAt`, ASM-032), e o caminho do arquivo dentro da pasta da loja (`sellers/{sellerId}/...`)
 - **E** outro tipo de arquivo ou mais de 5 MB respondem 400, sem pedir nada ao Storage
 
 #### AC-068 — Salvar as imagens do produto
@@ -296,6 +296,7 @@ Como vendedor, quero cadastrar e acompanhar os meus produtos pelo site, em etapa
 | ASM-029 | Os produtos de uma loja suspensa continuam com a situação que tinham; a loja só não consegue mexer neles (403, feature `vendedores`), e a feature `vitrine` esconde os produtos de lojas que não estão aprovadas | confirmada | confirmado pelo dono do produto em 16/11/2026 |
 | ASM-030 | Arquivar é definitivo nesta feature: não há "desarquivar". Para vender de novo, o vendedor cria outro produto | confirmada | confirmado pelo dono do produto em 16/11/2026 |
 | ASM-031 | As imagens ficam num bucket público do Supabase Storage (leitura pública, escrita só pela URL assinada), com limite de 5 MB e tipos jpeg/png/webp configurados no próprio bucket; a API confere de novo o tipo e o tamanho reais ao salvar as imagens | confirmada | confirmado pelo dono do produto em 16/11/2026 |
+| ASM-032 | A URL de upload assinada vale o que o Storage define, e a API informa essa validade em `expiresAt`. No Supabase hospedado são 2 horas, fixas (medido na gravação de 17/11/2026), e não os 60 segundos da spec 03. O risco é baixo: cada URL envia um arquivo só, num caminho só, sem sobrescrever; o bucket limita tipo e tamanho; a API confere o arquivo real; e a limpeza apaga o que não foi usado em 24 horas | confirmada | confirmado pelo dono do produto em 17/11/2026 |
 
 ## Perguntas em aberto
 

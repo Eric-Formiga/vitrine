@@ -1,6 +1,7 @@
 import type { INestApplication, ModuleMetadata } from '@nestjs/common';
 
 import { createApp } from '../../src/create-app.js';
+import type { StorageGateway } from '../../src/modules/media/application/storage-gateway.port.js';
 import type { PaymentGateway } from '../../src/modules/payments/application/payment-gateway.port.js';
 import { PrismaService } from '../../src/shared/prisma/prisma.service.js';
 import { sessionToken, TEST_JWT_PUBLIC_KEY, TEST_WEB_ORIGIN } from './clerk-test-kit.js';
@@ -14,10 +15,11 @@ export interface TestApp {
 }
 
 // API completa sobre um Postgres descartável, aceitando os tokens assinados pelo kit do Clerk.
-// `paymentGateway` troca o Asaas por um falso (ex.: o da conferência de chave Pix das lojas).
+// `paymentGateway` troca o Asaas por um falso (ex.: o da conferência de chave Pix das lojas);
+// `storageGateway`, o Supabase Storage (ex.: o FakeStorage do storage-test-kit).
 export async function startTestApp(
   imports: ModuleMetadata['imports'] = [],
-  { paymentGateway }: { paymentGateway?: PaymentGateway } = {},
+  { paymentGateway, storageGateway }: { paymentGateway?: PaymentGateway; storageGateway?: StorageGateway } = {},
 ): Promise<TestApp> {
   const db = await startTestDatabase();
   const app = await createApp({
@@ -29,6 +31,7 @@ export async function startTestApp(
     },
     imports,
     paymentGateway,
+    storageGateway,
   });
   await app.init();
   return {

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Inject, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import { IfMatch, sendEtag } from '../../../shared/http/if-match.js';
 import { ApiProblems, ApiZodResponse, SECURITY_SCHEME } from '../../../shared/openapi/openapi.js';
 import { IdParam } from '../../../shared/validation/id-param.pipe.js';
 import { ZodBody, ZodValidationPipe } from '../../../shared/validation/zod-validation.js';
+import { STORAGE_GATEWAY, type StorageGateway } from '../../media/application/storage-gateway.port.js';
 import { ApprovedSellerGuard, CurrentSeller } from '../../sellers/http/approved-seller.guard.js';
 import type { Seller } from '../../sellers/domain/seller.js';
 import { ArchiveProductUseCase } from '../application/archive-product.use-case.js';
@@ -49,6 +50,7 @@ export class SellerProductsController {
     private readonly updateProduct: UpdateProductUseCase,
     private readonly archiveProduct: ArchiveProductUseCase,
     private readonly myProducts: ListMyProductsUseCase,
+    @Inject(STORAGE_GATEWAY) private readonly storage: StorageGateway,
   ) {}
 
   @Post()
@@ -74,8 +76,8 @@ export class SellerProductsController {
     @CurrentSeller() seller: Seller,
     @Query('status', new ZodValidationPipe(productStatusQuerySchema)) status: ProductStatus | undefined,
   ): Promise<SellerProductSummaryResponse[]> {
-    // Sem a rota de imagens (T-022), nenhum produto tem capa ainda.
-    return (await this.myProducts.list(seller.id, status)).map((summary) => toSellerProductSummary(summary, () => null));
+    const publicUrl = (path: string) => this.storage.publicUrl(path);
+    return (await this.myProducts.list(seller.id, status)).map((summary) => toSellerProductSummary(summary, publicUrl));
   }
 
   @Get(':id')

@@ -47,6 +47,7 @@ describe('US-007 — A API não sobe com configuração errada', () => {
       CLERK_SECRET_KEY: VALID.CLERK_SECRET_KEY,
       CLERK_AUTHORIZED_PARTIES: ['http://localhost:3000'],
       ASAAS_API_URL: 'https://api-sandbox.asaas.com/v3',
+      SUPABASE_STORAGE_BUCKET: 'product-images',
       SELLER_DOCUMENT_KEY: VALID.SELLER_DOCUMENT_KEY,
     });
   });
@@ -65,6 +66,12 @@ describe('US-007 — A API não sobe com configuração errada', () => {
     expect(loadEnv(VALID).ASAAS_API_KEY).toBeUndefined();
     expect(() => loadEnv({ ...VALID, ASAAS_WEBHOOK_TOKEN: 'curto' })).toThrow(/ASAAS_WEBHOOK_TOKEN \(inválida\)/);
     expect(() => loadEnv({ ...VALID, ASAAS_API_URL: 'http://api-sandbox.asaas.com/v3' })).toThrow(/ASAAS_API_URL/);
+  });
+
+  it('sem as variáveis do Supabase a API sobe; o bucket tem padrão e a URL precisa ser https', () => {
+    const env = loadEnv(VALID);
+    expect([env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, env.SUPABASE_STORAGE_BUCKET]).toEqual([undefined, undefined, 'product-images']);
+    expect(() => loadEnv({ ...VALID, SUPABASE_URL: 'http://projeto.supabase.co' })).toThrow(/SUPABASE_URL \(inválida\)/);
   });
 
   it('aceita várias origens autorizadas separadas por vírgula', () => {

@@ -208,7 +208,7 @@ Todos os consumidores são idempotentes (chave por evento/entidade), com retry e
 - Clerk JWT verificado em toda rota não pública; CSRF não se aplica (Bearer token, sem cookie na API).
 - `helmet`, CORS restrito ao domínio do web, `@nestjs/throttler` com storage em memória (global 100 req/min/IP; checkout 10/min/usuário).
 - Validação Zod em todas as entradas; IDs como UUID/cuid; nenhuma query SQL concatenada.
-- Uploads: URL assinada com expiração de 60 s, MIME e tamanho validados (≤ 5 MB, jpeg/png/webp).
+- Uploads: URL assinada para um arquivo só, sem sobrescrever, com a validade fixa do Supabase (2 h; a API informa em `expiresAt`). MIME e tamanho validados no bucket e de novo pela API no arquivo real (≤ 5 MB, jpeg/png/webp).
 - Supabase: acesso só pela API com `service_role` mantido no servidor; RLS habilitado negando acesso a `anon` como defesa em profundidade.
 - Segredos via variáveis de ambiente; `.env.example` documentado; `gitleaks` no CI.
 - Logs sem PII (e-mail mascarado, nenhum endereço completo).

@@ -5,8 +5,10 @@ import { fileURLToPath } from 'node:url';
 // "Cassete" de HTTP (ASM-012): grava as conversas reais com uma API externa e depois
 // as reproduz. Com RECORD ligado, chama a API de verdade e salva cada requisição e
 // resposta; sem ele, devolve as respostas gravadas, sem rede e sem chave.
-// Nada sensível é salvo: os cabeçalhos da requisição ficam de fora e os campos
-// `apiKey` e `creditCardToken` das respostas viram "[removida]".
+// Nada sensível é salvo: os cabeçalhos da requisição (onde vão as chaves) ficam de fora,
+// os campos `apiKey` e `creditCardToken` das respostas viram "[removida]", e todo token
+// JWT (ex.: o da URL assinada do Storage) perde a assinatura, que é o que o faz valer.
+// O conteúdo do token fica, para o código ainda ler dele a validade.
 
 export interface Interaction {
   method: string;
@@ -45,24 +47,30 @@ export interface CassetteOptions {
    * não entram na conferência da reprodução. Todo o resto precisa bater com o gravado.
    */
   volatileRequestFields?: string[];
+  /** Variável que liga a gravação, citada nas mensagens de erro. Padrão: ASAAS_RECORD. */
+  recordVariable?: string;
 }
 
-export function createCassette(file: string | URL, { baseUrl, record, volatileRequestFields = [] }: CassetteOptions): Cassette {
+export function createCassette(
+  file: string | URL,
+  { baseUrl, record, volatileRequestFields = [], recordVariable = 'ASAAS_RECORD' }: CassetteOptions,
+): Cassette {
   const path = file instanceof URL ? fileURLToPath(file) : file;
   const calls: Interaction[] = [];
-  const relative = (url: string) => url.replace(baseUrl.replace(/\/$/, ''), '') || '/';
+  const relative = (url: string) => withoutJwtSignatures(url.replace(baseUrl.replace(/\/$/, ''), '') || '/');
+  const rerecord = `Regrave com ${recordVariable}=1.`;
 
   if (record) {
     const recordingFetch: typeof fetch = async (input, init) => {
       const request = new Request(input, init);
-      const requestText = init?.body ? String(init.body) : undefined;
+      const requestBody = describeBody(init?.body);
       const response = await fetch(request);
       const text = await response.text();
       const parsed = text ? (JSON.parse(text) as unknown) : null;
       calls.push({
         method: request.method,
         path: relative(request.url),
-        ...(requestText ? { requestBody: JSON.parse(requestText) as unknown } : {}),
+        ...(requestBody === undefined ? {} : { requestBody }),
         status: response.status,
         responseBody: redact(parsed),
       });
@@ -83,7 +91,7 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
   }
 
   if (!existsSync(path)) {
-    throw new Error(`Cassete não encontrado: ${path}. Grave com ASAAS_RECORD=1 (precisa da ASAAS_API_KEY do sandbox no .env).`);
+    throw new Error(`Cassete não encontrado: ${path}. Grave com ${recordVariable}=1 (precisa das chaves no .env).`);
   }
   const stored = JSON.parse(readFileSync(path, 'utf8')) as CassetteFile;
   const recorded = Array.isArray(stored) ? stored : stored.interactions;
@@ -96,11 +104,11 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
     const actual = `${request.method} ${relative(request.url)}`;
     if (!expected) throw new Error(`Requisição a mais, fora do cassete ${path}: ${actual}`);
     if (`${expected.method} ${expected.path}` !== actual) {
-      throw new Error(`O cassete ${path} esperava "${expected.method} ${expected.path}" na posição ${next}, veio "${actual}". Regrave com ASAAS_RECORD=1.`);
+      throw new Error(`O cassete ${path} esperava "${expected.method} ${expected.path}" na posição ${next}, veio "${actual}". ${rerecord}`);
     }
     // O corpo enviado também precisa bater: sem isso, o adaptador poderia parar de mandar
     // um campo (ex.: externalReference) e a resposta gravada esconderia o defeito.
-    const sentBody = init?.body ? (JSON.parse(String(init.body)) as unknown) : undefined;
+    const sentBody = describeBody(init?.body);
     const sent = JSON.stringify(withoutFields(sentBody, volatileRequestFields));
     const recordedBody = JSON.stringify(withoutFields(expected.requestBody, volatileRequestFields));
     if (sent !== recordedBody) {
@@ -119,15 +127,37 @@ export function createCassette(file: string | URL, { baseUrl, record, volatileRe
     calls,
     value: (name) => {
       const recordedValue = recordedValues[name];
-      if (recordedValue === undefined) throw new Error(`O cassete ${path} não tem o valor "${name}". Regrave com ASAAS_RECORD=1.`);
+      if (recordedValue === undefined) throw new Error(`O cassete ${path} não tem o valor "${name}". ${rerecord}`);
       return recordedValue;
     },
     done: () => {
       if (next !== recorded.length) {
-        throw new Error(`O cassete ${path} tem ${recorded.length} requisições, mas só ${next} foram feitas. Regrave com ASAAS_RECORD=1.`);
+        throw new Error(`O cassete ${path} tem ${recorded.length} requisições, mas só ${next} foram feitas. ${rerecord}`);
       }
     },
   };
+}
+
+/** O corpo enviado, como fica no cassete: JSON lido; arquivo (binário) só pelo tamanho. */
+function describeBody(body: RequestInit['body']): unknown {
+  if (body === undefined || body === null) return undefined;
+  if (typeof body === 'string') {
+    try {
+      return JSON.parse(body) as unknown;
+    } catch {
+      return body;
+    }
+  }
+  if (body instanceof Blob) return { binaryBytes: body.size };
+  if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) return { binaryBytes: body.byteLength };
+  throw new Error('O cassete não sabe gravar este tipo de corpo.');
+}
+
+const JWT = /(eyJ[\w-]*\.[\w-]*)\.[\w-]+/g;
+
+/** Mantém cabeçalho e conteúdo do JWT e tira a assinatura: o token não vale mais nada. */
+function withoutJwtSignatures(text: string): string {
+  return text.replace(JWT, '$1.assinatura-removida');
 }
 
 /** Cópia do corpo sem os campos voláteis (só no primeiro nível, onde eles ficam). */
@@ -137,6 +167,7 @@ function withoutFields(body: unknown, fields: string[]): unknown {
 }
 
 function redact(value: unknown): unknown {
+  if (typeof value === 'string') return withoutJwtSignatures(value);
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === 'object') {
     return Object.fromEntries(
