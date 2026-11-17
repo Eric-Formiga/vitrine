@@ -1,7 +1,7 @@
 {
   "feature": "spike-asaas",
-  "timestamp": "2026-11-16T23:57:24.602Z",
-  "gitRev": "d545b51",
+  "timestamp": "2026-11-17T00:17:27.978Z",
+  "gitRev": "53ecaf4",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,

@@ -1,0 +1,42 @@
+# Mantém o projeto do Supabase acordado. No plano grátis, o projeto é pausado depois de
+# 7 dias sem uso, e a demo cairia. A cada 3 dias, este job consulta o bucket de imagens
+# pela API do Storage, que lê o banco do projeto. Se a chamada falhar, o job falha e o
+# GitHub avisa por e-mail.
+#
+# Secrets do repositório: SUPABASE_URL e SUPABASE_SECRET_KEY (os mesmos valores do .env).
+# Trocou a chave no Supabase? Atualize o secret também.
+# Atenção: o GitHub desliga os agendamentos de um repositório público que fica 60 dias
+# sem commits. Se o projeto ficar parado esse tempo, reative em Actions → este workflow.
+name: Supabase acordado
+
+on:
+  schedule:
+    - cron: '17 9 */3 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  consultar-storage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Consulta o bucket de imagens
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BUCKET: product-images
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::error::Faltam os secrets SUPABASE_URL e SUPABASE_SECRET_KEY."
+            exit 1
+          fi
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 10 --max-time 30 \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            -H "authorization: Bearer $SUPABASE_SECRET_KEY" \
+            "${SUPABASE_URL%/}/storage/v1/bucket/$BUCKET")
+          echo "Storage respondeu $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::O Storage respondeu $status. Confira os secrets e se o projeto está pausado no painel do Supabase."
+            exit 1
+          fi

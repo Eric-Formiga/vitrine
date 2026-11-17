@@ -1,7 +1,7 @@
 {
   "feature": "fundacao",
-  "timestamp": "2026-11-16T23:57:22.907Z",
-  "gitRev": "d545b51",
+  "timestamp": "2026-11-17T00:17:25.324Z",
+  "gitRev": "53ecaf4",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,

@@ -1,7 +1,7 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-16T23:57:23.957Z",
-  "gitRev": "d545b51",
+  "timestamp": "2026-11-17T00:17:26.786Z",
+  "gitRev": "53ecaf4",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
