@@ -9,8 +9,10 @@ import { CreateCategoryUseCase } from './application/create-category.use-case.js
 import { CreateProductUseCase } from './application/create-product.use-case.js';
 import { GetCategoryTreeUseCase } from './application/get-category-tree.use-case.js';
 import { ListMyProductsUseCase } from './application/list-my-products.use-case.js';
+import { ModerateProductUseCase } from './application/moderate-product.use-case.js';
 import { PRODUCT_REPOSITORY } from './application/product.repository.js';
 import { PRODUCT_IMAGE_REPOSITORY } from './application/product-image.repository.js';
+import { PublishProductUseCase } from './application/publish-product.use-case.js';
 import { ListImagesUseCase, ReplaceImagesUseCase } from './application/replace-images.use-case.js';
 import { ListVariantsUseCase, ReplaceVariantsUseCase } from './application/replace-variants.use-case.js';
 import { RestoreCategoryUseCase } from './application/restore-category.use-case.js';
@@ -18,6 +20,7 @@ import { UpdateCategoryUseCase } from './application/update-category.use-case.js
 import { UpdateProductUseCase } from './application/update-product.use-case.js';
 import { VARIANT_REPOSITORY } from './application/variant.repository.js';
 import { AdminCategoriesController } from './http/admin-categories.controller.js';
+import { AdminProductsController } from './http/admin-products.controller.js';
 import { CategoriesController } from './http/categories.controller.js';
 import { SellerProductImagesController } from './http/seller-product-images.controller.js';
 import { SellerProductsController } from './http/seller-products.controller.js';
@@ -38,6 +41,7 @@ import { PrismaVariantRepository } from './infra/prisma-variant.repository.js';
     SellerProductsController,
     SellerVariantsController,
     SellerProductImagesController,
+    AdminProductsController,
   ],
   providers: [
     GetCategoryTreeUseCase,
@@ -54,6 +58,8 @@ import { PrismaVariantRepository } from './infra/prisma-variant.repository.js';
     AdjustStockUseCase,
     ListImagesUseCase,
     ReplaceImagesUseCase,
+    PublishProductUseCase,
+    ModerateProductUseCase,
     { provide: PRODUCT_IMAGE_REPOSITORY, useClass: PrismaProductImageRepository },
     { provide: CATEGORY_REPOSITORY, useClass: PrismaCategoryRepository },
     { provide: PRODUCT_REPOSITORY, useClass: PrismaProductRepository },

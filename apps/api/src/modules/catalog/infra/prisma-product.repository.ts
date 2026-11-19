@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
 import { Prisma } from '../../../generated/prisma/client.js';
+import { AuditTrail } from '../../../shared/audit/audit-trail.js';
 import { PrismaService } from '../../../shared/prisma/prisma.service.js';
 import type {
   CatalogTransaction,
   NewProduct,
+  ProductChanges,
   ProductRef,
   ProductRepository,
   ProductWork,
 } from '../application/product.repository.js';
-import type { Product, ProductStatus, ProductSummary } from '../domain/product.js';
+import { auditViewOf, type Product, type ProductStatus, type ProductSummary } from '../domain/product.js';
 import { ProductNotFoundError, ProductVersionConflictError } from '../domain/product-errors.js';
 
 type Row = Prisma.ProductGetPayload<object>;
@@ -24,7 +26,10 @@ const SUMMARY = {
 
 @Injectable()
 export class PrismaProductRepository implements ProductRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditTrail: AuditTrail,
+  ) {}
 
   async create(data: NewProduct, slugs: Iterable<string>): Promise<Product> {
     let attempts = 0;
@@ -74,6 +79,21 @@ export class PrismaProductRepository implements ProductRepository {
       const { changes, value } = await work(toProduct(row), asCatalogTransaction(tx));
       const saved = await tx.product.update({ where: { id: productId }, data: { ...changes, version: { increment: 1 } } });
       return { product: toProduct(saved), value };
+    });
+  }
+
+  moderate(productId: string, decide: (product: Product) => ProductChanges): Promise<Product> {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT 1 FROM products WHERE id = ${productId}::uuid FOR UPDATE`;
+      const row = await tx.product.findUnique({ where: { id: productId } });
+      if (!row) throw new ProductNotFoundError();
+
+      const before = toProduct(row);
+      const saved = toProduct(
+        await tx.product.update({ where: { id: productId }, data: { ...decide(before), version: { increment: 1 } } }),
+      );
+      await this.auditTrail.record(tx, { entityType: 'product', entityId: productId, before: auditViewOf(before), after: auditViewOf(saved) });
+      return saved;
     });
   }
 }

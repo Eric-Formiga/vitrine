@@ -18,6 +18,10 @@ export class PrismaProductImageRepository implements ProductImageRepository {
     return this.prisma.productImage.findMany({ where: { productId }, select: IMAGE, orderBy: { position: 'asc' } });
   }
 
+  count(tx: CatalogTransaction, productId: string): Promise<number> {
+    return prismaTransactionOf(tx).productImage.count({ where: { productId } });
+  }
+
   async registeredUploads(tx: CatalogTransaction, sellerId: string, paths: readonly string[]): Promise<Set<string>> {
     const rows = await prismaTransactionOf(tx).upload.findMany({
       where: { sellerId, path: { in: [...paths] } },

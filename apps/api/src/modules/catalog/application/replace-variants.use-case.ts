@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { RequestValidationError } from '../../../shared/errors/domain-error.js';
-import { assertCanChange, type Product } from '../domain/product.js';
-import { ProductNotFoundError } from '../domain/product-errors.js';
+import { assertCanChange, listedIssues, type Product } from '../domain/product.js';
+import { ProductNotFoundError, ProductNotPublishableError } from '../domain/product-errors.js';
 import { planGrid, sortVariants, type Variant, type VariantInput } from '../domain/variant.js';
 import { CATEGORY_REPOSITORY, type CategoryRepository } from './category.repository.js';
+import { PRODUCT_IMAGE_REPOSITORY, type ProductImageRepository } from './product-image.repository.js';
 import { PRODUCT_REPOSITORY, type ProductRef, type ProductRepository } from './product.repository.js';
 import { VARIANT_REPOSITORY, type VariantRepository } from './variant.repository.js';
 
@@ -22,6 +23,7 @@ export class ReplaceVariantsUseCase {
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
     @Inject(CATEGORY_REPOSITORY) private readonly categories: CategoryRepository,
     @Inject(VARIANT_REPOSITORY) private readonly variants: VariantRepository,
+    @Inject(PRODUCT_IMAGE_REPOSITORY) private readonly images: ProductImageRepository,
   ) {}
 
   async execute(ref: ProductRef, incoming: readonly VariantInput[]): Promise<ProductVariants> {
@@ -31,6 +33,12 @@ export class ReplaceVariantsUseCase {
       const existing = await this.variants.findAll(tx, current.id);
       const { issues, plan } = planGrid({ sizeType, productSlug: current.slug, existing, incoming });
       if (issues.length > 0) throw new RequestValidationError(issues);
+      // O produto publicado não fica sem grade (AC-073); estoque zero pode.
+      const missing = listedIssues(current, {
+        imageCount: await this.images.count(tx, current.id),
+        activeStocks: incoming.map((input) => input.stock),
+      });
+      if (missing.length > 0) throw new ProductNotPublishableError(missing);
 
       const saved = await this.variants.apply(tx, current, plan);
       return { changes: { minPriceCents: plan.minPriceCents }, value: sortVariants(sizeType, saved) };

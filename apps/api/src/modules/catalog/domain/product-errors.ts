@@ -1,5 +1,5 @@
 import { DomainError } from '../../../shared/errors/domain-error.js';
-import type { ProductStatus } from './product.js';
+import type { ProductStatus, PublishGap } from './product.js';
 
 export class ProductNotFoundError extends DomainError {
   readonly code = 'PRODUCT_NOT_FOUND';
@@ -32,6 +32,9 @@ const STATUS_LABEL: Record<ProductStatus, string> = {
 const ACTION_LABEL = {
   edit: 'alterar',
   archive: 'arquivar',
+  publish: 'publicar',
+  suspend: 'suspender',
+  reinstate: 'reativar',
 } as const;
 
 export type ProductAction = keyof typeof ACTION_LABEL;
@@ -43,5 +46,21 @@ export class InvalidProductStateError extends DomainError {
 
   constructor(action: ProductAction, current: ProductStatus) {
     super(`Não dá para ${ACTION_LABEL[action]} um produto ${STATUS_LABEL[current]}.`, { currentStatus: current });
+  }
+}
+
+const GAP_LABEL: Record<PublishGap, string> = {
+  images: 'pelo menos uma foto',
+  stock: 'pelo menos uma variante com estoque',
+  variants: 'pelo menos uma variante',
+};
+
+/** Falta algo para o produto estar (ou continuar) à venda (AC-072, AC-073). */
+export class ProductNotPublishableError extends DomainError {
+  readonly code = 'PRODUCT_NOT_PUBLISHABLE';
+  override readonly status = 422;
+
+  constructor(missing: PublishGap[]) {
+    super(`O produto precisa de ${missing.map((gap) => GAP_LABEL[gap]).join(' e ')}.`, { missing });
   }
 }

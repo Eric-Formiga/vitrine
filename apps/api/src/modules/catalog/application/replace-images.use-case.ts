@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { STORAGE_GATEWAY, type StorageGateway } from '../../media/application/storage-gateway.port.js';
 import { isInSellerFolder, storedFileProblem } from '../../media/domain/upload.js';
-import { assertCanChange, type Product } from '../domain/product.js';
+import { assertCanChange, listedIssues, type Product } from '../domain/product.js';
 import { type ImageInput, type ImageProblem, InvalidImageError, type ProductImage } from '../domain/product-image.js';
-import { ProductNotFoundError } from '../domain/product-errors.js';
+import { ProductNotFoundError, ProductNotPublishableError } from '../domain/product-errors.js';
 import { colorKey } from '../domain/variant.js';
 import { PRODUCT_IMAGE_REPOSITORY, type ProductImageRepository } from './product-image.repository.js';
 import { PRODUCT_REPOSITORY, type ProductRef, type ProductRepository } from './product.repository.js';
@@ -39,8 +39,11 @@ export class ReplaceImagesUseCase {
     const { product, value } = await this.products.write(ref, async (current, tx) => {
       assertCanChange(current, 'edit');
       const registered = await this.images.registeredUploads(tx, ref.sellerId, inputs.map((input) => input.path));
-      const active = await this.variants.findAll(tx, current.id);
-      const colors = new Map(active.filter((v) => !v.archivedAt).map((v) => [colorKey(v.color), v.color]));
+      const active = (await this.variants.findAll(tx, current.id)).filter((v) => !v.archivedAt);
+      // O produto publicado não fica sem foto (AC-073).
+      const missing = listedIssues(current, { imageCount: inputs.length, activeStocks: active.map((v) => v.stock) });
+      if (missing.length > 0) throw new ProductNotPublishableError(missing);
+      const colors = new Map(active.map((v) => [colorKey(v.color), v.color]));
 
       const images = inputs.map((input, position): ProductImage => {
         const file = files[position] ?? null;

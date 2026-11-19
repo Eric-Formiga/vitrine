@@ -75,6 +75,16 @@ export function variantOf(size: string, color = 'Preto', overrides: Record<strin
   return { size, color, colorHex: '#1A1A1A', priceCents: 19900, stock: 5, weightGrams: 300, ...overrides };
 }
 
+let nextImage = 0;
+
+/** Foto direto no banco (o upload registrado e a imagem), sem passar pelo Storage. */
+export async function insertImage(prisma: TestApp['prisma'], store: TestStore, productId: string, position = 0): Promise<string> {
+  const path = `sellers/${store.sellerId}/foto-${++nextImage}.webp`;
+  await prisma.upload.create({ data: { path, sellerId: store.sellerId, contentType: 'image/webp', sizeBytes: 1000 } });
+  await prisma.productImage.create({ data: { productId, path, position } });
+  return path;
+}
+
 /** Variante direto no banco, sem passar pela grade (para a lista e o arquivamento). */
 export async function insertVariant(
   prisma: TestApp['prisma'],
@@ -92,7 +102,8 @@ export async function insertVariant(
     data: {
       productId,
       sellerId: store.sellerId,
-      sku: `${productId.slice(0, 8)}-${size}-${color}`.toUpperCase(),
+      // O id inteiro: o UUID v7 começa pelo horário, e produtos do mesmo instante repetiriam o início.
+      sku: `${productId}-${size}-${color}`.toUpperCase(),
       size,
       color,
       colorHex: '#000000',

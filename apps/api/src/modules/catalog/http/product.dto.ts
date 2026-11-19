@@ -89,6 +89,16 @@ export const sellerProductSchema = z
 
 export type SellerProductResponse = z.output<typeof sellerProductSchema>;
 
+export const adminProductSchema = sellerProductSchema
+  .extend({ sellerId: z.uuid().describe('Loja dona do produto.') })
+  .meta({ id: 'AdminProduct' });
+
+export type AdminProductResponse = z.output<typeof adminProductSchema>;
+
+export function toAdminProduct(product: Product): AdminProductResponse {
+  return { ...toSellerProduct(product), sellerId: product.sellerId };
+}
+
 export const sellerProductSummarySchema = z
   .object({
     id: z.uuid(),

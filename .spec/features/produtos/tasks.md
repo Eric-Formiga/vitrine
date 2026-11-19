@@ -133,9 +133,9 @@
     - **Leitura:** `GET /v1/seller/products/{id}/images` devolve a lista com o ETag, para a tela da T-025.
     - **Prova por mutação:** 11 defeitos injetados; todos derrubaram algum teste. Um sobreviveu na primeira rodada porque o código conferia dois sinais equivalentes de "não existe"; ficou só um, e o defeito passou a ser pego.
 
-## T-023 — Publicar, manter o produto ativo completo e moderação do admin [pendente]
+## T-023 — Publicar, manter o produto ativo completo e moderação do admin [concluida]
 - Refs: US-026, AC-071, AC-072, AC-073, US-029, AC-079, AC-080
-- Arquivos: apps/api/src/modules/catalog/catalog.module.ts, apps/api/src/modules/catalog/domain/product.ts, apps/api/src/modules/catalog/domain/product.spec.ts, apps/api/src/modules/catalog/domain/product-errors.ts, apps/api/src/modules/catalog/application/product.repository.ts, apps/api/src/modules/catalog/application/publish-product.use-case.ts, apps/api/src/modules/catalog/application/moderate-product.use-case.ts, apps/api/src/modules/catalog/application/replace-variants.use-case.ts, apps/api/src/modules/catalog/application/replace-images.use-case.ts, apps/api/src/modules/catalog/infra/prisma-product.repository.ts, apps/api/src/modules/catalog/http/product.dto.ts, apps/api/src/modules/catalog/http/seller-products.controller.ts, apps/api/src/modules/catalog/http/admin-products.controller.ts, apps/api/test/support/product-test-kit.ts, apps/api/test/product-publishing.e2e-spec.ts, apps/api/test/admin-products.e2e-spec.ts, packages/api-client/openapi.json, packages/api-client/src/schema.d.ts, docs/API.md
+- Arquivos: apps/api/src/modules/catalog/catalog.module.ts, apps/api/src/modules/catalog/domain/product.ts, apps/api/src/modules/catalog/domain/product.spec.ts, apps/api/src/modules/catalog/domain/product-errors.ts, apps/api/src/modules/catalog/application/product.repository.ts, apps/api/src/modules/catalog/application/publish-product.use-case.ts, apps/api/src/modules/catalog/application/moderate-product.use-case.ts, apps/api/src/modules/catalog/application/archive-product.use-case.ts, apps/api/src/modules/catalog/application/product-image.repository.ts, apps/api/src/modules/catalog/infra/prisma-product-image.repository.ts, apps/api/src/modules/catalog/application/replace-variants.use-case.ts, apps/api/src/modules/catalog/application/replace-images.use-case.ts, apps/api/src/modules/catalog/infra/prisma-product.repository.ts, apps/api/src/modules/catalog/http/product.dto.ts, apps/api/src/modules/catalog/http/seller-products.controller.ts, apps/api/src/modules/catalog/http/admin-products.controller.ts, apps/api/test/support/product-test-kit.ts, apps/api/test/product-publishing.e2e-spec.ts, apps/api/test/admin-products.e2e-spec.ts, packages/api-client/openapi.json, packages/api-client/src/schema.d.ts, docs/API.md
 - Notas:
   - **Depende da T-021 e da T-022.**
   - Uma regra pura no domínio, `publishIssues(product)`, devolve o que falta: `images` (nenhuma imagem) e `stock` (nenhuma variante ativa com estoque > 0).
@@ -150,6 +150,12 @@
     - o resto vira `INVALID_STATE_TRANSITION`.
   - Rotas do admin em `@AdminController('products')`, com `@Audited` (`product.suspend`, `product.reinstate`) e `AuditTrail.record` na mesma transação (estado antes e depois, ASM-028). O motivo segue as regras do `decisionReasonSchema` do `sellers`.
   - A moderação não exige `If-Match`, mas incrementa a versão, para a aba do vendedor perceber a mudança.
+  - Feito assim:
+    - **Situação:** `transition(product, change, now)` no domínio decide publicar, suspender, reativar e arquivar a partir de uma tabela de origens. O arquivamento passou a usar a mesma função. Reativar mantém o `publishedAt` e limpa o motivo e a data da suspensão.
+    - **Completo para vender:** `publishIssues` (publicar: `images`, `stock`) e `listedIssues` (produto publicado: `images`, `variants`). A regra de continuar completo vale também para o suspenso, que volta a ativo ao ser reativado. O rascunho pode ficar vazio enquanto é montado.
+    - **Publicar:** confere a situação antes do conteúdo; conta as fotos e o estoque das variantes ativas na transação da escrita versionada.
+    - **Moderação:** `ProductRepository.moderate` trava o produto pelo id, sem conferir a versão, sobe a versão e grava a auditoria (status, motivo, data da suspensão e versão, antes e depois) na mesma transação. O motivo usa o `decisionReasonSchema` do `sellers`. A resposta é o `AdminProduct` (o produto com o `sellerId`).
+    - **Testes:** o `insertVariant` do kit passou a usar o id inteiro do produto no SKU: o UUID v7 começa pelo horário, e dois produtos criados no mesmo instante repetiam o SKU.
 
 ## T-024 — Limpeza das imagens órfãs [pendente]
 - Refs: US-030, AC-081

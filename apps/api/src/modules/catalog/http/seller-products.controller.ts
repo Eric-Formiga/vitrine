@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Inject, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Inject, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
@@ -14,6 +14,7 @@ import type { Seller } from '../../sellers/domain/seller.js';
 import { ArchiveProductUseCase } from '../application/archive-product.use-case.js';
 import { CreateProductUseCase } from '../application/create-product.use-case.js';
 import { ListMyProductsUseCase } from '../application/list-my-products.use-case.js';
+import { PublishProductUseCase } from '../application/publish-product.use-case.js';
 import { UpdateProductUseCase } from '../application/update-product.use-case.js';
 import { PRODUCT_STATUSES, type ProductStatus } from '../domain/product.js';
 import {
@@ -49,6 +50,7 @@ export class SellerProductsController {
     private readonly createProduct: CreateProductUseCase,
     private readonly updateProduct: UpdateProductUseCase,
     private readonly archiveProduct: ArchiveProductUseCase,
+    private readonly publishProduct: PublishProductUseCase,
     private readonly myProducts: ListMyProductsUseCase,
     @Inject(STORAGE_GATEWAY) private readonly storage: StorageGateway,
   ) {}
@@ -106,6 +108,28 @@ export class SellerProductsController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<SellerProductResponse> {
     const product = await this.updateProduct.execute({ sellerId: seller.id, productId: id, expectedVersion }, body);
+    sendEtag(res, product.version);
+    return toSellerProduct(product);
+  }
+
+  @Post(':id/publish')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Publicar',
+    description:
+      'Rascunho → ativo, com a data de publicação. Exige pelo menos uma foto e uma variante com estoque: ' +
+      'senão 422 PRODUCT_NOT_PUBLISHABLE com `missing` (images, stock). Fora do rascunho: 422 INVALID_STATE_TRANSITION.',
+  })
+  @ApiHeader(IF_MATCH)
+  @ApiZodResponse(200, sellerProductSchema)
+  @ApiProblems(400, 412, 422, 428)
+  async publish(
+    @CurrentSeller() seller: Seller,
+    @IdParam() id: string,
+    @IfMatch() expectedVersion: number,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SellerProductResponse> {
+    const product = await this.publishProduct.execute({ sellerId: seller.id, productId: id, expectedVersion });
     sendEtag(res, product.version);
     return toSellerProduct(product);
   }
