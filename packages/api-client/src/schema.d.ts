@@ -221,6 +221,26 @@ export interface paths {
         patch: operations["SellerProductsController_update"];
         trace?: never;
     };
+    "/v1/seller/products/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publicar
+         * @description Rascunho → ativo, com a data de publicação. Exige pelo menos uma foto e uma variante com estoque: senão 422 PRODUCT_NOT_PUBLISHABLE com `missing` (images, stock). Fora do rascunho: 422 INVALID_STATE_TRANSITION.
+         */
+        post: operations["SellerProductsController_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/seller/products/{id}/variants": {
         parameters: {
             query?: never;
@@ -283,6 +303,46 @@ export interface paths {
          */
         put: operations["SellerProductImagesController_replace"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/products/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suspender produto ativo
+         * @description Exige o motivo, mostrado ao vendedor. O produto sai da vitrine; nada é apagado.
+         */
+        post: operations["AdminProductsController_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/products/{id}/reinstate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reativar produto suspenso
+         * @description Volta a ativo, com a data da primeira publicação.
+         */
+        post: operations["AdminProductsController_reinstate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -748,36 +808,6 @@ export interface components {
             archivedAt: string | null;
             children: components["schemas"]["AdminCategoryNode"][];
         };
-        ProductImageInput: {
-            /** @description O `path` devolvido por POST /v1/seller/uploads. */
-            path: string;
-            /**
-             * @description Texto alternativo, para quem usa leitor de tela.
-             * @default
-             */
-            alt: string;
-            /**
-             * @description Cor de uma variante ativa; nula vale para todas as cores.
-             * @default null
-             */
-            color: string | null;
-        };
-        /** @description A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match. */
-        ProductImagesInput: {
-            images: components["schemas"]["ProductImageInput"][];
-        };
-        ProductImage: {
-            path: string;
-            /** @description URL pública; nula sem o Storage configurado. */
-            url: string | null;
-            alt: string;
-            color: string | null;
-            /** @description 0 é a capa. */
-            position: number;
-        };
-        ProductImageList: {
-            images: components["schemas"]["ProductImage"][];
-        };
         ProductInput: {
             title: string;
             /** @description Texto puro; as quebras de linha são mantidas. Padrão: vazia. */
@@ -834,6 +864,42 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        AdminProduct: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            description: string;
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            condition: "NEW" | "USED";
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            /** @description A mesma do cabeçalho ETag; mande de volta em If-Match. */
+            version: number;
+            /** @description Preço da variante ativa mais barata, em centavos. */
+            minPriceCents: number | null;
+            /** Format: date-time */
+            publishedAt: string | null;
+            /** @description Preenchido quando o admin suspendeu o produto. */
+            suspension: {
+                reason: string;
+                /** Format: date-time */
+                suspendedAt: string;
+            } | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * Format: uuid
+             * @description Loja dona do produto.
+             */
+            sellerId: string;
+        };
         SellerProductSummary: {
             /** Format: uuid */
             id: string;
@@ -857,6 +923,36 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        ProductImageInput: {
+            /** @description O `path` devolvido por POST /v1/seller/uploads. */
+            path: string;
+            /**
+             * @description Texto alternativo, para quem usa leitor de tela.
+             * @default
+             */
+            alt: string;
+            /**
+             * @description Cor de uma variante ativa; nula vale para todas as cores.
+             * @default null
+             */
+            color: string | null;
+        };
+        /** @description A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match. */
+        ProductImagesInput: {
+            images: components["schemas"]["ProductImageInput"][];
+        };
+        ProductImage: {
+            path: string;
+            /** @description URL pública; nula sem o Storage configurado. */
+            url: string | null;
+            alt: string;
+            color: string | null;
+            /** @description 0 é a capa. */
+            position: number;
+        };
+        ProductImageList: {
+            images: components["schemas"]["ProductImage"][];
         };
         VariantInput: {
             /** @description Único entre as variantes ativas da loja; guardado em maiúsculas. Sem ele: SLUG-TAMANHO-COR. */
@@ -1723,6 +1819,94 @@ export interface operations {
             };
         };
     };
+    SellerProductsController_publish: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description O ETag da versão que você está editando, ex.: "3". Desatualizado: 412; ausente: 428. */
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerProduct"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Erro */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A versão em If-Match não é mais a atual: recarregue antes de gravar */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Falta o cabeçalho If-Match */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     SellerVariantsController_list: {
         parameters: {
             query?: never;
@@ -2085,6 +2269,117 @@ export interface operations {
             };
             /** @description Erro */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AdminProductsController_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellerDecisionReason"];
+            };
+        };
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProduct"];
+                };
+            };
+            /** @description Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AdminProductsController_reinstate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProduct"];
+                };
+            };
+            /** @description É preciso entrar (token ausente, inválido ou vencido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Não encontrado (inclusive para quem não tem o papel exigido) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description A regra de negócio não permite */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1008,6 +1008,122 @@
         ]
       }
     },
+    "/v1/seller/products/{id}/publish": {
+      "post": {
+        "description": "Rascunho → ativo, com a data de publicação. Exige pelo menos uma foto e uma variante com estoque: senão 422 PRODUCT_NOT_PUBLISHABLE com `missing` (images, stock). Fora do rascunho: 422 INVALID_STATE_TRANSITION.",
+        "operationId": "SellerProductsController_publish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "O ETag da versão que você está editando, ex.: \"3\". Desatualizado: 412; ausente: 428.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "A versão em If-Match não é mais a atual: recarregue antes de gravar",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Falta o cabeçalho If-Match",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Publicar",
+        "tags": [
+          "vendedor"
+        ]
+      }
+    },
     "/v1/seller/products/{id}/variants": {
       "get": {
         "description": "As ativas, com o ETag do produto.",
@@ -1504,6 +1620,160 @@
         "summary": "Trocar as fotos",
         "tags": [
           "vendedor"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/suspend": {
+      "post": {
+        "description": "Exige o motivo, mostrado ao vendedor. O produto sai da vitrine; nada é apagado.",
+        "operationId": "AdminProductsController_suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerDecisionReason"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida (VALIDATION_FAILED, com a lista de campos em errors)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Suspender produto ativo",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/reinstate": {
+      "post": {
+        "description": "Volta a ativo, com a data da primeira publicação.",
+        "operationId": "AdminProductsController_reinstate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProduct"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "É preciso entrar (token ausente, inválido ou vencido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não encontrado (inclusive para quem não tem o papel exigido)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra de negócio não permite",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "clerk": []
+          }
+        ],
+        "summary": "Reativar produto suspenso",
+        "tags": [
+          "admin"
         ]
       }
     },
@@ -3348,101 +3618,6 @@
         ],
         "additionalProperties": false
       },
-      "ProductImageInput": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": "string",
-            "minLength": 1,
-            "description": "O `path` devolvido por POST /v1/seller/uploads."
-          },
-          "alt": {
-            "default": "",
-            "description": "Texto alternativo, para quem usa leitor de tela.",
-            "type": "string",
-            "maxLength": 200
-          },
-          "color": {
-            "default": null,
-            "description": "Cor de uma variante ativa; nula vale para todas as cores.",
-            "nullable": true,
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "path",
-          "alt",
-          "color"
-        ],
-        "additionalProperties": false
-      },
-      "ProductImagesInput": {
-        "type": "object",
-        "properties": {
-          "images": {
-            "maxItems": 8,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductImageInput"
-            }
-          }
-        },
-        "required": [
-          "images"
-        ],
-        "additionalProperties": false,
-        "description": "A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match."
-      },
-      "ProductImage": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": "string"
-          },
-          "url": {
-            "nullable": true,
-            "description": "URL pública; nula sem o Storage configurado.",
-            "type": "string"
-          },
-          "alt": {
-            "type": "string"
-          },
-          "color": {
-            "nullable": true,
-            "type": "string"
-          },
-          "position": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "0 é a capa."
-          }
-        },
-        "required": [
-          "path",
-          "url",
-          "alt",
-          "color",
-          "position"
-        ],
-        "additionalProperties": false
-      },
-      "ProductImageList": {
-        "type": "object",
-        "properties": {
-          "images": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductImage"
-            }
-          }
-        },
-        "required": [
-          "images"
-        ],
-        "additionalProperties": false
-      },
       "ProductInput": {
         "type": "object",
         "properties": {
@@ -3619,6 +3794,125 @@
         ],
         "additionalProperties": false
       },
+      "AdminProduct": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "USED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUSPENDED",
+              "ARCHIVED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "A mesma do cabeçalho ETag; mande de volta em If-Match."
+          },
+          "minPriceCents": {
+            "nullable": true,
+            "description": "Preço da variante ativa mais barata, em centavos.",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "publishedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "suspension": {
+            "nullable": true,
+            "description": "Preenchido quando o admin suspendeu o produto.",
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "suspendedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "reason",
+              "suspendedAt"
+            ],
+            "additionalProperties": false
+          },
+          "archivedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "sellerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Loja dona do produto."
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "description",
+          "categoryId",
+          "condition",
+          "status",
+          "version",
+          "minPriceCents",
+          "publishedAt",
+          "suspension",
+          "archivedAt",
+          "createdAt",
+          "updatedAt",
+          "sellerId"
+        ],
+        "additionalProperties": false
+      },
       "SellerProductSummary": {
         "type": "object",
         "properties": {
@@ -3707,6 +4001,101 @@
           "suspension",
           "createdAt",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ProductImageInput": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "O `path` devolvido por POST /v1/seller/uploads."
+          },
+          "alt": {
+            "default": "",
+            "description": "Texto alternativo, para quem usa leitor de tela.",
+            "type": "string",
+            "maxLength": 200
+          },
+          "color": {
+            "default": null,
+            "description": "Cor de uma variante ativa; nula vale para todas as cores.",
+            "nullable": true,
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "path",
+          "alt",
+          "color"
+        ],
+        "additionalProperties": false
+      },
+      "ProductImagesInput": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageInput"
+            }
+          }
+        },
+        "required": [
+          "images"
+        ],
+        "additionalProperties": false,
+        "description": "A lista inteira, na ordem: a primeira é a capa. Substitui a anterior. Exige If-Match."
+      },
+      "ProductImage": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "url": {
+            "nullable": true,
+            "description": "URL pública; nula sem o Storage configurado.",
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "color": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "0 é a capa."
+          }
+        },
+        "required": [
+          "path",
+          "url",
+          "alt",
+          "color",
+          "position"
+        ],
+        "additionalProperties": false
+      },
+      "ProductImageList": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImage"
+            }
+          }
+        },
+        "required": [
+          "images"
         ],
         "additionalProperties": false
       },

@@ -40,6 +40,12 @@ export interface ProductRepository {
    * 412), roda o trabalho e grava as mudanças com a versão + 1, tudo na mesma transação.
    */
   write<T>(ref: ProductRef, work: (product: Product, tx: CatalogTransaction) => Promise<ProductWork<T>>): Promise<{ product: Product; value: T }>;
+  /**
+   * Escrita do admin (moderação): trava o produto pelo id, de qualquer loja, sem conferir
+   * versão, mas sobe a versão, para a aba do vendedor perceber. O antes e o depois vão
+   * para a trilha de auditoria na mesma transação (ASM-028). Produto inexistente: 404.
+   */
+  moderate(productId: string, decide: (product: Product) => ProductChanges): Promise<Product>;
 }
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');

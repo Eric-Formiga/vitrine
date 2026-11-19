@@ -1,11 +1,11 @@
 {
   "feature": "produtos",
-  "timestamp": "2026-11-17T23:37:31.279Z",
-  "gitRev": "7bcff3d",
+  "timestamp": "2026-11-19T00:08:12.621Z",
+  "gitRev": "4957964",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 196,
+  "testsParsed": 204,
   "results": {
     "AC-060": {
       "status": "pass",
@@ -62,6 +62,21 @@
       "testName": "US-025 — Adaptador do Supabase Storage AC-070: o caminho real funciona contra o Supabase Storage @spec:AC-070 AC-070: o caminho real funciona contra o Supabase Storage @spec:AC-070",
       "method": "vitest-json"
     },
+    "AC-071": {
+      "status": "pass",
+      "testName": "US-026 — O vendedor publica o produto AC-071: publicar o produto completo @spec:AC-071 @spec:US-026 AC-071: publicar o produto completo @spec:AC-071 @spec:US-026",
+      "method": "vitest-json"
+    },
+    "AC-072": {
+      "status": "pass",
+      "testName": "US-026 — O vendedor publica o produto AC-072: produto incompleto não é publicado @spec:AC-072 AC-072: produto incompleto não é publicado @spec:AC-072",
+      "method": "vitest-json"
+    },
+    "AC-073": {
+      "status": "pass",
+      "testName": "US-026 — O vendedor publica o produto AC-073: o produto ativo continua completo @spec:AC-073 AC-073: o produto ativo continua completo @spec:AC-073",
+      "method": "vitest-json"
+    },
     "AC-074": {
       "status": "pass",
       "testName": "US-023 e US-027 — O vendedor cadastra, edita e arquiva produtos AC-074: edição com a versão certa @spec:AC-074 AC-074: edição com a versão certa @spec:AC-074",
@@ -85,6 +100,16 @@
     "AC-078": {
       "status": "pass",
       "testName": "US-024 e US-028 — O vendedor monta a grade de variantes e ajusta o estoque AC-078: ajustes simultâneos não se perdem e o estoque nunca fica negativo @spec:AC-078 AC-078: ajustes simultâneos não se perdem e o estoque nunca fica negativo @spec:AC-078",
+      "method": "vitest-json"
+    },
+    "AC-079": {
+      "status": "pass",
+      "testName": "US-029 — O admin suspende e reativa produtos AC-079: suspender e reativar, sempre com registro @spec:AC-079 @spec:US-029 AC-079: suspender e reativar, sempre com registro @spec:AC-079 @spec:US-029",
+      "method": "vitest-json"
+    },
+    "AC-080": {
+      "status": "pass",
+      "testName": "US-029 — O admin suspende e reativa produtos AC-080: decisão fora de hora e acesso de quem não é admin @spec:AC-080 AC-080: decisão fora de hora e acesso de quem não é admin @spec:AC-080",
       "method": "vitest-json"
     }
   },

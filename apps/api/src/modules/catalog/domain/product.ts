@@ -64,3 +64,84 @@ export function* slugCandidates(title: string): Generator<string> {
 export function assertCanChange(product: Pick<Product, 'status'>, action: ProductAction): void {
   if (product.status === 'ARCHIVED') throw new InvalidProductStateError(action, product.status);
 }
+
+// ── Situação ──────────────────────────────────────────────────────────────────
+
+/** Mudanças de situação: publicar e arquivar (vendedor), suspender e reativar (admin). */
+export type ProductTransition =
+  | { kind: 'publish' }
+  | { kind: 'suspend'; reason: string }
+  | { kind: 'reinstate' }
+  | { kind: 'archive' };
+
+export type ProductStatusChange = Pick<Product, 'status'> &
+  Partial<Pick<Product, 'publishedAt' | 'suspendedAt' | 'suspensionReason' | 'archivedAt'>>;
+
+/** De onde cada mudança pode partir; o resto é INVALID_STATE_TRANSITION. */
+const ALLOWED_FROM: Record<ProductTransition['kind'], readonly ProductStatus[]> = {
+  publish: ['DRAFT'],
+  suspend: ['ACTIVE'],
+  reinstate: ['SUSPENDED'],
+  archive: ['DRAFT', 'ACTIVE', 'SUSPENDED'],
+};
+
+export function transition(product: Pick<Product, 'status'>, change: ProductTransition, now: Date): ProductStatusChange {
+  if (!ALLOWED_FROM[change.kind].includes(product.status)) throw new InvalidProductStateError(change.kind, product.status);
+  switch (change.kind) {
+    case 'publish':
+      return { status: 'ACTIVE', publishedAt: now };
+    case 'suspend':
+      return { status: 'SUSPENDED', suspendedAt: now, suspensionReason: change.reason };
+    case 'reinstate':
+      // A data da primeira publicação continua: o produto não "nasce" de novo.
+      return { status: 'ACTIVE', suspendedAt: null, suspensionReason: null };
+    case 'archive':
+      return { status: 'ARCHIVED', archivedAt: now };
+  }
+}
+
+// ── Completo para vender ──────────────────────────────────────────────────────
+
+/**
+ * O que falta para o produto estar à venda:
+ * - `images`: nenhuma foto;
+ * - `stock`: nenhuma variante ativa com estoque (só para publicar);
+ * - `variants`: nenhuma variante ativa (para o produto já publicado).
+ */
+export type PublishGap = 'images' | 'stock' | 'variants';
+
+export interface ProductContents {
+  imageCount: number;
+  /** Estoque de cada variante ativa. */
+  activeStocks: readonly number[];
+}
+
+/** Para publicar (AC-071, AC-072): pelo menos uma foto e uma variante com estoque. */
+export function publishIssues({ imageCount, activeStocks }: ProductContents): PublishGap[] {
+  const gaps: PublishGap[] = [];
+  if (imageCount === 0) gaps.push('images');
+  if (!activeStocks.some((stock) => stock > 0)) gaps.push('stock');
+  return gaps;
+}
+
+/**
+ * O produto publicado (ativo, ou suspenso, que volta a ativo) continua com foto e com
+ * grade (AC-073). Estoque zero pode: ele fica à venda, mas esgotado.
+ */
+export function listedIssues(product: Pick<Product, 'status'>, { imageCount, activeStocks }: ProductContents): PublishGap[] {
+  if (product.status !== 'ACTIVE' && product.status !== 'SUSPENDED') return [];
+  const gaps: PublishGap[] = [];
+  if (imageCount === 0) gaps.push('images');
+  if (activeStocks.length === 0) gaps.push('variants');
+  return gaps;
+}
+
+/** O que vai para a trilha de auditoria na moderação (ASM-028). */
+export function auditViewOf(product: Product) {
+  return {
+    status: product.status,
+    suspensionReason: product.suspensionReason,
+    suspendedAt: product.suspendedAt,
+    version: product.version,
+  };
+}
