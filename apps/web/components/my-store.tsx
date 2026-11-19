@@ -53,6 +53,11 @@ export function MyStore({ application, now }: { application: MySellerApplication
           <strong data-status={application.status}>{status.label}</strong>
         </p>
         <p className="text-sm text-muted-foreground">{status.text}</p>
+        {application.status === 'APPROVED' ? (
+          <Button asChild>
+            <Link href="/minha-loja/produtos">Meus produtos</Link>
+          </Button>
+        ) : null}
       </header>
 
       {rejection ? (

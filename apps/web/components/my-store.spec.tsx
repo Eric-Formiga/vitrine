@@ -76,6 +76,16 @@ describe('US-022 — Minha loja (tela)', () => {
     expect(suspensa).toContain('Suspensa em 14/11/2026');
   });
 
+  it('AC-082: só a loja aprovada ganha o link "Meus produtos" @spec:AC-082', () => {
+    expect(links(render(candidatura({ status: 'APPROVED', approvedAt: '2026-11-12T13:00:00.000Z' })))).toContainEqual([
+      'Meus produtos',
+      '/minha-loja/produtos',
+    ]);
+    for (const status of ['PENDING', 'SUSPENDED'] as const) {
+      expect(links(render(candidatura({ status }))).map(([nome]) => nome), status).not.toContain('Meus produtos');
+    }
+  });
+
   it('AC-059: loja rejeitada mostra o motivo e a data para tentar de novo @spec:AC-059', () => {
     const rejeitada = candidatura({
       status: 'REJECTED',
