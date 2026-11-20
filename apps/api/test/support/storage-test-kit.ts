@@ -8,6 +8,10 @@ export class FakeStorage implements StorageGateway {
   /** Caminhos para os quais a API pediu URL assinada, em ordem. */
   readonly signed: string[] = [];
   readonly removed: string[] = [];
+  /** Cada chamada de remoção, com os caminhos dela (para conferir os lotes). */
+  readonly removeCalls: string[][] = [];
+  /** Liga para simular o Storage fora do ar na remoção. */
+  failRemove = false;
 
   async createSignedUpload(path: string): Promise<SignedUpload> {
     this.signed.push(path);
@@ -24,6 +28,8 @@ export class FakeStorage implements StorageGateway {
   }
 
   async remove(paths: readonly string[]): Promise<void> {
+    if (this.failRemove) throw new Error('Storage fora do ar (simulado).');
+    this.removeCalls.push([...paths]);
     for (const path of paths) {
       this.files.delete(path);
       this.removed.push(path);
@@ -38,5 +44,7 @@ export class FakeStorage implements StorageGateway {
     this.files.clear();
     this.signed.length = 0;
     this.removed.length = 0;
+    this.removeCalls.length = 0;
+    this.failRemove = false;
   }
 }

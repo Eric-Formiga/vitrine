@@ -21,6 +21,7 @@ export class PgBossJobQueue implements JobQueue, OnApplicationBootstrap, BeforeA
   private readonly logger = new Logger('Filas');
   private readonly boss: PgBoss;
   private readonly handlers = new Map<string, (data: unknown) => Promise<void>>();
+  private readonly schedules = new Map<string, string>();
   private readonly createdQueues = new Set<string>();
   private started = false;
   private retryTimer?: NodeJS.Timeout;
@@ -35,6 +36,10 @@ export class PgBossJobQueue implements JobQueue, OnApplicationBootstrap, BeforeA
 
   work<T = unknown>(queue: string, handler: (data: T) => Promise<void>): void {
     this.handlers.set(queue, handler as (data: unknown) => Promise<void>);
+  }
+
+  schedule(queue: string, cron: string): void {
+    this.schedules.set(queue, cron);
   }
 
   async send(queue: string, data: object): Promise<string | null> {
@@ -56,7 +61,10 @@ export class PgBossJobQueue implements JobQueue, OnApplicationBootstrap, BeforeA
       await this.boss.start();
       this.started = true;
       for (const queue of this.handlers.keys()) await this.ensureQueue(queue);
-      if (this.env.RUN_WORKER) await this.startConsumers();
+      if (this.env.RUN_WORKER) {
+        await this.startConsumers();
+        await this.startSchedules();
+      }
     } catch (error) {
       this.logger.warn(`filas indisponíveis (${(error as Error).message}); nova tentativa em ${RETRY_START_MS / 1000} s`);
       this.retryTimer = setTimeout(() => void this.tryStart(), RETRY_START_MS);
@@ -69,6 +77,15 @@ export class PgBossJobQueue implements JobQueue, OnApplicationBootstrap, BeforeA
       await this.boss.work(queue, async (jobs) => {
         for (const job of jobs) await handler(job.data);
       });
+    }
+  }
+
+  // O agendamento fica gravado no banco (pgboss.schedule): gravar de novo a cada subida só
+  // atualiza o cron, e com várias instâncias o pg-boss garante um job por horário.
+  private async startSchedules(): Promise<void> {
+    for (const [queue, cron] of this.schedules) {
+      await this.ensureQueue(queue);
+      await this.boss.schedule(queue, cron, null, { tz: 'America/Sao_Paulo' });
     }
   }
 

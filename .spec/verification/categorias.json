@@ -1,11 +1,11 @@
 {
   "feature": "categorias",
-  "timestamp": "2026-11-19T00:08:10.264Z",
-  "gitRev": "4957964",
+  "timestamp": "2026-11-19T16:00:30.894Z",
+  "gitRev": "ffbe4ac",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 204,
+  "testsParsed": 207,
   "results": {
     "AC-019": {
       "status": "pass",

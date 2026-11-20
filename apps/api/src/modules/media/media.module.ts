@@ -3,6 +3,7 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import { ENV } from '../../shared/config/config.module.js';
 import type { Env } from '../../shared/config/env.js';
 import { SellersModule } from '../sellers/sellers.module.js';
+import { CleanOrphanUploadsJob, CleanOrphanUploadsUseCase } from './application/clean-orphan-uploads.use-case.js';
 import { RequestUploadUseCase } from './application/request-upload.use-case.js';
 import { STORAGE_GATEWAY, type StorageGateway } from './application/storage-gateway.port.js';
 import { UPLOAD_REPOSITORY } from './application/upload.repository.js';
@@ -15,8 +16,9 @@ export interface MediaModuleOptions {
   storageGateway?: StorageGateway;
 }
 
-// Arquivos (ADR-0004): o adaptador do Supabase Storage atrás da porta StorageGateway e a
-// URL de upload do vendedor. Global: o catálogo usa a porta nas imagens dos produtos.
+// Arquivos (ADR-0004): o adaptador do Supabase Storage atrás da porta StorageGateway, a
+// URL de upload do vendedor e a limpeza de hora em hora dos arquivos sem uso (US-030).
+// Global: o catálogo usa a porta nas imagens dos produtos.
 @Module({})
 export class MediaModule {
   static forRoot({ storageGateway }: MediaModuleOptions = {}): DynamicModule {
@@ -40,6 +42,8 @@ export class MediaModule {
             },
         { provide: UPLOAD_REPOSITORY, useClass: PrismaUploadRepository },
         RequestUploadUseCase,
+        CleanOrphanUploadsUseCase,
+        CleanOrphanUploadsJob,
       ],
       exports: [STORAGE_GATEWAY],
     };
