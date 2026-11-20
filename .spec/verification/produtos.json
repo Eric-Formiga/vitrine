@@ -1,11 +1,11 @@
 {
   "feature": "produtos",
-  "timestamp": "2026-11-19T00:08:12.621Z",
-  "gitRev": "4957964",
+  "timestamp": "2026-11-19T16:00:34.925Z",
+  "gitRev": "ffbe4ac",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 204,
+  "testsParsed": 207,
   "results": {
     "AC-060": {
       "status": "pass",
@@ -110,6 +110,11 @@
     "AC-080": {
       "status": "pass",
       "testName": "US-029 — O admin suspende e reativa produtos AC-080: decisão fora de hora e acesso de quem não é admin @spec:AC-080 AC-080: decisão fora de hora e acesso de quem não é admin @spec:AC-080",
+      "method": "vitest-json"
+    },
+    "AC-081": {
+      "status": "pass",
+      "testName": "US-030 — As imagens enviadas e nunca usadas são apagadas AC-081: a limpeza apaga só os órfãos com mais de 24 horas @spec:AC-081 @spec:US-030 AC-081: a limpeza apaga só os órfãos com mais de 24 horas @spec:AC-081 @spec:US-030",
       "method": "vitest-json"
     }
   },

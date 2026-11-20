@@ -5,6 +5,11 @@ export interface JobQueue {
   send(queue: string, data: object): Promise<string | null>;
   /** Registra quem processa a fila. Só consome se RUN_WORKER=true. Chame no onModuleInit. */
   work<T = unknown>(queue: string, handler: (data: T) => Promise<void>): void;
+  /**
+   * Põe um job na fila no horário do cron (fuso de São Paulo), ex.: '0 * * * *' = de hora
+   * em hora. Como `work`, só vale com RUN_WORKER=true. Chame no onModuleInit.
+   */
+  schedule(queue: string, cron: string): void;
   /** true quando as filas estão conectadas e prontas. */
   isReady(): boolean;
 }

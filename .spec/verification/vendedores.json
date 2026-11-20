@@ -1,11 +1,11 @@
 {
   "feature": "vendedores",
-  "timestamp": "2026-11-19T00:08:11.865Z",
-  "gitRev": "4957964",
+  "timestamp": "2026-11-19T16:00:33.502Z",
+  "gitRev": "ffbe4ac",
   "command": "node scripts/spec-tests.mjs",
   "reporter": "vitest-json",
   "exitCode": 0,
-  "testsParsed": 204,
+  "testsParsed": 207,
   "results": {
     "AC-043": {
       "status": "pass",

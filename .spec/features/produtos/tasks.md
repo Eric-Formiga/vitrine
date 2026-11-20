@@ -157,9 +157,9 @@
     - **Moderação:** `ProductRepository.moderate` trava o produto pelo id, sem conferir a versão, sobe a versão e grava a auditoria (status, motivo, data da suspensão e versão, antes e depois) na mesma transação. O motivo usa o `decisionReasonSchema` do `sellers`. A resposta é o `AdminProduct` (o produto com o `sellerId`).
     - **Testes:** o `insertVariant` do kit passou a usar o id inteiro do produto no SKU: o UUID v7 começa pelo horário, e dois produtos criados no mesmo instante repetiam o SKU.
 
-## T-024 — Limpeza das imagens órfãs [pendente]
+## T-024 — Limpeza das imagens órfãs [concluida]
 - Refs: US-030, AC-081
-- Arquivos: apps/api/src/shared/queue/job-queue.port.ts, apps/api/src/shared/queue/pg-boss.job-queue.ts, apps/api/src/modules/media/media.module.ts, apps/api/src/modules/media/application/upload.repository.ts, apps/api/src/modules/media/application/clean-orphan-uploads.use-case.ts, apps/api/src/modules/media/infra/prisma-upload.repository.ts, apps/api/test/orphan-uploads.e2e-spec.ts
+- Arquivos: apps/api/src/shared/queue/job-queue.port.ts, apps/api/src/shared/queue/pg-boss.job-queue.ts, apps/api/src/modules/media/media.module.ts, apps/api/src/modules/media/application/upload.repository.ts, apps/api/src/modules/media/application/clean-orphan-uploads.use-case.ts, apps/api/src/modules/media/infra/prisma-upload.repository.ts, apps/api/test/support/storage-test-kit.ts, apps/api/test/orphan-uploads.e2e-spec.ts, docs/ARCHITECTURE.md
 - Notas:
   - **Depende da T-022.** A porta `JobQueue` ganha `schedule(queue, cron)`, com o `schedule` do pg-boss. A limpeza roda de hora em hora, só com `RUN_WORKER=true`, como as outras filas (ADR-0010).
   - Órfão é o upload:
@@ -168,6 +168,12 @@
   - O caso de uso recebe o relógio (`now`) para o teste.
   - Apaga do Storage em lotes de até 100. Apaga a linha de `uploads` só do que o Storage confirmou; o que falhar fica para a próxima rodada.
   - O teste chama o caso de uso direto, com o Storage falso da T-022, e confere também o registro da fila.
+  - Feito assim:
+    - **Agendamento:** `JobQueue.schedule(queue, cron)` guarda o cron, e o pg-boss o grava em `pgboss.schedule` na subida, com o fuso de São Paulo, só com `RUN_WORKER=true`. A fila é `media.clean-orphan-uploads`, `0 * * * *`. Como o agendamento fica no banco, com mais de uma instância o pg-boss põe um job só por horário.
+    - **Órfão:** nenhuma foto de produto usa o arquivo e, antes do corte de 24 h, ele foi criado e nunca usado (`detached_at` nulo) ou foi desligado (`detached_at`). Os mais antigos saem primeiro.
+    - **Lotes:** até 100 por chamada ao Storage, repetindo até sobrar menos de um lote. Se o Storage falhar, a rodada para ali (`pending: true`) e nada sai do registro.
+    - **Corrida aceita:** um arquivo sem uso há mais de 24 h, posto num produto no mesmo instante da limpeza, pode perder o arquivo no Storage. O registro não sai, porque a remoção confere de novo que ninguém o usa. A janela é de milissegundos, para um arquivo esquecido há um dia.
+    - **Prova por mutação:** 9 defeitos injetados (prazos, arquivo em uso, falha do Storage, lotes, agendamento e fuso); os 9 derrubaram algum teste.
 
 ## T-025 — Telas do vendedor: meus produtos e formulário em etapas [pendente]
 - Refs: US-031, AC-082, AC-083, AC-084, AC-085, AC-086

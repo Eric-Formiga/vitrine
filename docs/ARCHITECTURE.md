@@ -189,6 +189,7 @@ Filas com **pg-boss** no Postgres (schema `pgboss`), conectado pelo session pool
 | `payout-release` | diário + job atrasado | transfere por Pix, para a chave da loja, os sub-pedidos elegíveis (RN-11), descontando dívidas |
 | `ship-deadline` | diário | marca sub-pedidos atrasados (RN-8) |
 | `search-reindex` | `ProductUpdated` | atualiza vetor de busca e revalida cache do Next |
+| `media.clean-orphan-uploads` | de hora em hora (`0 * * * *`, fuso de São Paulo) | apaga do Storage, em lotes de 100, os arquivos sem uso há mais de 24 h; o registro em `uploads` só sai depois que o Storage confirma |
 
 Todos os consumidores são idempotentes (chave por evento/entidade), com retry exponencial e fila de *dead letter*. Concorrência baixa por fila para não competir com as requisições HTTP no mesmo processo.
 
