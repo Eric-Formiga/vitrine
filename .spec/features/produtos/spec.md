@@ -260,7 +260,7 @@ Como vendedor, quero cadastrar e acompanhar os meus produtos pelo site, em etapa
 
 - **Dado** a etapa de imagens
 - **Quando** o vendedor escolhe arquivos
-- **Então** os arquivos de outro tipo ou com mais de 5 MB são recusados no navegador, com a mensagem, antes de qualquer envio; os válidos sobem direto ao Storage pela URL assinada
+- **Então** os arquivos de outro tipo são recusados no navegador, com a mensagem, antes de qualquer envio; os válidos são reduzidos no navegador (lado maior até 1600 px, em WebP, Q-013), e a foto que mesmo reduzida passa de 5 MB é recusada antes de pedir a URL; as aceitas sobem direto ao Storage pela URL assinada
 - **E** ele reordena as fotos (a primeira é a capa), escolhe a cor de cada uma e remove fotos; o limite de 8 aparece na tela
 
 #### AC-086 — Conflito de versão e acesso
@@ -308,3 +308,4 @@ Como vendedor, quero cadastrar e acompanhar os meus produtos pelo site, em etapa
 | Q-010 | Onde ficam as imagens, e como provamos o caminho real? | respondida | Supabase Storage, num projeto criado pelo dono; a prova contra o Storage real fica gravada em cassete (decidido em 16/11/2026) |
 | Q-011 | Quais extras da spec 03 entram? | respondida | Edição concorrente, ajuste rápido de estoque, moderação do admin e limpeza das imagens órfãs (decidido em 16/11/2026) |
 | Q-012 | Como o rascunho é salvo? | respondida | A cada etapa do formulário, sem autosave contínuo (decidido em 16/11/2026) |
+| Q-013 | As fotos são reduzidas antes do envio? | respondida | Sim, no navegador: lado maior até 1600 px, em WebP (JPEG se o navegador não gerar WebP). O tipo é conferido antes; o arquivo escolhido pode ter até 20 MB, e o limite de 5 MB vale para o reduzido. A foto já pequena que ficaria maior ao converter vai como está (decidido em 19/11/2026) |
